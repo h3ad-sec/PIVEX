@@ -8,7 +8,7 @@ const GRAPH_NODES = [
       id: 'ip', type: 'artifact', label: 'IP Address',
       desc: 'An IP address observed in logs, alerts, or network telemetry.',
       sources: 'Firewall · SIEM · NetFlow · Proxy',
-      pivots: ['Passive DNS', 'Related IPs (same ASN)', 'URLs served', 'C2 check']
+      pivots: ['Passive DNS', 'Related IPs (same ASN)', 'URLs served', 'C2 check', 'DHCP asset lookup (→ Host)']
     }
   },
   {
@@ -40,7 +40,7 @@ const GRAPH_NODES = [
       id: 'process', type: 'artifact', label: 'Process',
       desc: 'A running or historical process with command line, parent, and hash context.',
       sources: 'EDR · Sysmon (Event ID 1) · Windows Security 4688',
-      pivots: ['Child processes', 'Network connections', 'Dropped files', 'Parent process']
+      pivots: ['Child processes', 'Network connections', 'Dropped files', 'Parent process', 'Binary hash', 'Process owner (→ User)']
     }
   },
   {
@@ -48,7 +48,7 @@ const GRAPH_NODES = [
       id: 'user', type: 'artifact', label: 'User',
       desc: 'A user account involved in the activity — local, domain, or service account.',
       sources: 'AD logs · IAM · Okta · SIEM',
-      pivots: ['Hosts logged into', 'Lateral movement paths', 'Privilege escalation']
+      pivots: ['Hosts logged into', 'Lateral movement paths', 'Privilege escalation', 'Login source IPs (→ IP)', 'Email activity (→ Email)']
     }
   },
   {
@@ -329,6 +329,10 @@ const GRAPH_EDGES = [
   { data: { id: 'email-puser',     source: 'email',   target: 'p-user',    label: 'recipients' } },
   { data: { id: 'host-pprocess',   source: 'host',    target: 'p-process', label: 'running procs' } },
   { data: { id: 'host-puser',      source: 'host',    target: 'p-user',    label: 'logged-in users' } },
+  { data: { id: 'email-pip',       source: 'email',   target: 'p-ip',      label: 'header IP' } },
+  { data: { id: 'host-pip',        source: 'host',    target: 'p-ip',      label: 'connections' } },
+  { data: { id: 'user-pip',        source: 'user',    target: 'p-ip',      label: 'login IPs' } },
+  { data: { id: 'proc-puser',      source: 'process', target: 'p-user',    label: 'process owner' } },
 
   // ── Cross-artifact pivoting (crossPivot: true) ──────────────────────
   { data: { id: 'ip-domain',    source: 'ip',      target: 'domain',  label: 'passive DNS',  crossPivot: true } },
@@ -338,6 +342,16 @@ const GRAPH_EDGES = [
   { data: { id: 'process-ip',   source: 'process', target: 'ip',      label: 'C2 comm',      crossPivot: true } },
   { data: { id: 'user-host',    source: 'user',    target: 'host',    label: 'impact scope', crossPivot: true } },
   { data: { id: 'email-user',   source: 'email',   target: 'user',    label: 'entry point',  crossPivot: true } },
+  { data: { id: 'url-domain',   source: 'url',     target: 'domain',  label: 'parent domain', crossPivot: true } },
+  { data: { id: 'email-ip',     source: 'email',   target: 'ip',      label: 'header IP',     crossPivot: true } },
+  { data: { id: 'process-hash', source: 'process', target: 'hash',    label: 'binary hash',   crossPivot: true } },
+  { data: { id: 'ip-host',      source: 'ip',      target: 'host',    label: 'DHCP/asset',    crossPivot: true } },
+  { data: { id: 'host-ip',      source: 'host',    target: 'ip',      label: 'connections',   crossPivot: true } },
+  { data: { id: 'hash-domain',  source: 'hash',    target: 'domain',  label: 'C2 domain',     crossPivot: true } },
+  { data: { id: 'hash-ip',      source: 'hash',    target: 'ip',      label: 'C2 IP',         crossPivot: true } },
+  { data: { id: 'process-user', source: 'process', target: 'user',    label: 'process owner', crossPivot: true } },
+  { data: { id: 'user-ip',      source: 'user',    target: 'ip',      label: 'login IPs',     crossPivot: true } },
+  { data: { id: 'user-email',   source: 'user',    target: 'email',   label: 'email activity',crossPivot: true } },
 
   // ── Pivot → Correlation ─────────────────────────────────────────────
   { data: { id: 'pip-corrasn',       source: 'p-ip',     target: 'corr-asn',      label: '' } },
@@ -374,7 +388,7 @@ const GRAPH_EDGES = [
 
 const ARTIFACT_PATHS = {
   ip: {
-    nodes: ['ip','rep','asn','whois','p-domain','p-url','p-ip','corr-asn','corr-campaign','first-seen','frequency','ti-tags','environment','dec-malicious','dec-suspicious','dec-benign','act-block','act-hunt','act-escalate'],
+    nodes: ['ip','rep','asn','whois','p-domain','p-url','p-ip','corr-asn','corr-campaign','first-seen','frequency','ti-tags','environment','dec-malicious','dec-suspicious','dec-benign','act-block','act-hunt','act-escalate','host'],
     label: 'IP Address',
     mitre: 'T1071 (C2), T1090 (Proxy), T1133 (External Remote Services)',
     sources: 'Firewall · NetFlow · Shodan · VT · AbuseIPDB · OTX'
@@ -386,37 +400,37 @@ const ARTIFACT_PATHS = {
     sources: 'DNS logs · WHOIS · Passive DNS · VT · OTX'
   },
   url: {
-    nodes: ['url','rep','p-domain','p-file','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt'],
+    nodes: ['url','rep','p-domain','p-file','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','domain'],
     label: 'URL',
     mitre: 'T1566.002 (Spearphishing Link), T1189 (Drive-by Compromise)',
     sources: 'Proxy logs · VT URL scan · URLscan.io · OTX'
   },
   hash: {
-    nodes: ['hash','rep','file-meta','sandbox','p-process','p-file','corr-malware','ti-tags','mitre','dec-malicious','dec-suspicious','dec-benign','act-block','act-isolate','act-escalate'],
+    nodes: ['hash','rep','file-meta','sandbox','p-process','p-file','corr-malware','ti-tags','mitre','dec-malicious','dec-suspicious','dec-benign','act-block','act-isolate','act-escalate','domain','ip'],
     label: 'File Hash',
     mitre: 'T1204 (User Execution), T1059 (Command and Scripting), T1055 (Process Injection)',
     sources: 'EDR · VT · AnyRun · MalwareBazaar · Hybrid Analysis'
   },
   process: {
-    nodes: ['process','proc-meta','rep','p-process','p-file','p-ip','mitre','corr-campaign','environment','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate'],
+    nodes: ['process','proc-meta','rep','p-process','p-file','p-ip','p-user','mitre','corr-campaign','environment','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','hash','user'],
     label: 'Process',
     mitre: 'T1059 (Execution), T1055 (Injection), T1003 (Cred Dump), T1021 (Lateral Move)',
     sources: 'EDR · Sysmon · Windows Event 4688 · Process tree'
   },
   user: {
-    nodes: ['user','p-host','p-user','corr-time','environment','frequency','dec-suspicious','dec-malicious','act-reset','act-escalate','act-hunt'],
+    nodes: ['user','p-host','p-user','p-ip','corr-time','environment','frequency','dec-suspicious','dec-malicious','act-reset','act-escalate','act-hunt','ip','email'],
     label: 'User',
     mitre: 'T1078 (Valid Accounts), T1021 (Lateral Movement), T1098 (Account Manipulation)',
     sources: 'AD · IAM · Okta · SIEM UEBA · Windows Security logs'
   },
   email: {
-    nodes: ['email','rep','p-url','p-file','p-user','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','act-escalate'],
+    nodes: ['email','rep','p-url','p-file','p-user','p-ip','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','act-escalate','ip'],
     label: 'Email',
     mitre: 'T1566 (Phishing), T1598 (Spearphishing for Info), T1534 (Internal Spearphishing)',
     sources: 'Email Gateway · O365 Message Trace · SIEM · Header analysis'
   },
   host: {
-    nodes: ['host','p-process','p-user','environment','corr-time','frequency','mitre','dec-suspicious','dec-malicious','act-isolate','act-hunt','act-escalate'],
+    nodes: ['host','p-process','p-user','p-ip','environment','corr-time','frequency','mitre','dec-suspicious','dec-malicious','act-isolate','act-hunt','act-escalate','ip'],
     label: 'Host',
     mitre: 'T1005 (Data from Local System), T1021 (Lateral Movement), T1070 (Indicator Removal)',
     sources: 'EDR · SIEM · AD · Vulnerability Scanner · CMDB'

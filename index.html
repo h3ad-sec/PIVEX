@@ -552,8 +552,13 @@
       margin-top: 10px;
     }
     @media (max-width: 768px) {
-      .cy-container { height: 420px; }
-      .info-panel { width: calc(100% - 24px); max-height: 50%; }
+      .piv-hero { padding: 18px 16px 14px; }
+      .hero-piv, .hero-ex { font-size: 26px; }
+      .piv-main { padding: 20px 14px 48px; gap: 28px; }
+      .cy-container { height: 500px; }
+      .info-panel { width: calc(100% - 24px); max-height: 55%; }
+      .modes-grid { grid-template-columns: 1fr 1fr; }
+      .tables-grid { grid-template-columns: 1fr; }
     }
 
     /* ── Investigation Modes ───────────────────────────────────────────── */
@@ -598,7 +603,34 @@
       line-height: 1.65;
     }
     @media (max-width: 600px) {
+      .piv-hero { padding: 14px 12px 12px; }
+      .hero-piv, .hero-ex { font-size: 22px; }
+      .piv-hero-right { display: none; }
+      .piv-main { padding: 14px 12px 36px; gap: 20px; }
+      .artifact-bar { gap: 6px; }
+      .artifact-btn { font-size: 10px; padding: 5px 12px; }
+      .cy-container { height: 380px; }
+      .info-panel {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        padding: 0;
+        margin-top: 0;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: max-height 0.28s ease, opacity 0.22s, padding 0.28s, margin-top 0.28s;
+      }
+      .info-panel.visible {
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 20px;
+        margin-top: 10px;
+      }
       .modes-grid { grid-template-columns: 1fr; }
+      .mode-card { padding: 14px 14px; }
     }
 
     /* ── Reference tables ──────────────────────────────────────────────── */
@@ -636,15 +668,20 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 8px;
-      overflow: hidden;
+      overflow-x: auto;
     }
     .tables-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
-    @media (max-width: 700px) {
-      .tables-grid { grid-template-columns: 1fr; }
+    @media (max-width: 400px) {
+      .nav { padding: 0 12px; }
+      .hero-piv, .hero-ex { font-size: 18px; }
+      .piv-tagline { font-size: 10px; }
+      .artifact-btn { font-size: 9px; padding: 5px 9px; }
+      .cy-container { height: 320px; }
+      .section-label { font-size: 9px; }
     }
 
     /* ── Legend ────────────────────────────────────────────────────────── */

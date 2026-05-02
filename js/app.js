@@ -145,13 +145,16 @@ function initGraph() {
       }
     ],
     layout: {
-      name: 'cose-bilkent',
+      name: 'cose',
       animate: false,
       nodeDimensionsIncludeLabels: true,
-      idealEdgeLength: 100,
-      nodeRepulsion: 6000,
-      gravity: 0.25,
-      numIter: 2500
+      idealEdgeLength: 120,
+      nodeRepulsion: 800000,
+      nodeOverlap: 20,
+      gravity: 1,
+      numIter: 1000,
+      fit: true,
+      padding: 30
     }
   });
 
@@ -392,8 +395,8 @@ function escHtml(str) {
   var cols, drops;
 
   function resize() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     cols = Math.floor(canvas.width / colW);
     drops = [];
     for (var i = 0; i < cols; i++) {

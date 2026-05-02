@@ -158,6 +158,11 @@ function initGraph() {
     }
   });
 
+  // ── Fit after layout completes ──
+  cy.on('layoutstop', function() {
+    cy.fit(undefined, 30);
+  });
+
   // ── Tap node ──
   cy.on('tap', 'node', function(evt) {
     showNodeInfo(evt.target);
@@ -454,8 +459,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Init graph
-  initGraph();
+  // Init graph after layout is painted
+  requestAnimationFrame(function() {
+    initGraph();
+  });
 
   // Activate ALL button
   var allBtn = document.querySelector('.artifact-btn[data-type="all"]');

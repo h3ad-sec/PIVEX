@@ -33,20 +33,17 @@ function nodeColor(node) {
 
 // ── initGraph ───────────────────────────────────────────────────────────────
 function initGraph() {
+  var container = document.getElementById('cy');
+  if (!container) return;
+
   cy = cytoscape({
-    container: document.getElementById('cy'),
-    elements: {
-      nodes: GRAPH_NODES,
-      edges: GRAPH_EDGES
-    },
+    container: container,
+    elements: GRAPH_NODES.concat(GRAPH_EDGES),
     style: [
-      // ── Base node ──
-      {
-        selector: 'node',
-        style: {
+      { selector: 'node', style: {
           'shape': 'roundrectangle',
           'label': 'data(label)',
-          'font-family': '"Share Tech Mono", monospace',
+          'font-family': 'Share Tech Mono, monospace',
           'font-size': '10px',
           'padding': '8px',
           'width': 'label',
@@ -54,126 +51,43 @@ function initGraph() {
           'text-valign': 'center',
           'text-halign': 'center',
           'text-wrap': 'wrap',
-          'text-max-width': '100px',
-          'background-color': function(ele) { return nodeColor(ele).bg; },
-          'border-color': function(ele) { return nodeColor(ele).border; },
-          'color': function(ele) { return nodeColor(ele).text; },
+          'text-max-width': '90px',
+          'background-color': '#1e3050',
+          'border-color': '#3a5470',
           'border-width': 1.5,
-          'opacity': 1
-        }
-      },
-      // ── Artifact nodes larger font ──
-      {
-        selector: 'node[type = "artifact"]',
-        style: {
-          'font-size': '11px',
-          'border-width': 2
-        }
-      },
-      // ── Base edge ──
-      {
-        selector: 'edge',
-        style: {
-          'width': 1,
-          'opacity': 0.35,
-          'line-color': '#3a5470',
-          'target-arrow-color': '#3a5470',
-          'target-arrow-shape': 'triangle',
-          'curve-style': 'bezier',
-          'label': 'data(label)',
-          'font-family': '"Share Tech Mono", monospace',
-          'font-size': '7px',
-          'color': '#62809c',
-          'text-opacity': 0.7,
-          'edge-text-rotation': 'autorotate'
-        }
-      },
-      // ── Cross-pivot edges ──
-      {
-        selector: 'edge[crossPivot]',
-        style: {
-          'width': 2,
-          'line-style': 'dashed',
-          'line-color': '#00ff9f',
-          'target-arrow-color': '#00ff9f',
-          'opacity': 0.7,
-          'color': '#00ff9f'
-        }
-      },
-      // ── Highlighted nodes ──
-      {
-        selector: 'node.highlighted',
-        style: {
-          'opacity': 1,
-          'border-color': '#00ff9f',
-          'border-width': 2.5
-        }
-      },
-      // ── Highlighted edges ──
-      {
-        selector: 'edge.highlighted',
-        style: {
-          'opacity': 1,
-          'width': 2,
-          'line-color': '#00ff9f',
-          'target-arrow-color': '#00ff9f',
-          'color': '#00ff9f',
-          'text-opacity': 1
-        }
-      },
-      // ── Dimmed nodes ──
-      {
-        selector: 'node.dimmed',
-        style: {
-          'opacity': 0.07
-        }
-      },
-      // ── Dimmed edges ──
-      {
-        selector: 'edge.dimmed',
-        style: {
-          'opacity': 0.07
-        }
-      },
-      // ── Selected node ──
-      {
-        selector: 'node.selected',
-        style: {
-          'border-color': '#ffd60a',
-          'border-width': 3
-        }
-      }
+          'color': '#e2eeff'
+      }},
+      { selector: 'node[type = "artifact"]',    style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f', 'border-width': 2, 'font-size': '11px' }},
+      { selector: 'node[type = "enrichment"]',  style: { 'background-color': '#3b82f6', 'border-color': '#2563eb', 'color': '#ffffff' }},
+      { selector: 'node[type = "context"]',     style: { 'background-color': '#a855f7', 'border-color': '#9333ea', 'color': '#ffffff' }},
+      { selector: 'node[type = "pivot"]',       style: { 'background-color': '#ffd60a', 'border-color': '#c9a800', 'color': '#06080f' }},
+      { selector: 'node[type = "correlation"]', style: { 'background-color': '#f97316', 'border-color': '#c95d0a', 'color': '#ffffff' }},
+      { selector: 'node[type = "action"]',      style: { 'background-color': '#ec4899', 'border-color': '#c4186e', 'color': '#ffffff' }},
+      { selector: '#dec-malicious',  style: { 'background-color': '#ff3b5c', 'border-color': '#cc2244', 'color': '#ffffff' }},
+      { selector: '#dec-suspicious', style: { 'background-color': '#ffd60a', 'border-color': '#c9a800', 'color': '#06080f' }},
+      { selector: '#dec-benign',     style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f' }},
+      { selector: '#dec-unknown',    style: { 'background-color': '#7d8fb3', 'border-color': '#5a6e92', 'color': '#ffffff' }},
+      { selector: 'edge', style: {
+          'width': 1, 'opacity': 0.4,
+          'line-color': '#3a5470', 'target-arrow-color': '#3a5470',
+          'target-arrow-shape': 'triangle', 'curve-style': 'bezier'
+      }},
+      { selector: 'edge[?crossPivot]', style: {
+          'width': 2, 'line-style': 'dashed', 'opacity': 0.75,
+          'line-color': '#00ff9f', 'target-arrow-color': '#00ff9f'
+      }},
+      { selector: 'node.highlighted', style: { 'opacity': 1, 'border-color': '#00ff9f', 'border-width': 2.5 }},
+      { selector: 'edge.highlighted', style: { 'opacity': 1, 'width': 2, 'line-color': '#00ff9f', 'target-arrow-color': '#00ff9f' }},
+      { selector: 'node.dimmed',      style: { 'opacity': 0.08 }},
+      { selector: 'edge.dimmed',      style: { 'opacity': 0.05 }},
+      { selector: 'node.selected',    style: { 'border-color': '#ffd60a', 'border-width': 3 }}
     ],
-    layout: {
-      name: 'cose',
-      animate: false,
-      nodeDimensionsIncludeLabels: true,
-      idealEdgeLength: 120,
-      nodeRepulsion: 800000,
-      nodeOverlap: 20,
-      gravity: 1,
-      numIter: 1000,
-      fit: true,
-      padding: 30
-    }
+    layout: { name: 'cose', animate: false, fit: true, padding: 40 }
   });
 
-  // ── Fit after layout completes ──
-  cy.on('layoutstop', function() {
-    cy.fit(undefined, 30);
-  });
-
-  // ── Tap node ──
-  cy.on('tap', 'node', function(evt) {
-    showNodeInfo(evt.target);
-  });
-
-  // ── Tap background ──
-  cy.on('tap', function(evt) {
-    if (evt.target === cy) {
-      clearNodeInfo();
-    }
-  });
+  cy.on('layoutstop', function() { cy.fit(undefined, 40); });
+  cy.on('tap', 'node', function(evt) { showNodeInfo(evt.target); });
+  cy.on('tap', function(evt) { if (evt.target === cy) clearNodeInfo(); });
 }
 
 // ── selectArtifact ──────────────────────────────────────────────────────────

@@ -3,436 +3,445 @@
 
 const GRAPH_NODES = [
   // ── ARTIFACT NODES ──────────────────────────────────────────────────
-  {
-    data: {
-      id: 'ip', type: 'artifact', label: 'IP Address',
+  { data: { id: 'ip',         type: 'artifact', category: 'network',  label: 'IP Address',
       desc: 'An IP address observed in logs, alerts, or network telemetry.',
       sources: 'Firewall · SIEM · NetFlow · Proxy',
-      pivots: ['Passive DNS', 'Related IPs (same ASN)', 'URLs served', 'C2 check', 'DHCP asset lookup (→ Host)']
-    }
-  },
-  {
-    data: {
-      id: 'domain', type: 'artifact', label: 'Domain',
+      pivots: ['Passive DNS (→ Domain)', 'Related IPs (same ASN)', 'URLs served', 'DHCP asset (→ Host)', 'Vulnerability check'] }},
+  { data: { id: 'domain',     type: 'artifact', category: 'network',  label: 'Domain',
       desc: 'A domain name seen in DNS queries, HTTP traffic, or email headers.',
       sources: 'DNS logs · Proxy · Email Gateway',
-      pivots: ['Resolved IPs', 'Subdomains', 'URLs on domain', 'WHOIS history']
-    }
-  },
-  {
-    data: {
-      id: 'url', type: 'artifact', label: 'URL',
+      pivots: ['Resolved IPs', 'Subdomains', 'URLs on domain', 'WHOIS history', 'Certificate (→ Cert)'] }},
+  { data: { id: 'url',        type: 'artifact', category: 'network',  label: 'URL',
       desc: 'A full URL from web proxy, email links, or browser history.',
       sources: 'Proxy logs · Email Gateway · Browser history',
-      pivots: ['Hosting domain', 'Hosting IP', 'Downloaded payload (hash)']
-    }
-  },
-  {
-    data: {
-      id: 'hash', type: 'artifact', label: 'File Hash',
+      pivots: ['Parent domain (→ Domain)', 'Hosting IP', 'Downloaded payload (→ Hash)'] }},
+  { data: { id: 'hash',       type: 'artifact', category: 'endpoint', label: 'File Hash',
       desc: 'MD5/SHA1/SHA256 of a file observed on disk or in memory.',
       sources: 'EDR · AV · Sandbox · Email attachment scan',
-      pivots: ['Associated processes', 'Dropped files', 'C2 IPs/domains', 'Malware family']
-    }
-  },
-  {
-    data: {
-      id: 'process', type: 'artifact', label: 'Process',
+      pivots: ['Associated processes', 'C2 IPs/domains', 'File path on disk (→ File Path)', 'Mutex created', 'Malware family'] }},
+  { data: { id: 'process',    type: 'artifact', category: 'endpoint', label: 'Process',
       desc: 'A running or historical process with command line, parent, and hash context.',
-      sources: 'EDR · Sysmon (Event ID 1) · Windows Security 4688',
-      pivots: ['Child processes', 'Network connections', 'Dropped files', 'Parent process', 'Binary hash', 'Process owner (→ User)']
-    }
-  },
-  {
-    data: {
-      id: 'user', type: 'artifact', label: 'User',
+      sources: 'EDR · Sysmon Event 1 · Windows Security 4688',
+      pivots: ['Binary hash', 'Child processes', 'C2 connection (→ IP)', 'Process owner (→ User)', 'Registry writes', 'Service it is'] }},
+  { data: { id: 'user',       type: 'artifact', category: 'identity', label: 'User',
       desc: 'A user account involved in the activity — local, domain, or service account.',
       sources: 'AD logs · IAM · Okta · SIEM',
-      pivots: ['Hosts logged into', 'Lateral movement paths', 'Privilege escalation', 'Login source IPs (→ IP)', 'Email activity (→ Email)']
-    }
-  },
-  {
-    data: {
-      id: 'email', type: 'artifact', label: 'Email',
+      pivots: ['Hosts logged into', 'Login source IPs', 'Email activity', 'Credentials', 'Cloud identity', 'Shared accessed'] }},
+  { data: { id: 'email',      type: 'artifact', category: 'identity', label: 'Email',
       desc: 'A phishing or suspicious email with headers, body, URLs, and attachments.',
       sources: 'Email Gateway · O365 Message Trace · SIEM',
-      pivots: ['Sender IP', 'Embedded URLs', 'Attachments (hash)', 'Recipient user']
-    }
-  },
-  {
-    data: {
-      id: 'host', type: 'artifact', label: 'Host',
+      pivots: ['Sender IP (→ IP)', 'Embedded URLs', 'Attachments (→ Hash)', 'Recipient (→ User)'] }},
+  { data: { id: 'host',       type: 'artifact', category: 'endpoint', label: 'Host',
       desc: 'An endpoint, server, or workstation involved in the incident.',
       sources: 'EDR · SIEM · AD · Vulnerability Scanner',
-      pivots: ['Running processes', 'Logged-in users', 'Network connections']
-    }
-  },
+      pivots: ['Running processes', 'Logged-in users', 'Network connections (→ IP)', 'File paths', 'Credentials', 'Vulnerabilities'] }},
+  // ── NEW ARTIFACT NODES ──────────────────────────────────────────────
+  { data: { id: 'registry',   type: 'artifact', category: 'endpoint', label: 'Registry Key',
+      desc: 'Windows registry key or value — persistence, configuration, and malware indicators.',
+      sources: 'Sysmon 12/13/14 · EDR · Windows Security · Autoruns',
+      pivots: ['Process that created it', 'Binary in key value (→ Hash)', 'Service defined by key', 'Scheduled task config'] }},
+  { data: { id: 'task',       type: 'artifact', category: 'endpoint', label: 'Sched. Task',
+      desc: 'Windows scheduled task for persistence or lateral execution.',
+      sources: 'Sysmon Event 11 · EDR · Windows Task Scheduler logs · %SystemRoot%/System32/Tasks',
+      pivots: ['Spawned process', 'Binary hash', 'Task creator (→ User)', 'Registry config', 'Command path (→ File Path)'] }},
+  { data: { id: 'service',    type: 'artifact', category: 'endpoint', label: 'Service',
+      desc: 'Windows service — malicious installs, driver loads, privilege escalation paths.',
+      sources: 'Sysmon Event 6 · EDR · Windows Event 7045 · sc.exe · Services registry hive',
+      pivots: ['Service binary (→ Process)', 'Binary hash', 'Registry config key', 'Service account (→ User)'] }},
+  { data: { id: 'filepath',   type: 'artifact', category: 'endpoint', label: 'File Path',
+      desc: 'Specific file or directory path — drop locations, staging dirs, LOLBin paths.',
+      sources: 'EDR · Sysmon Event 11 · Windows Security · MFT · USN Journal',
+      pivots: ['File hash at path', 'Process spawned from path', 'Host containing path', 'Share hosting path'] }},
+  { data: { id: 'certificate',type: 'artifact', category: 'network',  label: 'Certificate',
+      desc: 'SSL/TLS or code-signing certificate — infrastructure clustering and binary authenticity.',
+      sources: 'Censys · Shodan · crt.sh · VT code-signing · Passive DNS',
+      pivots: ['IPs using this cert', 'Domains using this cert', 'Code-signed binary (→ Hash)'] }},
+  { data: { id: 'credential', type: 'artifact', category: 'identity', label: 'Credential',
+      desc: 'NTLM hash, Kerberos ticket, plaintext password, or API key. Captured or leaked.',
+      sources: 'LSASS dump · Mimikatz · SIEM · AD audit logs · HaveIBeenPwned · GitGuardian',
+      pivots: ['User account (owner)', 'Host used on', 'Source IP', 'Process that captured it'] }},
+  { data: { id: 'netshare',   type: 'artifact', category: 'endpoint', label: 'Network Share',
+      desc: 'SMB/NFS share used for lateral movement, data staging, or exfiltration.',
+      sources: 'Windows Event 5140/5145 · EDR · Sysmon · Network traffic · AD',
+      pivots: ['Host sharing it', 'User accessing it', 'Files on share (→ File Path)', 'Source IP'] }},
+  { data: { id: 'cloud',      type: 'artifact', category: 'cloud',    label: 'Cloud Resource',
+      desc: 'S3 bucket, Azure blob, IAM role, Lambda function, or cloud compute resource.',
+      sources: 'CloudTrail · Azure Monitor · GCP Audit Logs · GuardDuty · Defender for Cloud',
+      pivots: ['Resource IP/endpoint', 'URL accessed', 'Identity accessing (→ User)', 'Files stored (→ Hash)'] }},
+  { data: { id: 'mutex',      type: 'artifact', category: 'endpoint', label: 'Mutex',
+      desc: 'Named mutex — anti-reinfection primitive used by malware as a unique fingerprint.',
+      sources: 'EDR memory analysis · Sandbox · Volatility · Process Monitor · Any.run',
+      pivots: ['Malware family (→ Hash)', 'Process holding mutex', 'Hosts with mutex active'] }},
+  { data: { id: 'named-pipe', type: 'artifact', category: 'endpoint', label: 'Named Pipe',
+      desc: 'Windows named pipe — Cobalt Strike C2, inter-process comms, lateral movement indicator.',
+      sources: 'Sysmon Event 17/18 · EDR · PipeList · Process Monitor',
+      pivots: ['Process using pipe', 'Host where pipe exists'] }},
+  { data: { id: 'wmi',        type: 'artifact', category: 'endpoint', label: 'WMI Sub.',
+      desc: 'WMI event subscription for fileless persistence and lateral execution.',
+      sources: 'Sysmon Event 19/20/21 · EDR · Get-WMIObject · Windows Event 5857/5861',
+      pivots: ['Executed process', 'Payload hash', 'Subscription creator (→ User)', 'Host with subscription'] }},
+  { data: { id: 'vuln',       type: 'artifact', category: 'threat',   label: 'Vulnerability',
+      desc: 'CVE being actively exploited — entry point, lateral move, or privilege escalation.',
+      sources: 'NVD · Tenable · Qualys · CISA KEV · EDR exploit detection · SIEM alert',
+      pivots: ['Exploited service', 'Affected hosts', 'Affected IPs', 'Exploit payload (→ Hash)'] }},
 
   // ── ENRICHMENT NODES ────────────────────────────────────────────────
-  {
-    data: {
-      id: 'rep', type: 'enrichment', label: 'Reputation',
-      desc: 'Threat reputation scores from VT, OTX, AbuseIPDB, and other feeds.',
-      sources: 'VirusTotal · OTX · AbuseIPDB'
-    }
-  },
-  {
-    data: {
-      id: 'whois', type: 'enrichment', label: 'WHOIS / DNS',
-      desc: 'Registration data, NS records, MX records, A/AAAA resolution.',
-      sources: 'WHOIS · Passive DNS · RiskIQ'
-    }
-  },
-  {
-    data: {
-      id: 'asn', type: 'enrichment', label: 'ASN / Geo',
-      desc: 'Autonomous System Number, geolocation, hosting provider, and org info.',
-      sources: 'Shodan · IPinfo · MaxMind · Censys'
-    }
-  },
-  {
-    data: {
-      id: 'file-meta', type: 'enrichment', label: 'File Metadata',
-      desc: 'PE headers, compile time, imphash, rich header, code signing status.',
-      sources: 'VT file report · PE analysis · Sandbox'
-    }
-  },
-  {
-    data: {
-      id: 'sandbox', type: 'enrichment', label: 'Sandbox',
-      desc: 'Dynamic analysis — runtime behavior, network IOCs, registry, dropped files.',
-      sources: 'Any.run · Hybrid Analysis · VT Sandbox'
-    }
-  },
-  {
-    data: {
-      id: 'proc-meta', type: 'enrichment', label: 'Process Info',
-      desc: 'Command line args, binary path, signing status, parent/child tree.',
-      sources: 'EDR · Sysmon · Windows Event Logs'
-    }
-  },
+  { data: { id: 'rep',       type: 'enrichment', label: 'Reputation',   desc: 'Threat reputation scores from VT, OTX, AbuseIPDB, and other feeds.', sources: 'VirusTotal · OTX · AbuseIPDB' }},
+  { data: { id: 'whois',     type: 'enrichment', label: 'WHOIS / DNS',  desc: 'Registration data, NS records, MX records, A/AAAA resolution.',       sources: 'WHOIS · Passive DNS · RiskIQ' }},
+  { data: { id: 'asn',       type: 'enrichment', label: 'ASN / Geo',    desc: 'Autonomous System Number, geolocation, hosting provider, and org info.',sources: 'Shodan · IPinfo · MaxMind · Censys' }},
+  { data: { id: 'file-meta', type: 'enrichment', label: 'File Metadata',desc: 'PE headers, compile time, imphash, rich header, code signing status.', sources: 'VT file report · PE analysis · Sandbox' }},
+  { data: { id: 'sandbox',   type: 'enrichment', label: 'Sandbox',      desc: 'Dynamic analysis — runtime behavior, network IOCs, registry, dropped files.', sources: 'Any.run · Hybrid Analysis · VT Sandbox' }},
+  { data: { id: 'proc-meta', type: 'enrichment', label: 'Process Info', desc: 'Command line args, binary path, signing status, parent/child tree.',   sources: 'EDR · Sysmon · Windows Event Logs' }},
 
   // ── CONTEXT NODES ───────────────────────────────────────────────────
-  {
-    data: {
-      id: 'first-seen', type: 'context', label: 'First/Last Seen',
-      desc: 'When the artifact was first and last observed.',
-      sources: 'SIEM timeline · EDR history'
-    }
-  },
-  {
-    data: {
-      id: 'frequency', type: 'context', label: 'Frequency',
-      desc: 'How often the artifact appears — beaconing intervals, login frequency.',
-      sources: 'SIEM aggregation · Proxy logs'
-    }
-  },
-  {
-    data: {
-      id: 'environment', type: 'context', label: 'Environment',
-      desc: 'Whether the host/user is production, dev, user workstation, or server.',
-      sources: 'CMDB · AD OU · Asset inventory'
-    }
-  },
-  {
-    data: {
-      id: 'ti-tags', type: 'context', label: 'TI Tags',
-      desc: 'Threat intel tags: malware family, actor, campaign, TTPs.',
-      sources: 'OTX pulses · VT community · MISP · ISACs'
-    }
-  },
-  {
-    data: {
-      id: 'mitre', type: 'context', label: 'MITRE TTP',
-      desc: 'ATT&CK technique mapping for the observed behavior or artifact.',
-      sources: 'Sigma rules · EDR detections · HYPOS'
-    }
-  },
+  { data: { id: 'first-seen',  type: 'context', label: 'First/Last Seen', desc: 'When the artifact was first and last observed.',                          sources: 'SIEM timeline · EDR history' }},
+  { data: { id: 'frequency',   type: 'context', label: 'Frequency',        desc: 'How often the artifact appears — beaconing intervals, login frequency.',  sources: 'SIEM aggregation · Proxy logs' }},
+  { data: { id: 'environment', type: 'context', label: 'Environment',      desc: 'Whether the host/user is production, dev, user workstation, or server.',   sources: 'CMDB · AD OU · Asset inventory' }},
+  { data: { id: 'ti-tags',     type: 'context', label: 'TI Tags',          desc: 'Threat intel tags: malware family, actor, campaign, TTPs.',               sources: 'OTX pulses · VT community · MISP · ISACs' }},
+  { data: { id: 'mitre',       type: 'context', label: 'MITRE TTP',        desc: 'ATT&CK technique mapping for the observed behavior or artifact.',          sources: 'Sigma rules · EDR detections · HYPOS' }},
 
   // ── PIVOT NODES ─────────────────────────────────────────────────────
-  {
-    data: {
-      id: 'p-ip', type: 'pivot', label: 'Related IPs',
-      desc: 'IPs sharing same ASN, infra, SSL cert, or campaign.'
-    }
-  },
-  {
-    data: {
-      id: 'p-domain', type: 'pivot', label: 'Related Domains',
-      desc: 'Domains resolving to same IP, registrant, SSL cert, or DGA pattern.'
-    }
-  },
-  {
-    data: {
-      id: 'p-url', type: 'pivot', label: 'Related URLs',
-      desc: 'URLs on the same domain or IP, or serving similar payloads.'
-    }
-  },
-  {
-    data: {
-      id: 'p-file', type: 'pivot', label: 'Related Files',
-      desc: 'Files with same imphash, code-signing cert, or dropped by same parent.'
-    }
-  },
-  {
-    data: {
-      id: 'p-process', type: 'pivot', label: 'Related Processes',
-      desc: 'Child/parent processes, spawned commands, or processes with same hash.'
-    }
-  },
-  {
-    data: {
-      id: 'p-user', type: 'pivot', label: 'Related Users',
-      desc: 'Users on same host, same credential, or same access scope.'
-    }
-  },
-  {
-    data: {
-      id: 'p-host', type: 'pivot', label: 'Related Hosts',
-      desc: 'Hosts with same user activity or lateral movement destination.'
-    }
-  },
+  { data: { id: 'p-ip',      type: 'pivot', label: 'Related IPs',      desc: 'IPs sharing same ASN, infra, SSL cert, or campaign.' }},
+  { data: { id: 'p-domain',  type: 'pivot', label: 'Related Domains',  desc: 'Domains resolving to same IP, registrant, SSL cert, or DGA pattern.' }},
+  { data: { id: 'p-url',     type: 'pivot', label: 'Related URLs',     desc: 'URLs on the same domain or IP, or serving similar payloads.' }},
+  { data: { id: 'p-file',    type: 'pivot', label: 'Related Files',    desc: 'Files with same imphash, code-signing cert, or dropped by same parent.' }},
+  { data: { id: 'p-process', type: 'pivot', label: 'Related Processes',desc: 'Child/parent processes, spawned commands, or processes with same hash.' }},
+  { data: { id: 'p-user',    type: 'pivot', label: 'Related Users',    desc: 'Users on same host, same credential, or same access scope.' }},
+  { data: { id: 'p-host',    type: 'pivot', label: 'Related Hosts',    desc: 'Hosts with same user activity or lateral movement destination.' }},
 
   // ── CORRELATION NODES ───────────────────────────────────────────────
-  {
-    data: {
-      id: 'corr-asn', type: 'correlation', label: 'Same ASN / Infra',
-      desc: 'Multiple IPs/domains hosted on the same ASN or infrastructure block.'
-    }
-  },
-  {
-    data: {
-      id: 'corr-ssl', type: 'correlation', label: 'Same SSL Cert',
-      desc: 'Domains/IPs sharing an SSL certificate — strong infra cluster signal.'
-    }
-  },
-  {
-    data: {
-      id: 'corr-malware', type: 'correlation', label: 'Same Malware',
-      desc: 'Files/processes attributed to the same malware family.'
-    }
-  },
-  {
-    data: {
-      id: 'corr-campaign', type: 'correlation', label: 'Same Campaign',
-      desc: 'Multiple indicators linked to the same threat campaign or actor.'
-    }
-  },
-  {
-    data: {
-      id: 'corr-time', type: 'correlation', label: 'Temporal Cluster',
-      desc: 'Events temporally clustered — simultaneous activity across hosts or users.'
-    }
-  },
+  { data: { id: 'corr-asn',      type: 'correlation', label: 'Same ASN / Infra',  desc: 'Multiple IPs/domains hosted on the same ASN or infrastructure block.' }},
+  { data: { id: 'corr-ssl',      type: 'correlation', label: 'Same SSL Cert',     desc: 'Domains/IPs sharing an SSL certificate — strong infra cluster signal.' }},
+  { data: { id: 'corr-malware',  type: 'correlation', label: 'Same Malware',      desc: 'Files/processes attributed to the same malware family.' }},
+  { data: { id: 'corr-campaign', type: 'correlation', label: 'Same Campaign',     desc: 'Multiple indicators linked to the same threat campaign or actor.' }},
+  { data: { id: 'corr-time',     type: 'correlation', label: 'Temporal Cluster',  desc: 'Events temporally clustered — simultaneous activity across hosts or users.' }},
 
   // ── DECISION NODES ──────────────────────────────────────────────────
-  {
-    data: {
-      id: 'dec-malicious', type: 'decision', label: 'Malicious',
-      desc: 'High confidence — confirmed threat. Proceed with containment.'
-    }
-  },
-  {
-    data: {
-      id: 'dec-suspicious', type: 'decision', label: 'Suspicious',
-      desc: 'Medium confidence — requires further investigation before action.'
-    }
-  },
-  {
-    data: {
-      id: 'dec-benign', type: 'decision', label: 'Benign',
-      desc: 'Low/no threat signal — likely false positive or expected behavior.'
-    }
-  },
-  {
-    data: {
-      id: 'dec-unknown', type: 'decision', label: 'Unknown',
-      desc: 'Insufficient data to determine verdict. Expand enrichment.'
-    }
-  },
+  { data: { id: 'dec-malicious',  type: 'decision', label: 'Malicious',  desc: 'High confidence — confirmed threat. Proceed with containment.' }},
+  { data: { id: 'dec-suspicious', type: 'decision', label: 'Suspicious', desc: 'Medium confidence — requires further investigation before action.' }},
+  { data: { id: 'dec-benign',     type: 'decision', label: 'Benign',     desc: 'Low/no threat signal — likely false positive or expected behavior.' }},
+  { data: { id: 'dec-unknown',    type: 'decision', label: 'Unknown',    desc: 'Insufficient data to determine verdict. Expand enrichment.' }},
 
   // ── ACTION NODES ────────────────────────────────────────────────────
-  {
-    data: {
-      id: 'act-block', type: 'action', label: 'Block Indicator',
-      desc: 'Add IP/domain/hash to firewall, proxy, or EDR block list.'
-    }
-  },
-  {
-    data: {
-      id: 'act-isolate', type: 'action', label: 'Isolate Host',
-      desc: 'Network-isolate the compromised endpoint to prevent lateral movement.'
-    }
-  },
-  {
-    data: {
-      id: 'act-reset', type: 'action', label: 'Reset Credentials',
-      desc: 'Force password reset and session invalidation for affected accounts.'
-    }
-  },
-  {
-    data: {
-      id: 'act-escalate', type: 'action', label: 'Escalate Incident',
-      desc: 'Open formal incident, notify IR team, preserve evidence.'
-    }
-  },
-  {
-    data: {
-      id: 'act-hunt', type: 'action', label: 'Continue Hunting',
-      desc: 'Expand investigation scope — pivot to related artifacts, run new hunt queries.'
-    }
-  }
+  { data: { id: 'act-block',    type: 'action', label: 'Block Indicator',  desc: 'Add IP/domain/hash to firewall, proxy, or EDR block list.' }},
+  { data: { id: 'act-isolate',  type: 'action', label: 'Isolate Host',     desc: 'Network-isolate the compromised endpoint to prevent lateral movement.' }},
+  { data: { id: 'act-reset',    type: 'action', label: 'Reset Credentials',desc: 'Force password reset and session invalidation for affected accounts.' }},
+  { data: { id: 'act-escalate', type: 'action', label: 'Escalate Incident',desc: 'Open formal incident, notify IR team, preserve evidence.' }},
+  { data: { id: 'act-hunt',     type: 'action', label: 'Continue Hunting', desc: 'Expand investigation scope — pivot to related artifacts, run new hunt queries.' }}
 ];
 
 const GRAPH_EDGES = [
   // ── Artifact → Enrichment ───────────────────────────────────────────
-  { data: { id: 'ip-rep',       source: 'ip',      target: 'rep',       label: 'reputation' } },
-  { data: { id: 'ip-asn',       source: 'ip',      target: 'asn',       label: 'geo/ASN' } },
-  { data: { id: 'ip-whois',     source: 'ip',      target: 'whois',     label: 'rDNS' } },
-  { data: { id: 'domain-whois', source: 'domain',  target: 'whois',     label: 'WHOIS/DNS' } },
-  { data: { id: 'domain-rep',   source: 'domain',  target: 'rep',       label: 'reputation' } },
-  { data: { id: 'url-rep',      source: 'url',     target: 'rep',       label: 'URL scan' } },
-  { data: { id: 'hash-rep',     source: 'hash',    target: 'rep',       label: 'AV detection' } },
-  { data: { id: 'hash-filemeta',source: 'hash',    target: 'file-meta', label: 'static analysis' } },
-  { data: { id: 'hash-sandbox', source: 'hash',    target: 'sandbox',   label: 'dynamic analysis' } },
-  { data: { id: 'proc-procmeta',source: 'process', target: 'proc-meta', label: 'process info' } },
-  { data: { id: 'proc-rep',     source: 'process', target: 'rep',       label: 'hash check' } },
-  { data: { id: 'email-rep',    source: 'email',   target: 'rep',       label: 'header check' } },
+  { data: { id: 'ip-rep',            source: 'ip',          target: 'rep',       label: 'reputation' }},
+  { data: { id: 'ip-asn',            source: 'ip',          target: 'asn',       label: 'geo/ASN' }},
+  { data: { id: 'ip-whois',          source: 'ip',          target: 'whois',     label: 'rDNS' }},
+  { data: { id: 'domain-whois',      source: 'domain',      target: 'whois',     label: 'WHOIS/DNS' }},
+  { data: { id: 'domain-rep',        source: 'domain',      target: 'rep',       label: 'reputation' }},
+  { data: { id: 'url-rep',           source: 'url',         target: 'rep',       label: 'URL scan' }},
+  { data: { id: 'hash-rep',          source: 'hash',        target: 'rep',       label: 'AV detection' }},
+  { data: { id: 'hash-filemeta',     source: 'hash',        target: 'file-meta', label: 'static analysis' }},
+  { data: { id: 'hash-sandbox',      source: 'hash',        target: 'sandbox',   label: 'dynamic analysis' }},
+  { data: { id: 'proc-procmeta',     source: 'process',     target: 'proc-meta', label: 'process info' }},
+  { data: { id: 'proc-rep',          source: 'process',     target: 'rep',       label: 'hash check' }},
+  { data: { id: 'email-rep',         source: 'email',       target: 'rep',       label: 'header check' }},
+  { data: { id: 'registry-procmeta', source: 'registry',    target: 'proc-meta', label: 'event analysis' }},
+  { data: { id: 'task-procmeta',     source: 'task',        target: 'proc-meta', label: 'task analysis' }},
+  { data: { id: 'service-procmeta',  source: 'service',     target: 'proc-meta', label: 'service info' }},
+  { data: { id: 'filepath-filemeta', source: 'filepath',    target: 'file-meta', label: 'file analysis' }},
+  { data: { id: 'filepath-sandbox',  source: 'filepath',    target: 'sandbox',   label: 'sandbox drop' }},
+  { data: { id: 'cert-whois',        source: 'certificate', target: 'whois',     label: 'cert lookup' }},
+  { data: { id: 'cert-rep',          source: 'certificate', target: 'rep',       label: 'cert reputation' }},
+  { data: { id: 'cred-rep',          source: 'credential',  target: 'rep',       label: 'exposure check' }},
+  { data: { id: 'netshare-asn',      source: 'netshare',    target: 'asn',       label: 'host lookup' }},
+  { data: { id: 'cloud-asn',         source: 'cloud',       target: 'asn',       label: 'infra lookup' }},
+  { data: { id: 'cloud-rep',         source: 'cloud',       target: 'rep',       label: 'reputation' }},
+  { data: { id: 'mutex-rep',         source: 'mutex',       target: 'rep',       label: 'mutex lookup' }},
+  { data: { id: 'npipe-procmeta',    source: 'named-pipe',  target: 'proc-meta', label: 'pipe analysis' }},
+  { data: { id: 'wmi-procmeta',      source: 'wmi',         target: 'proc-meta', label: 'WMI analysis' }},
+  { data: { id: 'vuln-rep',          source: 'vuln',        target: 'rep',       label: 'CVE lookup' }},
 
   // ── Enrichment → Context ────────────────────────────────────────────
-  { data: { id: 'rep-titags',      source: 'rep',       target: 'ti-tags',    label: 'threat tags' } },
-  { data: { id: 'rep-firstseen',   source: 'rep',       target: 'first-seen', label: 'first seen' } },
-  { data: { id: 'asn-environment', source: 'asn',       target: 'environment',label: 'hosting context' } },
-  { data: { id: 'whois-firstseen', source: 'whois',     target: 'first-seen', label: 'reg date' } },
-  { data: { id: 'procmeta-mitre',  source: 'proc-meta', target: 'mitre',      label: 'TTP mapping' } },
-  { data: { id: 'sandbox-mitre',   source: 'sandbox',   target: 'mitre',      label: 'behavior→TTP' } },
-  { data: { id: 'sandbox-titags',  source: 'sandbox',   target: 'ti-tags',    label: 'malware family' } },
-  { data: { id: 'filemeta-titags', source: 'file-meta', target: 'ti-tags',    label: 'family tag' } },
+  { data: { id: 'rep-titags',        source: 'rep',       target: 'ti-tags',    label: 'threat tags' }},
+  { data: { id: 'rep-firstseen',     source: 'rep',       target: 'first-seen', label: 'first seen' }},
+  { data: { id: 'asn-environment',   source: 'asn',       target: 'environment',label: 'hosting context' }},
+  { data: { id: 'whois-firstseen',   source: 'whois',     target: 'first-seen', label: 'reg date' }},
+  { data: { id: 'procmeta-mitre',    source: 'proc-meta', target: 'mitre',      label: 'TTP mapping' }},
+  { data: { id: 'sandbox-mitre',     source: 'sandbox',   target: 'mitre',      label: 'behavior→TTP' }},
+  { data: { id: 'sandbox-titags',    source: 'sandbox',   target: 'ti-tags',    label: 'malware family' }},
+  { data: { id: 'filemeta-titags',   source: 'file-meta', target: 'ti-tags',    label: 'family tag' }},
 
   // ── Artifact → Pivot ────────────────────────────────────────────────
-  { data: { id: 'ip-pdomain',      source: 'ip',      target: 'p-domain',  label: 'passive DNS' } },
-  { data: { id: 'ip-purl',         source: 'ip',      target: 'p-url',     label: 'hosted URLs' } },
-  { data: { id: 'ip-pip',          source: 'ip',      target: 'p-ip',      label: 'same ASN' } },
-  { data: { id: 'domain-pip',      source: 'domain',  target: 'p-ip',      label: 'resolved IPs' } },
-  { data: { id: 'domain-purl',     source: 'domain',  target: 'p-url',     label: 'served URLs' } },
-  { data: { id: 'url-pdomain',     source: 'url',     target: 'p-domain',  label: 'parent domain' } },
-  { data: { id: 'url-pfile',       source: 'url',     target: 'p-file',    label: 'payload' } },
-  { data: { id: 'hash-pprocess',   source: 'hash',    target: 'p-process', label: 'executed as' } },
-  { data: { id: 'hash-pfile',      source: 'hash',    target: 'p-file',    label: 'dropped files' } },
-  { data: { id: 'proc-pprocess',   source: 'process', target: 'p-process', label: 'child procs' } },
-  { data: { id: 'proc-pfile',      source: 'process', target: 'p-file',    label: 'dropped files' } },
-  { data: { id: 'proc-pip',        source: 'process', target: 'p-ip',      label: 'C2 connection' } },
-  { data: { id: 'user-phost',      source: 'user',    target: 'p-host',    label: 'hosts' } },
-  { data: { id: 'user-puser',      source: 'user',    target: 'p-user',    label: 'shared creds' } },
-  { data: { id: 'email-purl',      source: 'email',   target: 'p-url',     label: 'embedded links' } },
-  { data: { id: 'email-pfile',     source: 'email',   target: 'p-file',    label: 'attachments' } },
-  { data: { id: 'email-puser',     source: 'email',   target: 'p-user',    label: 'recipients' } },
-  { data: { id: 'host-pprocess',   source: 'host',    target: 'p-process', label: 'running procs' } },
-  { data: { id: 'host-puser',      source: 'host',    target: 'p-user',    label: 'logged-in users' } },
-  { data: { id: 'email-pip',       source: 'email',   target: 'p-ip',      label: 'header IP' } },
-  { data: { id: 'host-pip',        source: 'host',    target: 'p-ip',      label: 'connections' } },
-  { data: { id: 'user-pip',        source: 'user',    target: 'p-ip',      label: 'login IPs' } },
-  { data: { id: 'proc-puser',      source: 'process', target: 'p-user',    label: 'process owner' } },
-
-  // ── Cross-artifact pivoting (crossPivot: true) ──────────────────────
-  { data: { id: 'ip-domain',    source: 'ip',      target: 'domain',  label: 'passive DNS',  crossPivot: true } },
-  { data: { id: 'domain-url',   source: 'domain',  target: 'url',     label: 'delivery',     crossPivot: true } },
-  { data: { id: 'url-hash',     source: 'url',     target: 'hash',    label: 'payload',      crossPivot: true } },
-  { data: { id: 'hash-process', source: 'hash',    target: 'process', label: 'execution',    crossPivot: true } },
-  { data: { id: 'process-ip',   source: 'process', target: 'ip',      label: 'C2 comm',      crossPivot: true } },
-  { data: { id: 'user-host',    source: 'user',    target: 'host',    label: 'impact scope', crossPivot: true } },
-  { data: { id: 'email-user',   source: 'email',   target: 'user',    label: 'entry point',  crossPivot: true } },
-  { data: { id: 'url-domain',   source: 'url',     target: 'domain',  label: 'parent domain', crossPivot: true } },
-  { data: { id: 'email-ip',     source: 'email',   target: 'ip',      label: 'header IP',     crossPivot: true } },
-  { data: { id: 'process-hash', source: 'process', target: 'hash',    label: 'binary hash',   crossPivot: true } },
-  { data: { id: 'ip-host',      source: 'ip',      target: 'host',    label: 'DHCP/asset',    crossPivot: true } },
-  { data: { id: 'host-ip',      source: 'host',    target: 'ip',      label: 'connections',   crossPivot: true } },
-  { data: { id: 'hash-domain',  source: 'hash',    target: 'domain',  label: 'C2 domain',     crossPivot: true } },
-  { data: { id: 'hash-ip',      source: 'hash',    target: 'ip',      label: 'C2 IP',         crossPivot: true } },
-  { data: { id: 'process-user', source: 'process', target: 'user',    label: 'process owner', crossPivot: true } },
-  { data: { id: 'user-ip',      source: 'user',    target: 'ip',      label: 'login IPs',     crossPivot: true } },
-  { data: { id: 'user-email',   source: 'user',    target: 'email',   label: 'email activity',crossPivot: true } },
+  { data: { id: 'ip-pdomain',        source: 'ip',          target: 'p-domain',  label: 'passive DNS' }},
+  { data: { id: 'ip-purl',           source: 'ip',          target: 'p-url',     label: 'hosted URLs' }},
+  { data: { id: 'ip-pip',            source: 'ip',          target: 'p-ip',      label: 'same ASN' }},
+  { data: { id: 'domain-pip',        source: 'domain',      target: 'p-ip',      label: 'resolved IPs' }},
+  { data: { id: 'domain-purl',       source: 'domain',      target: 'p-url',     label: 'served URLs' }},
+  { data: { id: 'url-pdomain',       source: 'url',         target: 'p-domain',  label: 'parent domain' }},
+  { data: { id: 'url-pfile',         source: 'url',         target: 'p-file',    label: 'payload' }},
+  { data: { id: 'hash-pprocess',     source: 'hash',        target: 'p-process', label: 'executed as' }},
+  { data: { id: 'hash-pfile',        source: 'hash',        target: 'p-file',    label: 'dropped files' }},
+  { data: { id: 'proc-pprocess',     source: 'process',     target: 'p-process', label: 'child procs' }},
+  { data: { id: 'proc-pfile',        source: 'process',     target: 'p-file',    label: 'dropped files' }},
+  { data: { id: 'proc-pip',          source: 'process',     target: 'p-ip',      label: 'C2 connection' }},
+  { data: { id: 'proc-puser',        source: 'process',     target: 'p-user',    label: 'process owner' }},
+  { data: { id: 'user-phost',        source: 'user',        target: 'p-host',    label: 'hosts' }},
+  { data: { id: 'user-puser',        source: 'user',        target: 'p-user',    label: 'shared creds' }},
+  { data: { id: 'user-pip',          source: 'user',        target: 'p-ip',      label: 'login IPs' }},
+  { data: { id: 'email-purl',        source: 'email',       target: 'p-url',     label: 'embedded links' }},
+  { data: { id: 'email-pfile',       source: 'email',       target: 'p-file',    label: 'attachments' }},
+  { data: { id: 'email-puser',       source: 'email',       target: 'p-user',    label: 'recipients' }},
+  { data: { id: 'email-pip',         source: 'email',       target: 'p-ip',      label: 'header IP' }},
+  { data: { id: 'host-pprocess',     source: 'host',        target: 'p-process', label: 'running procs' }},
+  { data: { id: 'host-puser',        source: 'host',        target: 'p-user',    label: 'logged-in users' }},
+  { data: { id: 'host-pip',          source: 'host',        target: 'p-ip',      label: 'connections' }},
+  { data: { id: 'registry-pprocess', source: 'registry',    target: 'p-process', label: 'created by' }},
+  { data: { id: 'registry-pfile',    source: 'registry',    target: 'p-file',    label: 'ref binary' }},
+  { data: { id: 'task-pprocess',     source: 'task',        target: 'p-process', label: 'spawned proc' }},
+  { data: { id: 'task-pfile',        source: 'task',        target: 'p-file',    label: 'task binary' }},
+  { data: { id: 'task-puser',        source: 'task',        target: 'p-user',    label: 'task creator' }},
+  { data: { id: 'service-pprocess',  source: 'service',     target: 'p-process', label: 'service binary' }},
+  { data: { id: 'service-pfile',     source: 'service',     target: 'p-file',    label: 'service binary' }},
+  { data: { id: 'filepath-pfile',    source: 'filepath',    target: 'p-file',    label: 'related files' }},
+  { data: { id: 'filepath-pprocess', source: 'filepath',    target: 'p-process', label: 'spawning proc' }},
+  { data: { id: 'cert-pdomain',      source: 'certificate', target: 'p-domain',  label: 'cert domains' }},
+  { data: { id: 'cert-pip',          source: 'certificate', target: 'p-ip',      label: 'cert IPs' }},
+  { data: { id: 'cred-puser',        source: 'credential',  target: 'p-user',    label: 'related users' }},
+  { data: { id: 'cred-phost',        source: 'credential',  target: 'p-host',    label: 'used on hosts' }},
+  { data: { id: 'cred-pip',          source: 'credential',  target: 'p-ip',      label: 'source IPs' }},
+  { data: { id: 'netshare-phost',    source: 'netshare',    target: 'p-host',    label: 'share host' }},
+  { data: { id: 'netshare-puser',    source: 'netshare',    target: 'p-user',    label: 'accessing users' }},
+  { data: { id: 'netshare-pip',      source: 'netshare',    target: 'p-ip',      label: 'accessing IPs' }},
+  { data: { id: 'cloud-purl',        source: 'cloud',       target: 'p-url',     label: 'endpoints' }},
+  { data: { id: 'cloud-puser',       source: 'cloud',       target: 'p-user',    label: 'cloud identities' }},
+  { data: { id: 'cloud-pip',         source: 'cloud',       target: 'p-ip',      label: 'cloud IPs' }},
+  { data: { id: 'mutex-pfile',       source: 'mutex',       target: 'p-file',    label: 'malware family' }},
+  { data: { id: 'mutex-pprocess',    source: 'mutex',       target: 'p-process', label: 'holding process' }},
+  { data: { id: 'npipe-pprocess',    source: 'named-pipe',  target: 'p-process', label: 'using process' }},
+  { data: { id: 'npipe-phost',       source: 'named-pipe',  target: 'p-host',    label: 'host' }},
+  { data: { id: 'wmi-pprocess',      source: 'wmi',         target: 'p-process', label: 'executed proc' }},
+  { data: { id: 'wmi-pfile',         source: 'wmi',         target: 'p-file',    label: 'payload' }},
+  { data: { id: 'wmi-puser',         source: 'wmi',         target: 'p-user',    label: 'creator' }},
+  { data: { id: 'vuln-pip',          source: 'vuln',        target: 'p-ip',      label: 'affected IPs' }},
+  { data: { id: 'vuln-phost',        source: 'vuln',        target: 'p-host',    label: 'affected hosts' }},
 
   // ── Pivot → Correlation ─────────────────────────────────────────────
-  { data: { id: 'pip-corrasn',       source: 'p-ip',     target: 'corr-asn',      label: '' } },
-  { data: { id: 'pdomain-corrssl',   source: 'p-domain', target: 'corr-ssl',      label: '' } },
-  { data: { id: 'pdomain-corrcampaign', source: 'p-domain', target: 'corr-campaign', label: '' } },
-  { data: { id: 'pfile-corrmalware', source: 'p-file',   target: 'corr-malware',  label: '' } },
-  { data: { id: 'titags-corrcampaign',source: 'ti-tags', target: 'corr-campaign', label: '' } },
-  { data: { id: 'titags-corrmalware', source: 'ti-tags', target: 'corr-malware',  label: '' } },
-  { data: { id: 'mitre-corrcampaign', source: 'mitre',   target: 'corr-campaign', label: '' } },
-  { data: { id: 'firstseen-corrtime', source: 'first-seen', target: 'corr-time',  label: '' } },
-  { data: { id: 'frequency-corrtime', source: 'frequency',  target: 'corr-time',  label: '' } },
+  { data: { id: 'pip-corrasn',           source: 'p-ip',      target: 'corr-asn',      label: '' }},
+  { data: { id: 'pdomain-corrssl',       source: 'p-domain',  target: 'corr-ssl',      label: '' }},
+  { data: { id: 'pdomain-corrcampaign',  source: 'p-domain',  target: 'corr-campaign', label: '' }},
+  { data: { id: 'pfile-corrmalware',     source: 'p-file',    target: 'corr-malware',  label: '' }},
+  { data: { id: 'titags-corrcampaign',   source: 'ti-tags',   target: 'corr-campaign', label: '' }},
+  { data: { id: 'titags-corrmalware',    source: 'ti-tags',   target: 'corr-malware',  label: '' }},
+  { data: { id: 'mitre-corrcampaign',    source: 'mitre',     target: 'corr-campaign', label: '' }},
+  { data: { id: 'firstseen-corrtime',    source: 'first-seen',target: 'corr-time',     label: '' }},
+  { data: { id: 'frequency-corrtime',    source: 'frequency', target: 'corr-time',     label: '' }},
 
   // ── Correlation + Context → Decision ────────────────────────────────
-  { data: { id: 'corrcampaign-malicious', source: 'corr-campaign', target: 'dec-malicious',  label: '' } },
-  { data: { id: 'corrmalware-malicious',  source: 'corr-malware',  target: 'dec-malicious',  label: '' } },
-  { data: { id: 'corrasn-suspicious',     source: 'corr-asn',      target: 'dec-suspicious', label: '' } },
-  { data: { id: 'corrssl-suspicious',     source: 'corr-ssl',      target: 'dec-suspicious', label: '' } },
-  { data: { id: 'corrtime-suspicious',    source: 'corr-time',     target: 'dec-suspicious', label: '' } },
-  { data: { id: 'rep-decmalicious',       source: 'rep',           target: 'dec-malicious',  label: 'high score' } },
-  { data: { id: 'rep-decbenign',          source: 'rep',           target: 'dec-benign',     label: 'clean' } },
-  { data: { id: 'rep-decunknown',         source: 'rep',           target: 'dec-unknown',    label: 'no data' } },
-  { data: { id: 'environment-suspicious', source: 'environment',   target: 'dec-suspicious', label: 'anomaly' } },
+  { data: { id: 'corrcampaign-malicious',source: 'corr-campaign',target: 'dec-malicious',  label: '' }},
+  { data: { id: 'corrmalware-malicious', source: 'corr-malware', target: 'dec-malicious',  label: '' }},
+  { data: { id: 'corrasn-suspicious',    source: 'corr-asn',     target: 'dec-suspicious', label: '' }},
+  { data: { id: 'corrssl-suspicious',    source: 'corr-ssl',     target: 'dec-suspicious', label: '' }},
+  { data: { id: 'corrtime-suspicious',   source: 'corr-time',    target: 'dec-suspicious', label: '' }},
+  { data: { id: 'rep-decmalicious',      source: 'rep',          target: 'dec-malicious',  label: 'high score' }},
+  { data: { id: 'rep-decbenign',         source: 'rep',          target: 'dec-benign',     label: 'clean' }},
+  { data: { id: 'rep-decunknown',        source: 'rep',          target: 'dec-unknown',    label: 'no data' }},
+  { data: { id: 'environment-suspicious',source: 'environment',  target: 'dec-suspicious', label: 'anomaly' }},
 
   // ── Decision → Action ───────────────────────────────────────────────
-  { data: { id: 'malicious-block',     source: 'dec-malicious',  target: 'act-block',    label: '' } },
-  { data: { id: 'malicious-isolate',   source: 'dec-malicious',  target: 'act-isolate',  label: '' } },
-  { data: { id: 'malicious-escalate',  source: 'dec-malicious',  target: 'act-escalate', label: '' } },
-  { data: { id: 'suspicious-hunt',     source: 'dec-suspicious', target: 'act-hunt',     label: '' } },
-  { data: { id: 'suspicious-escalate', source: 'dec-suspicious', target: 'act-escalate', label: '' } },
-  { data: { id: 'benign-hunt',         source: 'dec-benign',     target: 'act-hunt',     label: 'tune & verify' } },
-  { data: { id: 'unknown-hunt',        source: 'dec-unknown',    target: 'act-hunt',     label: '' } },
-  { data: { id: 'malicious-reset',     source: 'dec-malicious',  target: 'act-reset',    label: 'if user involved' } }
+  { data: { id: 'malicious-block',    source: 'dec-malicious',  target: 'act-block',    label: '' }},
+  { data: { id: 'malicious-isolate',  source: 'dec-malicious',  target: 'act-isolate',  label: '' }},
+  { data: { id: 'malicious-escalate', source: 'dec-malicious',  target: 'act-escalate', label: '' }},
+  { data: { id: 'suspicious-hunt',    source: 'dec-suspicious', target: 'act-hunt',     label: '' }},
+  { data: { id: 'suspicious-escalate',source: 'dec-suspicious', target: 'act-escalate', label: '' }},
+  { data: { id: 'benign-hunt',        source: 'dec-benign',     target: 'act-hunt',     label: 'tune & verify' }},
+  { data: { id: 'unknown-hunt',       source: 'dec-unknown',    target: 'act-hunt',     label: '' }},
+  { data: { id: 'malicious-reset',    source: 'dec-malicious',  target: 'act-reset',    label: 'if user involved' }},
+
+  // ── Cross-artifact pivoting (crossPivot: true) ──────────────────────
+  // Original 8 artifact cross-pivots
+  { data: { id: 'ip-domain',     source: 'ip',      target: 'domain',  label: 'passive DNS',   crossPivot: true }},
+  { data: { id: 'domain-url',    source: 'domain',  target: 'url',     label: 'delivery',      crossPivot: true }},
+  { data: { id: 'url-hash',      source: 'url',     target: 'hash',    label: 'payload',       crossPivot: true }},
+  { data: { id: 'hash-process',  source: 'hash',    target: 'process', label: 'execution',     crossPivot: true }},
+  { data: { id: 'process-ip',    source: 'process', target: 'ip',      label: 'C2 comm',       crossPivot: true }},
+  { data: { id: 'user-host',     source: 'user',    target: 'host',    label: 'impact scope',  crossPivot: true }},
+  { data: { id: 'email-user',    source: 'email',   target: 'user',    label: 'entry point',   crossPivot: true }},
+  // Previously added cross-pivots
+  { data: { id: 'url-domain',    source: 'url',     target: 'domain',  label: 'parent domain', crossPivot: true }},
+  { data: { id: 'email-ip',      source: 'email',   target: 'ip',      label: 'header IP',     crossPivot: true }},
+  { data: { id: 'process-hash',  source: 'process', target: 'hash',    label: 'binary hash',   crossPivot: true }},
+  { data: { id: 'ip-host',       source: 'ip',      target: 'host',    label: 'DHCP/asset',    crossPivot: true }},
+  { data: { id: 'host-ip',       source: 'host',    target: 'ip',      label: 'connections',   crossPivot: true }},
+  { data: { id: 'hash-domain',   source: 'hash',    target: 'domain',  label: 'C2 domain',     crossPivot: true }},
+  { data: { id: 'hash-ip',       source: 'hash',    target: 'ip',      label: 'C2 IP',         crossPivot: true }},
+  { data: { id: 'process-user',  source: 'process', target: 'user',    label: 'process owner', crossPivot: true }},
+  { data: { id: 'user-ip',       source: 'user',    target: 'ip',      label: 'login IPs',     crossPivot: true }},
+  { data: { id: 'user-email',    source: 'user',    target: 'email',   label: 'email activity',crossPivot: true }},
+  // New artifact cross-pivots
+  { data: { id: 'registry-process',  source: 'registry',    target: 'process',    label: 'created by',      crossPivot: true }},
+  { data: { id: 'registry-hash',     source: 'registry',    target: 'hash',       label: 'ref binary',      crossPivot: true }},
+  { data: { id: 'registry-user',     source: 'registry',    target: 'user',       label: 'modified by',     crossPivot: true }},
+  { data: { id: 'registry-service',  source: 'registry',    target: 'service',    label: 'defines service', crossPivot: true }},
+  { data: { id: 'registry-task',     source: 'registry',    target: 'task',       label: 'defines task',    crossPivot: true }},
+  { data: { id: 'task-process',      source: 'task',        target: 'process',    label: 'spawns',          crossPivot: true }},
+  { data: { id: 'task-hash',         source: 'task',        target: 'hash',       label: 'binary',          crossPivot: true }},
+  { data: { id: 'task-user',         source: 'task',        target: 'user',       label: 'creator',         crossPivot: true }},
+  { data: { id: 'task-registry',     source: 'task',        target: 'registry',   label: 'stored in',       crossPivot: true }},
+  { data: { id: 'task-filepath',     source: 'task',        target: 'filepath',   label: 'command path',    crossPivot: true }},
+  { data: { id: 'service-process',   source: 'service',     target: 'process',    label: 'runs as',         crossPivot: true }},
+  { data: { id: 'service-hash',      source: 'service',     target: 'hash',       label: 'binary',          crossPivot: true }},
+  { data: { id: 'service-registry',  source: 'service',     target: 'registry',   label: 'config key',      crossPivot: true }},
+  { data: { id: 'service-user',      source: 'service',     target: 'user',       label: 'service acct',    crossPivot: true }},
+  { data: { id: 'service-vuln',      source: 'service',     target: 'vuln',       label: 'exploited via',   crossPivot: true }},
+  { data: { id: 'filepath-hash',     source: 'filepath',    target: 'hash',       label: 'file hash',       crossPivot: true }},
+  { data: { id: 'filepath-process',  source: 'filepath',    target: 'process',    label: 'executed from',   crossPivot: true }},
+  { data: { id: 'filepath-host',     source: 'filepath',    target: 'host',       label: 'on host',         crossPivot: true }},
+  { data: { id: 'filepath-netshare', source: 'filepath',    target: 'netshare',   label: 'on share',        crossPivot: true }},
+  { data: { id: 'cert-ip',           source: 'certificate', target: 'ip',         label: 'on IPs',          crossPivot: true }},
+  { data: { id: 'cert-domain',       source: 'certificate', target: 'domain',     label: 'for domain',      crossPivot: true }},
+  { data: { id: 'cert-hash',         source: 'certificate', target: 'hash',       label: 'signed binary',   crossPivot: true }},
+  { data: { id: 'cred-user',         source: 'credential',  target: 'user',       label: 'belongs to',      crossPivot: true }},
+  { data: { id: 'cred-host',         source: 'credential',  target: 'host',       label: 'used on',         crossPivot: true }},
+  { data: { id: 'cred-ip',           source: 'credential',  target: 'ip',         label: 'from IP',         crossPivot: true }},
+  { data: { id: 'cred-process',      source: 'credential',  target: 'process',    label: 'captured by',     crossPivot: true }},
+  { data: { id: 'netshare-host',     source: 'netshare',    target: 'host',       label: 'on host',         crossPivot: true }},
+  { data: { id: 'netshare-user',     source: 'netshare',    target: 'user',       label: 'accessed by',     crossPivot: true }},
+  { data: { id: 'netshare-filepath', source: 'netshare',    target: 'filepath',   label: 'path on share',   crossPivot: true }},
+  { data: { id: 'netshare-ip',       source: 'netshare',    target: 'ip',         label: 'from IP',         crossPivot: true }},
+  { data: { id: 'cloud-ip',          source: 'cloud',       target: 'ip',         label: 'resource IP',     crossPivot: true }},
+  { data: { id: 'cloud-url',         source: 'cloud',       target: 'url',        label: 'endpoint URL',    crossPivot: true }},
+  { data: { id: 'cloud-user',        source: 'cloud',       target: 'user',       label: 'identity',        crossPivot: true }},
+  { data: { id: 'cloud-hash',        source: 'cloud',       target: 'hash',       label: 'stored file',     crossPivot: true }},
+  { data: { id: 'mutex-hash',        source: 'mutex',       target: 'hash',       label: 'malware',         crossPivot: true }},
+  { data: { id: 'mutex-process',     source: 'mutex',       target: 'process',    label: 'owner',           crossPivot: true }},
+  { data: { id: 'mutex-host',        source: 'mutex',       target: 'host',       label: 'on host',         crossPivot: true }},
+  { data: { id: 'npipe-process',     source: 'named-pipe',  target: 'process',    label: 'using process',   crossPivot: true }},
+  { data: { id: 'npipe-host',        source: 'named-pipe',  target: 'host',       label: 'on host',         crossPivot: true }},
+  { data: { id: 'wmi-process',       source: 'wmi',         target: 'process',    label: 'executes',        crossPivot: true }},
+  { data: { id: 'wmi-hash',          source: 'wmi',         target: 'hash',       label: 'payload',         crossPivot: true }},
+  { data: { id: 'wmi-user',          source: 'wmi',         target: 'user',       label: 'creator',         crossPivot: true }},
+  { data: { id: 'wmi-host',          source: 'wmi',         target: 'host',       label: 'on host',         crossPivot: true }},
+  { data: { id: 'vuln-service',      source: 'vuln',        target: 'service',    label: 'in service',      crossPivot: true }},
+  { data: { id: 'vuln-host',         source: 'vuln',        target: 'host',       label: 'on host',         crossPivot: true }},
+  { data: { id: 'vuln-ip',           source: 'vuln',        target: 'ip',         label: 'at IP',           crossPivot: true }},
+  { data: { id: 'vuln-hash',         source: 'vuln',        target: 'hash',       label: 'exploit payload', crossPivot: true }},
+  // Reverse/bidirectional pivots
+  { data: { id: 'process-registry',  source: 'process',     target: 'registry',   label: 'writes to',       crossPivot: true }},
+  { data: { id: 'process-service',   source: 'process',     target: 'service',    label: 'is service',      crossPivot: true }},
+  { data: { id: 'process-filepath',  source: 'process',     target: 'filepath',   label: 'executed from',   crossPivot: true }},
+  { data: { id: 'process-mutex',     source: 'process',     target: 'mutex',      label: 'creates mutex',   crossPivot: true }},
+  { data: { id: 'process-npipe',     source: 'process',     target: 'named-pipe', label: 'creates pipe',    crossPivot: true }},
+  { data: { id: 'hash-filepath',     source: 'hash',        target: 'filepath',   label: 'at path',         crossPivot: true }},
+  { data: { id: 'hash-mutex',        source: 'hash',        target: 'mutex',      label: 'creates mutex',   crossPivot: true }},
+  { data: { id: 'host-filepath',     source: 'host',        target: 'filepath',   label: 'contains path',   crossPivot: true }},
+  { data: { id: 'host-credential',   source: 'host',        target: 'credential', label: 'has creds',       crossPivot: true }},
+  { data: { id: 'host-netshare',     source: 'host',        target: 'netshare',   label: 'hosts share',     crossPivot: true }},
+  { data: { id: 'host-vuln',         source: 'host',        target: 'vuln',       label: 'vulnerable to',   crossPivot: true }},
+  { data: { id: 'user-credential',   source: 'user',        target: 'credential', label: 'has credential',  crossPivot: true }},
+  { data: { id: 'user-netshare',     source: 'user',        target: 'netshare',   label: 'accessed share',  crossPivot: true }},
+  { data: { id: 'user-cloud',        source: 'user',        target: 'cloud',      label: 'cloud identity',  crossPivot: true }},
+  { data: { id: 'ip-vuln',           source: 'ip',          target: 'vuln',       label: 'vulnerable',      crossPivot: true }},
+  { data: { id: 'domain-cert',       source: 'domain',      target: 'certificate',label: 'uses cert',       crossPivot: true }}
 ];
 
 const ARTIFACT_PATHS = {
   ip: {
-    nodes: ['ip','rep','asn','whois','p-domain','p-url','p-ip','corr-asn','corr-campaign','first-seen','frequency','ti-tags','environment','dec-malicious','dec-suspicious','dec-benign','act-block','act-hunt','act-escalate','host'],
-    label: 'IP Address',
-    mitre: 'T1071 (C2), T1090 (Proxy), T1133 (External Remote Services)',
+    nodes: ['ip','rep','asn','whois','p-domain','p-url','p-ip','corr-asn','corr-campaign','first-seen','frequency','ti-tags','environment','dec-malicious','dec-suspicious','dec-benign','act-block','act-hunt','act-escalate','host','vuln'],
+    label: 'IP Address', mitre: 'T1071 (C2), T1090 (Proxy), T1133 (External Remote Services)',
     sources: 'Firewall · NetFlow · Shodan · VT · AbuseIPDB · OTX'
   },
   domain: {
-    nodes: ['domain','whois','rep','p-url','p-ip','corr-ssl','corr-campaign','first-seen','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt'],
-    label: 'Domain',
-    mitre: 'T1566 (Phishing), T1071.001 (Web Protocol), T1568 (Dynamic Resolution)',
+    nodes: ['domain','whois','rep','p-url','p-ip','corr-ssl','corr-campaign','first-seen','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','url','ip','certificate'],
+    label: 'Domain', mitre: 'T1566 (Phishing), T1071.001 (Web Protocol), T1568 (Dynamic Resolution)',
     sources: 'DNS logs · WHOIS · Passive DNS · VT · OTX'
   },
   url: {
-    nodes: ['url','rep','p-domain','p-file','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','domain'],
-    label: 'URL',
-    mitre: 'T1566.002 (Spearphishing Link), T1189 (Drive-by Compromise)',
+    nodes: ['url','rep','p-domain','p-file','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','domain','hash'],
+    label: 'URL', mitre: 'T1566.002 (Spearphishing Link), T1189 (Drive-by Compromise)',
     sources: 'Proxy logs · VT URL scan · URLscan.io · OTX'
   },
   hash: {
-    nodes: ['hash','rep','file-meta','sandbox','p-process','p-file','corr-malware','ti-tags','mitre','dec-malicious','dec-suspicious','dec-benign','act-block','act-isolate','act-escalate','domain','ip'],
-    label: 'File Hash',
-    mitre: 'T1204 (User Execution), T1059 (Command and Scripting), T1055 (Process Injection)',
+    nodes: ['hash','rep','file-meta','sandbox','p-process','p-file','corr-malware','ti-tags','mitre','dec-malicious','dec-suspicious','dec-benign','act-block','act-isolate','act-escalate','domain','ip','filepath','mutex'],
+    label: 'File Hash', mitre: 'T1204 (User Execution), T1059 (Command and Scripting), T1055 (Process Injection)',
     sources: 'EDR · VT · AnyRun · MalwareBazaar · Hybrid Analysis'
   },
   process: {
-    nodes: ['process','proc-meta','rep','p-process','p-file','p-ip','p-user','mitre','corr-campaign','environment','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','hash','user'],
-    label: 'Process',
-    mitre: 'T1059 (Execution), T1055 (Injection), T1003 (Cred Dump), T1021 (Lateral Move)',
+    nodes: ['process','proc-meta','rep','p-process','p-file','p-ip','p-user','mitre','corr-campaign','environment','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','hash','user','registry','service','filepath','mutex','named-pipe'],
+    label: 'Process', mitre: 'T1059 (Execution), T1055 (Injection), T1003 (Cred Dump), T1021 (Lateral Move)',
     sources: 'EDR · Sysmon · Windows Event 4688 · Process tree'
   },
   user: {
-    nodes: ['user','p-host','p-user','p-ip','corr-time','environment','frequency','dec-suspicious','dec-malicious','act-reset','act-escalate','act-hunt','ip','email'],
-    label: 'User',
-    mitre: 'T1078 (Valid Accounts), T1021 (Lateral Movement), T1098 (Account Manipulation)',
+    nodes: ['user','p-host','p-user','p-ip','corr-time','environment','frequency','dec-suspicious','dec-malicious','act-reset','act-escalate','act-hunt','ip','email','credential','netshare','cloud'],
+    label: 'User', mitre: 'T1078 (Valid Accounts), T1021 (Lateral Movement), T1098 (Account Manipulation)',
     sources: 'AD · IAM · Okta · SIEM UEBA · Windows Security logs'
   },
   email: {
-    nodes: ['email','rep','p-url','p-file','p-user','p-ip','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','act-escalate','ip'],
-    label: 'Email',
-    mitre: 'T1566 (Phishing), T1598 (Spearphishing for Info), T1534 (Internal Spearphishing)',
+    nodes: ['email','rep','p-url','p-file','p-user','p-ip','corr-campaign','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','act-escalate','ip','user'],
+    label: 'Email', mitre: 'T1566 (Phishing), T1598 (Spearphishing for Info), T1534 (Internal Spearphishing)',
     sources: 'Email Gateway · O365 Message Trace · SIEM · Header analysis'
   },
   host: {
-    nodes: ['host','p-process','p-user','p-ip','environment','corr-time','frequency','mitre','dec-suspicious','dec-malicious','act-isolate','act-hunt','act-escalate','ip'],
-    label: 'Host',
-    mitre: 'T1005 (Data from Local System), T1021 (Lateral Movement), T1070 (Indicator Removal)',
+    nodes: ['host','p-process','p-user','p-ip','environment','corr-time','frequency','mitre','dec-suspicious','dec-malicious','act-isolate','act-hunt','act-escalate','ip','filepath','credential','netshare','vuln'],
+    label: 'Host', mitre: 'T1005 (Data from Local System), T1021 (Lateral Movement), T1070 (Indicator Removal)',
     sources: 'EDR · SIEM · AD · Vulnerability Scanner · CMDB'
+  },
+  registry: {
+    nodes: ['registry','proc-meta','p-process','p-file','ti-tags','mitre','corr-campaign','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','process','hash','user','service','task'],
+    label: 'Registry Key', mitre: 'T1547 (Boot Autostart), T1112 (Modify Registry), T1543 (Create/Modify Service)',
+    sources: 'Sysmon 12/13/14 · EDR · Autoruns · Windows Security'
+  },
+  task: {
+    nodes: ['task','proc-meta','p-process','p-file','p-user','mitre','corr-campaign','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','process','hash','user','registry','filepath'],
+    label: 'Scheduled Task', mitre: 'T1053.005 (Scheduled Task/Job), T1059 (Execution)',
+    sources: 'EDR · Sysmon 11 · Windows Task Scheduler · %SystemRoot%/System32/Tasks'
+  },
+  service: {
+    nodes: ['service','proc-meta','p-process','p-file','mitre','corr-campaign','environment','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','process','hash','registry','user','vuln'],
+    label: 'Service', mitre: 'T1543.003 (Windows Service), T1055 (Process Injection), T1574 (DLL Hijacking)',
+    sources: 'EDR · Windows Event 7045 · Sysmon 6 · Services registry hive'
+  },
+  filepath: {
+    nodes: ['filepath','file-meta','sandbox','p-file','p-process','corr-malware','ti-tags','dec-malicious','dec-benign','dec-suspicious','act-block','act-isolate','act-hunt','hash','process','host','netshare'],
+    label: 'File Path', mitre: 'T1005 (Data from Local), T1074 (Data Staged), T1036 (Masquerading)',
+    sources: 'EDR · Sysmon 11 · MFT · USN Journal · Windows Security'
+  },
+  certificate: {
+    nodes: ['certificate','whois','rep','p-domain','p-ip','corr-ssl','corr-campaign','first-seen','dec-malicious','dec-suspicious','act-block','act-hunt','ip','domain','hash'],
+    label: 'Certificate', mitre: 'T1553.004 (Code Signing), T1608.003 (Install Digital Certificate)',
+    sources: 'Censys · crt.sh · Shodan · VT code-signing · Passive DNS'
+  },
+  credential: {
+    nodes: ['credential','rep','p-user','p-host','p-ip','corr-time','corr-campaign','environment','dec-malicious','dec-suspicious','act-reset','act-escalate','act-hunt','user','host','ip','process'],
+    label: 'Credential', mitre: 'T1003 (Credential Dumping), T1552 (Unsecured Credentials), T1558 (Kerberoasting)',
+    sources: 'LSASS · Mimikatz · AD audit logs · HaveIBeenPwned · GitGuardian'
+  },
+  netshare: {
+    nodes: ['netshare','asn','p-host','p-user','p-ip','environment','frequency','dec-suspicious','dec-malicious','act-isolate','act-hunt','host','user','filepath','ip'],
+    label: 'Network Share', mitre: 'T1021.002 (SMB/Windows Admin Shares), T1039 (Data from Network Shared Drive)',
+    sources: 'Windows Event 5140/5145 · EDR · Sysmon · Network traffic'
+  },
+  cloud: {
+    nodes: ['cloud','asn','rep','p-ip','p-url','p-user','corr-campaign','ti-tags','environment','dec-malicious','dec-suspicious','act-block','act-escalate','act-hunt','ip','url','user','hash'],
+    label: 'Cloud Resource', mitre: 'T1530 (Data from Cloud Storage), T1078.004 (Valid Cloud Accounts), T1190 (Exploit Public-Facing)',
+    sources: 'CloudTrail · Azure Monitor · GCP Audit · GuardDuty · Defender for Cloud'
+  },
+  mutex: {
+    nodes: ['mutex','rep','p-file','p-process','corr-malware','ti-tags','dec-malicious','dec-suspicious','act-block','act-hunt','hash','process','host'],
+    label: 'Mutex', mitre: 'T1106 (Native API), T1055 (Process Injection) — malware family indicator',
+    sources: 'EDR memory analysis · Sandbox (Any.run) · Volatility · Process Monitor'
+  },
+  'named-pipe': {
+    nodes: ['named-pipe','proc-meta','p-process','p-host','mitre','corr-campaign','dec-malicious','dec-suspicious','act-isolate','act-hunt','process','host'],
+    label: 'Named Pipe', mitre: 'T1071 (App Layer Protocol), T1570 (Lateral Tool Transfer) — CS beacon indicator',
+    sources: 'Sysmon 17/18 · EDR · PipeList · Process Monitor'
+  },
+  wmi: {
+    nodes: ['wmi','proc-meta','p-process','p-file','p-user','mitre','corr-campaign','dec-malicious','dec-suspicious','act-isolate','act-hunt','act-escalate','process','hash','user','host'],
+    label: 'WMI Subscription', mitre: 'T1546.003 (WMI Event Subscription), T1059.001 (PowerShell via WMI)',
+    sources: 'Sysmon 19/20/21 · EDR · Get-WMIObject · Windows Event 5857/5861'
+  },
+  vuln: {
+    nodes: ['vuln','rep','p-ip','p-host','corr-campaign','ti-tags','mitre','environment','dec-malicious','dec-suspicious','act-isolate','act-block','act-escalate','service','host','ip','hash'],
+    label: 'Vulnerability', mitre: 'T1190 (Exploit Public-Facing), T1203 (Client Execution), T1068 (Privilege Escalation)',
+    sources: 'NVD · CISA KEV · Tenable · Qualys · EDR exploit detection'
   }
 };

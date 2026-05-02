@@ -6,30 +6,84 @@ var cy = null;
 var activeArtifact = null;
 var activeMode = 'reactive';
 var graphMode = 'simple';
+var _flowTimer = null;
+var _flowOffset = 0;
 
-// ── Node color map ──────────────────────────────────────────────────────────
-var NODE_COLORS = {
-  artifact:    { bg: '#00ff9f', border: '#00cc7a', text: '#06080f' },
-  enrichment:  { bg: '#3b82f6', border: '#2563eb', text: '#ffffff' },
-  context:     { bg: '#a855f7', border: '#9333ea', text: '#ffffff' },
-  pivot:       { bg: '#ffd60a', border: '#c9a800', text: '#06080f' },
-  correlation: { bg: '#f97316', border: '#c95d0a', text: '#ffffff' },
-  action:      { bg: '#ec4899', border: '#c4186e', text: '#ffffff' }
+// ── Category colors ─────────────────────────────────────────────────────────
+var CAT_COLORS = {
+  network:  { bg: '#00d4ff', border: '#0099bb', text: '#06080f', glow: '#00d4ff' },
+  endpoint: { bg: '#00ff9f', border: '#00cc7a', text: '#06080f', glow: '#00ff9f' },
+  identity: { bg: '#c084fc', border: '#9333ea', text: '#06080f', glow: '#c084fc' },
+  cloud:    { bg: '#60a5fa', border: '#2563eb', text: '#06080f', glow: '#60a5fa' },
+  threat:   { bg: '#f87171', border: '#dc2626', text: '#06080f', glow: '#f87171' }
 };
 
-var DECISION_COLORS = {
-  'dec-malicious':  { bg: '#ff3b5c', border: '#cc2244', text: '#ffffff' },
-  'dec-suspicious': { bg: '#ffd60a', border: '#c9a800', text: '#06080f' },
-  'dec-benign':     { bg: '#00ff9f', border: '#00cc7a', text: '#06080f' },
-  'dec-unknown':    { bg: '#7d8fb3', border: '#5a6e92', text: '#ffffff' }
-};
+// ── Artifact order (for circular layout) ────────────────────────────────────
+var ARTIFACT_ORDER = [
+  'ip','domain','url','certificate',
+  'hash','process','filepath','service','registry','task','mutex','named-pipe','wmi','netshare','host',
+  'user','email','credential',
+  'cloud',
+  'vuln'
+];
 
-// ── Helper: get node color ──────────────────────────────────────────────────
-function nodeColor(node) {
-  var id = node.data('id');
-  var type = node.data('type');
-  if (type === 'decision' && DECISION_COLORS[id]) return DECISION_COLORS[id];
-  return NODE_COLORS[type] || { bg: '#334155', border: '#475569', text: '#ffffff' };
+// ── applyCircularLayout ──────────────────────────────────────────────────────
+function applyCircularLayout() {
+  if (!cy) return;
+  var artNodes = cy.nodes('[type = "artifact"]');
+  var n = artNodes.length;
+  if (!n) return;
+  var container = document.getElementById('cy');
+  var w = container ? container.offsetWidth  : 800;
+  var h = container ? container.offsetHeight : 560;
+  var cx = w / 2;
+  var cyCenter = h / 2;
+  var radius = Math.min(w, h) * 0.38;
+
+  // Map id → ordered index
+  var orderMap = {};
+  ARTIFACT_ORDER.forEach(function(id, i) { orderMap[id] = i; });
+
+  artNodes.forEach(function(node) {
+    var id = node.id();
+    var idx = (orderMap[id] !== undefined) ? orderMap[id] : 0;
+    var angle = (idx / ARTIFACT_ORDER.length) * 2 * Math.PI - Math.PI / 2;
+    node.position({ x: cx + radius * Math.cos(angle), y: cyCenter + radius * Math.sin(angle) });
+  });
+
+  cy.fit(artNodes, 50);
+}
+
+// ── startEdgeFlow / stopEdgeFlow ─────────────────────────────────────────────
+function startEdgeFlow() {
+  stopEdgeFlow();
+  _flowOffset = 0;
+  _flowTimer = setInterval(function() {
+    _flowOffset = (_flowOffset + 1) % 30;
+    if (cy) {
+      cy.edges('.highlighted').style('line-dash-offset', -_flowOffset);
+    }
+  }, 50);
+}
+
+function stopEdgeFlow() {
+  if (_flowTimer) { clearInterval(_flowTimer); _flowTimer = null; }
+  if (cy) cy.edges().style('line-dash-offset', 0);
+}
+
+// ── updateStats ──────────────────────────────────────────────────────────────
+function updateStats(selectedType) {
+  var el = document.getElementById('graph-stats');
+  if (!el) return;
+  if (!selectedType) {
+    var totalNodes = cy ? cy.nodes('[type = "artifact"]').length : 0;
+    var totalEdges = cy ? cy.edges('[?crossPivot]').length : 0;
+    el.innerHTML = '<span>' + totalNodes + ' artifacts</span><span>' + totalEdges + ' cross-pivots</span>';
+    return;
+  }
+  var pathData = ARTIFACT_PATHS[selectedType];
+  var nodeCount = pathData ? pathData.nodes.length : 0;
+  el.innerHTML = '<span>' + selectedType.toUpperCase() + ' path</span><span>' + nodeCount + ' nodes</span>';
 }
 
 // ── initGraph ───────────────────────────────────────────────────────────────
@@ -41,6 +95,7 @@ function initGraph() {
     container: container,
     elements: GRAPH_NODES.concat(GRAPH_EDGES),
     style: [
+      // ── Base node ──────────────────────────────────────────────────────
       { selector: 'node', style: {
           'shape': 'roundrectangle',
           'label': 'data(label)',
@@ -58,7 +113,18 @@ function initGraph() {
           'border-width': 1.5,
           'color': '#e2eeff'
       }},
-      { selector: 'node[type = "artifact"]',    style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f', 'border-width': 2, 'font-size': '11px' }},
+      // ── Artifact nodes by category ─────────────────────────────────────
+      { selector: 'node[type = "artifact"][category = "network"]',
+        style: { 'background-color': '#00d4ff', 'border-color': '#0099bb', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
+      { selector: 'node[type = "artifact"][category = "endpoint"]',
+        style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
+      { selector: 'node[type = "artifact"][category = "identity"]',
+        style: { 'background-color': '#c084fc', 'border-color': '#9333ea', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
+      { selector: 'node[type = "artifact"][category = "cloud"]',
+        style: { 'background-color': '#60a5fa', 'border-color': '#2563eb', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
+      { selector: 'node[type = "artifact"][category = "threat"]',
+        style: { 'background-color': '#f87171', 'border-color': '#dc2626', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
+      // ── Non-artifact node types ────────────────────────────────────────
       { selector: 'node[type = "enrichment"]',  style: { 'background-color': '#3b82f6', 'border-color': '#2563eb', 'color': '#ffffff' }},
       { selector: 'node[type = "context"]',     style: { 'background-color': '#a855f7', 'border-color': '#9333ea', 'color': '#ffffff' }},
       { selector: 'node[type = "pivot"]',       style: { 'background-color': '#ffd60a', 'border-color': '#c9a800', 'color': '#06080f' }},
@@ -68,63 +134,79 @@ function initGraph() {
       { selector: '#dec-suspicious', style: { 'background-color': '#ffd60a', 'border-color': '#c9a800', 'color': '#06080f' }},
       { selector: '#dec-benign',     style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f' }},
       { selector: '#dec-unknown',    style: { 'background-color': '#7d8fb3', 'border-color': '#5a6e92', 'color': '#ffffff' }},
+      // ── Edges ──────────────────────────────────────────────────────────
       { selector: 'edge', style: {
           'width': 1, 'opacity': 0.4,
           'line-color': '#3a5470', 'target-arrow-color': '#3a5470',
           'target-arrow-shape': 'triangle', 'curve-style': 'bezier'
       }},
       { selector: 'edge[?crossPivot]', style: {
-          'width': 2, 'line-style': 'dashed', 'opacity': 0.75,
+          'width': 2, 'line-style': 'dashed',
+          'line-dash-pattern': [6, 3], 'line-dash-offset': 0,
+          'opacity': 0.75,
           'line-color': '#00ff9f', 'target-arrow-color': '#00ff9f'
       }},
-      { selector: 'node.highlighted', style: { 'opacity': 1, 'border-color': '#00ff9f', 'border-width': 2.5 }},
-      { selector: 'edge.highlighted', style: { 'opacity': 1, 'width': 2, 'line-color': '#00ff9f', 'target-arrow-color': '#00ff9f' }},
-      { selector: 'node.dimmed',      style: { 'opacity': 0.08 }},
-      { selector: 'edge.dimmed',      style: { 'opacity': 0.05 }},
-      { selector: 'node.selected',    style: { 'border-color': '#ffd60a', 'border-width': 3 }},
-      { selector: 'node[type != "artifact"]', style: { 'display': 'none' } },
-      { selector: 'edge[!crossPivot]',        style: { 'display': 'none' } },
-      { selector: 'node.view-full',           style: { 'display': 'element' } },
-      { selector: 'edge.view-full',           style: { 'display': 'element' } }
+      // ── Highlight / dim / selected states ─────────────────────────────
+      { selector: 'node.highlighted', style: {
+          'opacity': 1, 'border-width': 3,
+          'shadow-blur': 18, 'shadow-opacity': 0.65, 'z-index': 10
+      }},
+      { selector: 'node[category = "network"].highlighted',  style: { 'border-color': '#00d4ff', 'shadow-color': '#00d4ff' }},
+      { selector: 'node[category = "endpoint"].highlighted', style: { 'border-color': '#00ff9f', 'shadow-color': '#00ff9f' }},
+      { selector: 'node[category = "identity"].highlighted', style: { 'border-color': '#c084fc', 'shadow-color': '#c084fc' }},
+      { selector: 'node[category = "cloud"].highlighted',    style: { 'border-color': '#60a5fa', 'shadow-color': '#60a5fa' }},
+      { selector: 'node[category = "threat"].highlighted',   style: { 'border-color': '#f87171', 'shadow-color': '#f87171' }},
+      { selector: 'node[type != "artifact"].highlighted',    style: { 'border-color': '#ffd60a', 'shadow-color': '#ffd60a' }},
+      { selector: 'edge.highlighted', style: {
+          'opacity': 1, 'width': 2.5,
+          'line-color': '#ffd60a', 'target-arrow-color': '#ffd60a',
+          'line-style': 'dashed', 'line-dash-pattern': [6, 3]
+      }},
+      { selector: 'node.dimmed', style: { 'opacity': 0.07 }},
+      { selector: 'edge.dimmed', style: { 'opacity': 0.04 }},
+      { selector: 'node.selected', style: { 'border-color': '#ffd60a', 'border-width': 3.5 }},
+      // ── Simple mode hides non-artifact elements ────────────────────────
+      { selector: 'node[type != "artifact"]', style: { 'display': 'none' }},
+      { selector: 'edge[!crossPivot]',        style: { 'display': 'none' }},
+      { selector: 'node.view-full',           style: { 'display': 'element' }},
+      { selector: 'edge.view-full',           style: { 'display': 'element' }}
     ],
-    layout: { name: 'cose', animate: false, fit: true, padding: 60, randomize: false }
+    layout: { name: 'null' }
   });
 
-  cy.on('layoutstop', function() {
-    if (graphMode === 'simple') {
-      cy.fit(cy.nodes('[type = "artifact"]'), 60);
-    } else {
-      cy.fit(undefined, 40);
-    }
-  });
+  applyCircularLayout();
+  updateStats(null);
+
   cy.on('tap', 'node', function(evt) { showNodeInfo(evt.target); });
   cy.on('tap', function(evt) { if (evt.target === cy) clearNodeInfo(); });
 }
 
 // ── selectArtifact ──────────────────────────────────────────────────────────
 function selectArtifact(type) {
+  stopEdgeFlow();
+
   if (activeArtifact === type) {
     resetHighlight();
     activeArtifact = null;
-    document.querySelectorAll('.artifact-btn').forEach(function(b) {
+    document.querySelectorAll('.artifact-chip').forEach(function(b) {
       b.classList.remove('active');
     });
-    // Re-activate ALL
-    var allBtn = document.querySelector('.artifact-btn[data-type="all"]');
-    if (allBtn) allBtn.classList.add('active');
+    var allChip = document.querySelector('.artifact-chip[data-type="all"]');
+    if (allChip) allChip.classList.add('active');
+    updateStats(null);
     return;
   }
 
   activeArtifact = type;
 
-  // Update button states
-  document.querySelectorAll('.artifact-btn').forEach(function(b) {
+  document.querySelectorAll('.artifact-chip').forEach(function(b) {
     b.classList.remove('active');
   });
-  var btn = document.querySelector('.artifact-btn[data-type="' + type + '"]');
-  if (btn) btn.classList.add('active');
+  var chip = document.querySelector('.artifact-chip[data-type="' + type + '"]');
+  if (chip) chip.classList.add('active');
 
   if (!cy) return;
+  updateStats(type);
 
   if (graphMode === 'simple') {
     var artNode = cy.getElementById(type);
@@ -140,6 +222,7 @@ function selectArtifact(type) {
         e.addClass(connEdges.has(e) ? 'highlighted' : 'dimmed');
       });
     });
+    startEdgeFlow();
   } else {
     var pathData = ARTIFACT_PATHS[type];
     if (!pathData) return;
@@ -155,6 +238,7 @@ function selectArtifact(type) {
         e.addClass(pathNodeIds.indexOf(src) !== -1 && pathNodeIds.indexOf(tgt) !== -1 ? 'highlighted' : 'dimmed');
       });
     });
+    startEdgeFlow();
   }
 
   showArtifactInfo(type);
@@ -162,18 +246,20 @@ function selectArtifact(type) {
 
 // ── selectAll ───────────────────────────────────────────────────────────────
 function selectAll() {
+  stopEdgeFlow();
   resetHighlight();
   activeArtifact = null;
-  document.querySelectorAll('.artifact-btn').forEach(function(b) {
+  document.querySelectorAll('.artifact-chip').forEach(function(b) {
     b.classList.remove('active');
   });
-  var allBtn = document.querySelector('.artifact-btn[data-type="all"]');
-  if (allBtn) allBtn.classList.add('active');
+  var allChip = document.querySelector('.artifact-chip[data-type="all"]');
+  if (allChip) allChip.classList.add('active');
+  updateStats(null);
 
   var panel = document.getElementById('info-panel');
   if (panel) {
     panel.classList.remove('visible');
-    panel.innerHTML = '<div class="info-placeholder"><div class="info-ph-icon">&#9672;</div><div class="info-ph-text">Select an artifact type above or click any node in the graph to see investigation details.</div></div>';
+    panel.innerHTML = '<div class="info-placeholder"><div class="info-ph-icon">&#9672;</div><div class="info-ph-text">Select an artifact type or click any node to see investigation details.</div></div>';
   }
 }
 
@@ -189,16 +275,19 @@ function resetHighlight() {
 // ── setGraphView ─────────────────────────────────────────────────────────────
 function setGraphView(mode) {
   graphMode = mode;
+  stopEdgeFlow();
   document.querySelectorAll('.view-btn').forEach(function(b) { b.classList.remove('active'); });
   var btn = document.getElementById('btn-' + mode);
   if (btn) btn.classList.add('active');
   if (!cy) return;
   resetHighlight();
   activeArtifact = null;
-  document.querySelectorAll('.artifact-btn').forEach(function(b) { b.classList.remove('active'); });
-  var allBtn = document.querySelector('.artifact-btn[data-type="all"]');
-  if (allBtn) allBtn.classList.add('active');
+  document.querySelectorAll('.artifact-chip').forEach(function(b) { b.classList.remove('active'); });
+  var allChip = document.querySelector('.artifact-chip[data-type="all"]');
+  if (allChip) allChip.classList.add('active');
   clearNodeInfo();
+  updateStats(null);
+
   cy.batch(function() {
     if (mode === 'full') {
       cy.nodes('[type != "artifact"]').addClass('view-full');
@@ -207,17 +296,25 @@ function setGraphView(mode) {
       cy.elements().removeClass('view-full');
     }
   });
-  var layoutEles = mode === 'full'
-    ? cy.elements()
-    : cy.nodes('[type = "artifact"]').add(cy.edges('[?crossPivot]'));
-  layoutEles.layout({ name: 'cose', animate: false, fit: true, padding: 60, randomize: false }).run();
+
+  if (mode === 'simple') {
+    applyCircularLayout();
+  } else {
+    cy.elements().layout({
+      name: 'cose',
+      animate: false, fit: true, padding: 50,
+      randomize: false,
+      nodeRepulsion: 2048,
+      idealEdgeLength: 80,
+      edgeElasticity: 0.45,
+      gravity: 0.25
+    }).run();
+  }
 }
 
 // ── showNodeInfo ─────────────────────────────────────────────────────────────
 function showNodeInfo(node) {
   if (!node) return;
-
-  // Remove selected from all, add to this
   cy.nodes().removeClass('selected');
   node.addClass('selected');
 
@@ -236,16 +333,19 @@ function showNodeInfo(node) {
     sourcesHtml = '<div class="info-section"><div class="info-section-label">DATA SOURCES</div><div class="info-sources">' + escHtml(d.sources) + '</div></div>';
   }
 
+  var catBadge = '';
+  if (d.category && CAT_COLORS[d.category]) {
+    catBadge = '<span class="info-cat-badge" style="background:' + CAT_COLORS[d.category].bg + ';color:' + CAT_COLORS[d.category].text + '">' + d.category + '</span>';
+  }
+
   var html = '<div class="info-header">' +
     '<span class="info-type-badge info-type-' + escHtml(d.type || '') + '">' + escHtml(typeLabel) + '</span>' +
+    catBadge +
     '<button class="info-close" onclick="clearNodeInfo()">&#x2715;</button>' +
     '</div>' +
     '<div class="info-title">' + escHtml(d.label || d.id) + '</div>';
 
-  if (d.desc) {
-    html += '<div class="info-desc">' + escHtml(d.desc) + '</div>';
-  }
-
+  if (d.desc) html += '<div class="info-desc">' + escHtml(d.desc) + '</div>';
   html += sourcesHtml + pivotsHtml;
 
   var panel = document.getElementById('info-panel');
@@ -260,13 +360,20 @@ function showArtifactInfo(type) {
   var p = ARTIFACT_PATHS[type];
   if (!p) return;
 
+  var catColor = '';
+  var nodeData = GRAPH_NODES.find(function(n) { return n.data && n.data.id === type; });
+  if (nodeData && nodeData.data.category && CAT_COLORS[nodeData.data.category]) {
+    catColor = CAT_COLORS[nodeData.data.category].bg;
+  }
+
   var html = '<div class="info-header">' +
     '<span class="info-type-badge info-type-artifact">Artifact Path</span>' +
+    (catColor ? '<span class="info-cat-badge" style="background:' + catColor + ';color:#06080f">' + (nodeData.data.category) + '</span>' : '') +
     '<button class="info-close" onclick="clearNodeInfo()">&#x2715;</button>' +
     '</div>' +
     '<div class="info-title">' + escHtml(p.label) + ' Investigation</div>' +
     '<div class="info-section">' +
-      '<div class="info-section-label">PATH NODES</div>' +
+      '<div class="info-section-label">PATH COVERAGE</div>' +
       '<div class="info-stat">' + p.nodes.length + ' nodes highlighted</div>' +
     '</div>' +
     '<div class="info-section">' +
@@ -292,16 +399,14 @@ function clearNodeInfo() {
   var panel = document.getElementById('info-panel');
   if (panel) {
     panel.classList.remove('visible');
-    panel.innerHTML = '<div class="info-placeholder"><div class="info-ph-icon">&#9672;</div><div class="info-ph-text">Select an artifact type above or click any node in the graph to see investigation details.</div></div>';
+    panel.innerHTML = '<div class="info-placeholder"><div class="info-ph-icon">&#9672;</div><div class="info-ph-text">Select an artifact type or click any node to see investigation details.</div></div>';
   }
 }
 
 // ── setMode ──────────────────────────────────────────────────────────────────
 function setMode(mode) {
   activeMode = mode;
-  document.querySelectorAll('.mode-card').forEach(function(c) {
-    c.classList.remove('active');
-  });
+  document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('active'); });
   var card = document.querySelector('.mode-card[data-mode="' + mode + '"]');
   if (card) card.classList.add('active');
 }
@@ -313,7 +418,6 @@ function toggleTheme() {
   setLogo(isLight);
 }
 
-// ── setLogo ──────────────────────────────────────────────────────────────────
 function setLogo(isLight) {
   var el = document.getElementById('navLogo');
   if (!el) return;
@@ -348,84 +452,48 @@ function escHtml(str) {
   var canvas = document.getElementById('matrix');
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
-
-  var chars = ['Pivot','IOC','IP','Hash','Domain','TTP','T1566','T1071','T1059','T1003','T1021',
-    'MITRE','ATT&CK','C2','DNS','EDR','SIEM','VT','OTX','Enrich','Correlate','Hunt',
-    'Artifact','Process','User','Host','Email','URL','Lateral','Persist'];
-
-  var colW = 18;
-  var cols, drops;
+  var terms = ['IOC','PIVOT','TTPs','C2','SIEM','EDR','HASH','SCAN',
+                'DNS','TI','CVE','YARA','MITRE','HUNT','SOCK','APT',
+                'NULL','0x','0xff','REG','SMB','WMI','LSASS','RCE'];
+  var cols, drops, fontSize = 13;
 
   function resize() {
-    canvas.width = window.innerWidth;
+    canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
-    cols = Math.floor(canvas.width / colW);
-    drops = [];
-    for (var i = 0; i < cols; i++) {
-      drops[i] = Math.floor(Math.random() * -canvas.height / 14);
+    cols  = Math.floor(canvas.width / fontSize);
+    drops = Array(cols).fill(1);
+  }
+
+  function draw() {
+    ctx.fillStyle = 'rgba(6,8,15,0.15)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0,255,159,0.25)';
+    ctx.font = fontSize + 'px Share Tech Mono, monospace';
+    for (var i = 0; i < drops.length; i++) {
+      var text = terms[Math.floor(Math.random() * terms.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
     }
   }
 
   resize();
   window.addEventListener('resize', resize);
-
-  function draw() {
-    var light = document.body.classList.contains('light');
-    ctx.fillStyle = light ? 'rgba(238,242,248,0.1)' : 'rgba(6,8,14,0.14)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = light ? '#004db8' : '#00ff9f';
-    ctx.font = '11px monospace';
-
-    for (var i = 0; i < drops.length; i++) {
-      var word = chars[Math.floor(Math.random() * chars.length)];
-      var x = i * colW;
-      var y = drops[i] * 14;
-      if (y > 0 && y < canvas.height) {
-        ctx.fillText(word, x, y);
-      }
-      drops[i]++;
-      if (drops[i] * 14 > canvas.height && Math.random() > 0.975) {
-        drops[i] = Math.floor(Math.random() * -20);
-      }
-    }
-  }
-
-  setInterval(draw, 45);
+  setInterval(draw, 55);
 })();
 
-// ── DOMContentLoaded ─────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  // Apply saved theme
-  var savedTheme = localStorage.getItem('pivex-theme');
-  if (savedTheme === 'light') {
+// ── Boot ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  var saved = localStorage.getItem('pivex-theme');
+  if (saved === 'light') {
     document.body.classList.add('light');
     setLogo(true);
   } else {
     setLogo(false);
   }
+  initGraph();
+});
 
-  // Close drawer on outside click
-  document.addEventListener('click', function(e) {
-    var drawer = document.getElementById('navDrawer');
-    var hamburger = document.querySelector('.nav-hamburger');
-    if (drawer && hamburger) {
-      if (!drawer.contains(e.target) && !hamburger.contains(e.target)) {
-        drawer.classList.remove('open');
-      }
-    }
-  });
-
-  // Init graph after layout is painted
-  requestAnimationFrame(function() {
-    initGraph();
-  });
-
-  // Activate ALL button
-  var allBtn = document.querySelector('.artifact-btn[data-type="all"]');
-  if (allBtn) allBtn.classList.add('active');
-
-  // Activate reactive mode card
-  var reactCard = document.querySelector('.mode-card[data-mode="reactive"]');
-  if (reactCard) reactCard.classList.add('active');
+window.addEventListener('resize', function() {
+  if (cy && graphMode === 'simple') applyCircularLayout();
 });

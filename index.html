@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <!-- Cytoscape.js CDNs — order matters -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cytoscape-cose-bilkent@4.1.0/cytoscape-cose-bilkent.js"></script>
   <style>
     /* ── CSS variables ─────────────────────────────────────────────────── */
@@ -170,20 +169,31 @@
       gap: 8px;
       flex-shrink: 0;
     }
-    .nav-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 4px;
+    .theme-toggle {
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
+      flex-shrink: 0;
     }
-    .nav-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+    .toggle-track {
+      width: 36px;
+      height: 20px;
+      background: var(--border);
+      border-radius: 50px;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .toggle-thumb {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      transition: transform 0.3s;
+      box-shadow: 0 0 6px var(--accent);
+    }
+    body.light .toggle-thumb {
+      transform: translateX(16px);
     }
     .nav-hamburger {
       display: none;
@@ -695,14 +705,14 @@
   <!-- ── NAV ─────────────────────────────────────────────────────────── -->
   <nav class="nav">
     <a class="nav-brand" href="https://h3ad-sec.github.io" target="_blank" rel="noopener">
-      <img id="navLogo" src="https://h3ad-sec.github.io/assets/logo-light.png" alt="H3AD-SEC" />
+      <img id="navLogo" src="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" alt="H3AD-SEC" />
     </a>
 
-    <ul class="nav-links">
+    <div class="nav-links">
       <div class="nav-divider"></div>
-      <li><a href="https://h3ad-sec.github.io" target="_blank" rel="noopener">HOME</a></li>
+      <a href="https://h3ad-sec.github.io" target="_blank" rel="noopener">HOME</a>
       <div class="nav-divider"></div>
-      <li class="nav-item">
+      <div class="nav-item">
         <a href="https://h3ad-sec.github.io/H3AD-X/" target="_blank" rel="noopener">H3AD-X</a>
         <div class="nav-dropdown">
           <div class="nav-dropdown-inner">
@@ -710,10 +720,10 @@
             <a href="https://h3ad-sec.github.io/X-VERDIKT/" target="_blank" rel="noopener">X-VERDIKT</a>
           </div>
         </div>
-      </li>
-      <li><a href="https://h3ad-sec.github.io/H3AD-AI/" target="_blank" rel="noopener">H3AD-AI</a></li>
-      <li><a href="https://h3ad-sec.github.io/H3AD-DETECT/" target="_blank" rel="noopener">H3AD-DETECT</a></li>
-      <li class="nav-item">
+      </div>
+      <a href="https://h3ad-sec.github.io/H3AD-AI/" target="_blank" rel="noopener">H3AD-AI</a>
+      <a href="https://h3ad-sec.github.io/H3AD-DETECT/" target="_blank" rel="noopener">H3AD-DETECT</a>
+      <div class="nav-item">
         <a href="https://h3ad-sec.github.io/H3AD-HUNT/" target="_blank" rel="noopener">H3AD-HUNT</a>
         <div class="nav-dropdown">
           <div class="nav-dropdown-inner">
@@ -721,16 +731,18 @@
             <a href="https://h3ad-sec.github.io/PIVEX/" class="nav-current">PIVEX</a>
           </div>
         </div>
-      </li>
-      <li><a href="https://h3ad-sec.github.io/H3AD-OPS/" target="_blank" rel="noopener">H3AD-OPS</a></li>
-      <li><a href="https://h3ad-sec.github.io/H3AD-DF/" target="_blank" rel="noopener">H3AD-DF</a></li>
-      <li><a href="https://h3ad-sec.github.io/H3AD-IR/" target="_blank" rel="noopener">H3AD-IR</a></li>
+      </div>
+      <a href="https://h3ad-sec.github.io/H3AD-OPS/" target="_blank" rel="noopener">H3AD-OPS</a>
+      <a href="https://h3ad-sec.github.io/H3AD-DF/" target="_blank" rel="noopener">H3AD-DF</a>
+      <a href="https://h3ad-sec.github.io/H3AD-IR/" target="_blank" rel="noopener">H3AD-IR</a>
       <div class="nav-divider"></div>
-      <li><a href="mailto:h3adsec@gmail.com">CONTACT</a></li>
-    </ul>
+      <a href="mailto:h3adsec@gmail.com">CONTACT</a>
+    </div>
 
     <div class="nav-actions">
-      <button class="nav-btn" onclick="toggleTheme()">THEME</button>
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      </div>
       <button class="nav-hamburger" onclick="toggleDrawer()" aria-label="Menu">&#9776;</button>
     </div>
   </nav>

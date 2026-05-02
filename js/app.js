@@ -353,8 +353,8 @@ function setLogo(isLight) {
   var el = document.getElementById('navLogo');
   if (!el) return;
   el.src = isLight
-    ? 'https://h3ad-sec.github.io/assets/logo-dark.png'
-    : 'https://h3ad-sec.github.io/assets/logo-light.png';
+    ? 'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-light.png'
+    : 'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png';
 }
 
 // ── toggleDrawer / closeDrawer ───────────────────────────────────────────────

@@ -5,6 +5,7 @@
 var cy = null;
 var activeArtifact = null;
 var activeMode = 'reactive';
+var graphMode = 'simple';
 
 // ── Node color map ──────────────────────────────────────────────────────────
 var NODE_COLORS = {
@@ -80,12 +81,22 @@ function initGraph() {
       { selector: 'edge.highlighted', style: { 'opacity': 1, 'width': 2, 'line-color': '#00ff9f', 'target-arrow-color': '#00ff9f' }},
       { selector: 'node.dimmed',      style: { 'opacity': 0.08 }},
       { selector: 'edge.dimmed',      style: { 'opacity': 0.05 }},
-      { selector: 'node.selected',    style: { 'border-color': '#ffd60a', 'border-width': 3 }}
+      { selector: 'node.selected',    style: { 'border-color': '#ffd60a', 'border-width': 3 }},
+      { selector: 'node[type != "artifact"]', style: { 'display': 'none' } },
+      { selector: 'edge[!crossPivot]',        style: { 'display': 'none' } },
+      { selector: 'node.view-full',           style: { 'display': 'element' } },
+      { selector: 'edge.view-full',           style: { 'display': 'element' } }
     ],
-    layout: { name: 'cose', animate: false, fit: true, padding: 40 }
+    layout: { name: 'cose', animate: false, fit: true, padding: 60, randomize: false }
   });
 
-  cy.on('layoutstop', function() { cy.fit(undefined, 40); });
+  cy.on('layoutstop', function() {
+    if (graphMode === 'simple') {
+      cy.fit(cy.nodes('[type = "artifact"]'), 60);
+    } else {
+      cy.fit(undefined, 40);
+    }
+  });
   cy.on('tap', 'node', function(evt) { showNodeInfo(evt.target); });
   cy.on('tap', function(evt) { if (evt.target === cy) clearNodeInfo(); });
 }
@@ -113,33 +124,38 @@ function selectArtifact(type) {
   var btn = document.querySelector('.artifact-btn[data-type="' + type + '"]');
   if (btn) btn.classList.add('active');
 
-  var pathData = ARTIFACT_PATHS[type];
-  if (!pathData || !cy) return;
+  if (!cy) return;
 
-  var pathNodeIds = pathData.nodes;
-
-  // Highlight path nodes, dim everything else
-  cy.batch(function() {
-    cy.nodes().forEach(function(n) {
-      n.removeClass('highlighted dimmed selected');
-      if (pathNodeIds.indexOf(n.data('id')) !== -1) {
-        n.addClass('highlighted');
-      } else {
-        n.addClass('dimmed');
-      }
+  if (graphMode === 'simple') {
+    var artNode = cy.getElementById(type);
+    var connEdges = artNode.connectedEdges('[?crossPivot]');
+    var connNodes = connEdges.connectedNodes();
+    cy.batch(function() {
+      cy.nodes('[type = "artifact"]').forEach(function(n) {
+        n.removeClass('highlighted dimmed selected');
+        n.addClass(n.id() === type || connNodes.has(n) ? 'highlighted' : 'dimmed');
+      });
+      cy.edges('[?crossPivot]').forEach(function(e) {
+        e.removeClass('highlighted dimmed');
+        e.addClass(connEdges.has(e) ? 'highlighted' : 'dimmed');
+      });
     });
-
-    cy.edges().forEach(function(e) {
-      e.removeClass('highlighted dimmed');
-      var src = e.data('source');
-      var tgt = e.data('target');
-      if (pathNodeIds.indexOf(src) !== -1 && pathNodeIds.indexOf(tgt) !== -1) {
-        e.addClass('highlighted');
-      } else {
-        e.addClass('dimmed');
-      }
+  } else {
+    var pathData = ARTIFACT_PATHS[type];
+    if (!pathData) return;
+    var pathNodeIds = pathData.nodes;
+    cy.batch(function() {
+      cy.nodes().forEach(function(n) {
+        n.removeClass('highlighted dimmed selected');
+        n.addClass(pathNodeIds.indexOf(n.data('id')) !== -1 ? 'highlighted' : 'dimmed');
+      });
+      cy.edges().forEach(function(e) {
+        e.removeClass('highlighted dimmed');
+        var src = e.data('source'), tgt = e.data('target');
+        e.addClass(pathNodeIds.indexOf(src) !== -1 && pathNodeIds.indexOf(tgt) !== -1 ? 'highlighted' : 'dimmed');
+      });
     });
-  });
+  }
 
   showArtifactInfo(type);
 }
@@ -168,6 +184,33 @@ function resetHighlight() {
     cy.nodes().removeClass('highlighted dimmed selected');
     cy.edges().removeClass('highlighted dimmed');
   });
+}
+
+// ── setGraphView ─────────────────────────────────────────────────────────────
+function setGraphView(mode) {
+  graphMode = mode;
+  document.querySelectorAll('.view-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('btn-' + mode);
+  if (btn) btn.classList.add('active');
+  if (!cy) return;
+  resetHighlight();
+  activeArtifact = null;
+  document.querySelectorAll('.artifact-btn').forEach(function(b) { b.classList.remove('active'); });
+  var allBtn = document.querySelector('.artifact-btn[data-type="all"]');
+  if (allBtn) allBtn.classList.add('active');
+  clearNodeInfo();
+  cy.batch(function() {
+    if (mode === 'full') {
+      cy.nodes('[type != "artifact"]').addClass('view-full');
+      cy.edges('[!crossPivot]').addClass('view-full');
+    } else {
+      cy.elements().removeClass('view-full');
+    }
+  });
+  var layoutEles = mode === 'full'
+    ? cy.elements()
+    : cy.nodes('[type = "artifact"]').add(cy.edges('[?crossPivot]'));
+  layoutEles.layout({ name: 'cose', animate: false, fit: true, padding: 60, randomize: false }).run();
 }
 
 // ── showNodeInfo ─────────────────────────────────────────────────────────────

@@ -398,6 +398,35 @@
       box-shadow: 0 0 10px rgba(0,77,184,0.15);
     }
 
+    /* ── Graph section header + view toggle ───────────────────────────── */
+    .graph-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .graph-view-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .view-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      background: var(--panel);
+      color: var(--muted);
+      border: none;
+      border-right: 1px solid var(--border);
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .view-btn:last-child { border-right: none; }
+    .view-btn.active { background: var(--accent); color: var(--bg); }
+    .view-btn:hover:not(.active) { color: var(--text); background: var(--panel-alt); }
+
     /* ── Graph layout ──────────────────────────────────────────────────── */
     .graph-layout {
       position: relative;
@@ -855,6 +884,13 @@
 
       <!-- ── Section 2: Graph + Info Panel ─────────────────────── -->
       <section>
+        <div class="graph-section-header">
+          <div class="section-label" style="margin-bottom:0;">INVESTIGATION GRAPH</div>
+          <div class="graph-view-toggle">
+            <button class="view-btn active" id="btn-simple" onclick="setGraphView('simple')">SIMPLE</button>
+            <button class="view-btn" id="btn-full" onclick="setGraphView('full')">FULL</button>
+          </div>
+        </div>
         <div class="graph-layout">
           <div id="cy" class="cy-container"></div>
           <div id="info-panel" class="info-panel">

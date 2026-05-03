@@ -474,9 +474,12 @@
       .piv-tagline { display: none; }
       .graph-panel { height: 54vh; min-height: 340px; }
       .info-panel {
+        position: fixed;
         top: auto; right: 0; left: 0; bottom: 0;
-        width: 100%; max-height: 52%;
-        border-radius: 10px 10px 0 0; transform: translateY(8px);
+        width: 100%; max-height: 52vh;
+        border-radius: 10px 10px 0 0;
+        transform: translateY(8px);
+        z-index: 50;
       }
       .info-panel.visible { transform: translateY(0); }
       .cat-arc-label { font-size: 7.5px; padding: 1px 5px; }

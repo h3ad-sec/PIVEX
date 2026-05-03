@@ -14,17 +14,22 @@ var CAT_COLORS = {
   network:  { bg: '#00d4ff', border: '#0099bb', text: '#06080f', glow: '#00d4ff' },
   endpoint: { bg: '#00ff9f', border: '#00cc7a', text: '#06080f', glow: '#00ff9f' },
   identity: { bg: '#c084fc', border: '#9333ea', text: '#06080f', glow: '#c084fc' },
-  cloud:    { bg: '#60a5fa', border: '#2563eb', text: '#06080f', glow: '#60a5fa' },
-  threat:   { bg: '#f87171', border: '#dc2626', text: '#06080f', glow: '#f87171' }
+  email:    { bg: '#fb923c', border: '#ea580c', text: '#06080f', glow: '#fb923c' },
+  cloud:    { bg: '#60a5fa', border: '#2563eb', text: '#06080f', glow: '#60a5fa' }
 };
 
-// ── Artifact order (for circular layout) ────────────────────────────────────
+// ── Artifact order (for circular layout, grouped by category) ───────────────
 var ARTIFACT_ORDER = [
-  'ip','domain','url','certificate',
-  'hash','process','filepath','service','registry','task','mutex','named-pipe','wmi','netshare','host',
-  'user','email','credential',
-  'cloud',
-  'vuln'
+  // network (13)
+  'ip','domain','fqdn','url','dns_query','http_request','asn','dns_record','ssl_cert','ja3','user_agent','port','certificate',
+  // endpoint (15)
+  'hash','file_path','process','process_guid','dll','driver','service','registry','scheduled_task','startup_item','mutex','pipe','host','share','event_id',
+  // identity (6)
+  'user','identity','logon_session','kerberos_ticket','spn','rdp_session',
+  // email (2)
+  'email','attachment',
+  // cloud (1)
+  'cloud_resource'
 ];
 
 // ── applyCircularLayout ──────────────────────────────────────────────────────
@@ -120,10 +125,10 @@ function initGraph() {
         style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
       { selector: 'node[type = "artifact"][category = "identity"]',
         style: { 'background-color': '#c084fc', 'border-color': '#9333ea', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
+      { selector: 'node[type = "artifact"][category = "email"]',
+        style: { 'background-color': '#fb923c', 'border-color': '#ea580c', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
       { selector: 'node[type = "artifact"][category = "cloud"]',
         style: { 'background-color': '#60a5fa', 'border-color': '#2563eb', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
-      { selector: 'node[type = "artifact"][category = "threat"]',
-        style: { 'background-color': '#f87171', 'border-color': '#dc2626', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
       // ── Non-artifact node types ────────────────────────────────────────
       { selector: 'node[type = "enrichment"]',  style: { 'background-color': '#3b82f6', 'border-color': '#2563eb', 'color': '#ffffff' }},
       { selector: 'node[type = "context"]',     style: { 'background-color': '#a855f7', 'border-color': '#9333ea', 'color': '#ffffff' }},
@@ -154,8 +159,8 @@ function initGraph() {
       { selector: 'node[category = "network"].highlighted',  style: { 'border-color': '#00d4ff', 'shadow-color': '#00d4ff' }},
       { selector: 'node[category = "endpoint"].highlighted', style: { 'border-color': '#00ff9f', 'shadow-color': '#00ff9f' }},
       { selector: 'node[category = "identity"].highlighted', style: { 'border-color': '#c084fc', 'shadow-color': '#c084fc' }},
-      { selector: 'node[category = "cloud"].highlighted',    style: { 'border-color': '#60a5fa', 'shadow-color': '#60a5fa' }},
-      { selector: 'node[category = "threat"].highlighted',   style: { 'border-color': '#f87171', 'shadow-color': '#f87171' }},
+      { selector: 'node[category = "email"].highlighted',    style: { 'border-color': '#fb923c', 'shadow-color': '#fb923c' }},
+      { selector: 'node[category = "cloud"].highlighted',   style: { 'border-color': '#60a5fa', 'shadow-color': '#60a5fa' }},
       { selector: 'node[type != "artifact"].highlighted',    style: { 'border-color': '#ffd60a', 'shadow-color': '#ffd60a' }},
       { selector: 'edge.highlighted', style: {
           'opacity': 1, 'width': 2.5,

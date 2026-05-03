@@ -271,8 +271,8 @@
     .chip-group-label.cat-network  { color: #00d4ff; }
     .chip-group-label.cat-endpoint { color: #00ff9f; }
     .chip-group-label.cat-identity { color: #c084fc; }
+    .chip-group-label.cat-email    { color: #fb923c; }
     .chip-group-label.cat-cloud    { color: #60a5fa; }
-    .chip-group-label.cat-threat   { color: #f87171; }
 
     /* Artifact chip base */
     .artifact-chip {
@@ -304,17 +304,17 @@
     }
 
     /* Per-category color coding */
-    .artifact-chip[data-category="network"] { border-left-color: rgba(0,212,255,0.4); }
-    .artifact-chip[data-category="endpoint"]{ border-left-color: rgba(0,255,159,0.4); }
-    .artifact-chip[data-category="identity"]{ border-left-color: rgba(192,132,252,0.4); }
-    .artifact-chip[data-category="cloud"]   { border-left-color: rgba(96,165,250,0.4); }
-    .artifact-chip[data-category="threat"]  { border-left-color: rgba(248,113,113,0.4); }
+    .artifact-chip[data-category="network"]  { border-left-color: rgba(0,212,255,0.4); }
+    .artifact-chip[data-category="endpoint"] { border-left-color: rgba(0,255,159,0.4); }
+    .artifact-chip[data-category="identity"] { border-left-color: rgba(192,132,252,0.4); }
+    .artifact-chip[data-category="email"]    { border-left-color: rgba(251,146,60,0.4); }
+    .artifact-chip[data-category="cloud"]    { border-left-color: rgba(96,165,250,0.4); }
 
     .artifact-chip[data-category="network"].active  { background: rgba(0,212,255,0.12);  border-left-color: #00d4ff; color: #00d4ff;  box-shadow: 0 0 8px rgba(0,212,255,0.2); }
     .artifact-chip[data-category="endpoint"].active { background: rgba(0,255,159,0.12);  border-left-color: #00ff9f; color: #00ff9f;  box-shadow: 0 0 8px rgba(0,255,159,0.2); }
     .artifact-chip[data-category="identity"].active { background: rgba(192,132,252,0.12);border-left-color: #c084fc; color: #c084fc;  box-shadow: 0 0 8px rgba(192,132,252,0.2); }
+    .artifact-chip[data-category="email"].active    { background: rgba(251,146,60,0.12); border-left-color: #fb923c; color: #fb923c;  box-shadow: 0 0 8px rgba(251,146,60,0.2); }
     .artifact-chip[data-category="cloud"].active    { background: rgba(96,165,250,0.12); border-left-color: #60a5fa; color: #60a5fa;  box-shadow: 0 0 8px rgba(96,165,250,0.2); }
-    .artifact-chip[data-category="threat"].active   { background: rgba(248,113,113,0.12);border-left-color: #f87171; color: #f87171;  box-shadow: 0 0 8px rgba(248,113,113,0.2); }
 
     body.light .artifact-chip { background: rgba(255,255,255,0.85); color: var(--muted); }
     body.light .artifact-chip:hover { background: rgba(200,216,236,0.95); }
@@ -627,7 +627,7 @@
         </div>
       </div>
       <div class="topbar-right">
-        <span class="piv-version">v2.0 &middot; 20 ARTIFACTS</span>
+        <span class="piv-version">v8.3 &middot; 37 ARTIFACTS</span>
         <div class="graph-view-toggle">
           <button class="view-btn active" id="btn-simple" onclick="setGraphView('simple')">SIMPLE</button>
           <button class="view-btn" id="btn-full" onclick="setGraphView('full')">FULL</button>
@@ -647,49 +647,66 @@
             <button class="artifact-chip active" data-type="all" onclick="selectAll()">ALL</button>
           </div>
 
-          <!-- Network -->
+          <!-- Network (13) -->
           <div class="chip-section">
             <span class="chip-group-label cat-network">NET</span>
-            <button class="artifact-chip" data-type="ip"          data-category="network"  onclick="selectArtifact('ip')">IP</button>
-            <button class="artifact-chip" data-type="domain"      data-category="network"  onclick="selectArtifact('domain')">DOMAIN</button>
-            <button class="artifact-chip" data-type="url"         data-category="network"  onclick="selectArtifact('url')">URL</button>
-            <button class="artifact-chip" data-type="certificate" data-category="network"  onclick="selectArtifact('certificate')">CERT</button>
+            <button class="artifact-chip" data-type="ip"           data-category="network"  onclick="selectArtifact('ip')">IP</button>
+            <button class="artifact-chip" data-type="domain"       data-category="network"  onclick="selectArtifact('domain')">DOMAIN</button>
+            <button class="artifact-chip" data-type="fqdn"         data-category="network"  onclick="selectArtifact('fqdn')">FQDN</button>
+            <button class="artifact-chip" data-type="url"          data-category="network"  onclick="selectArtifact('url')">URL</button>
+            <button class="artifact-chip" data-type="dns_query"    data-category="network"  onclick="selectArtifact('dns_query')">DNS QRY</button>
+            <button class="artifact-chip" data-type="http_request" data-category="network"  onclick="selectArtifact('http_request')">HTTP REQ</button>
+            <button class="artifact-chip" data-type="asn"          data-category="network"  onclick="selectArtifact('asn')">ASN</button>
+            <button class="artifact-chip" data-type="dns_record"   data-category="network"  onclick="selectArtifact('dns_record')">DNS REC</button>
+            <button class="artifact-chip" data-type="ssl_cert"     data-category="network"  onclick="selectArtifact('ssl_cert')">SSL CERT</button>
+            <button class="artifact-chip" data-type="ja3"          data-category="network"  onclick="selectArtifact('ja3')">JA3</button>
+            <button class="artifact-chip" data-type="user_agent"   data-category="network"  onclick="selectArtifact('user_agent')">USER AGENT</button>
+            <button class="artifact-chip" data-type="port"         data-category="network"  onclick="selectArtifact('port')">PORT</button>
+            <button class="artifact-chip" data-type="certificate"  data-category="network"  onclick="selectArtifact('certificate')">CODE CERT</button>
           </div>
 
-          <!-- Endpoint -->
+          <!-- Endpoint (15) -->
           <div class="chip-section">
             <span class="chip-group-label cat-endpoint">EPT</span>
-            <button class="artifact-chip" data-type="hash"        data-category="endpoint" onclick="selectArtifact('hash')">HASH</button>
-            <button class="artifact-chip" data-type="process"     data-category="endpoint" onclick="selectArtifact('process')">PROCESS</button>
-            <button class="artifact-chip" data-type="filepath"    data-category="endpoint" onclick="selectArtifact('filepath')">FILE PATH</button>
-            <button class="artifact-chip" data-type="service"     data-category="endpoint" onclick="selectArtifact('service')">SERVICE</button>
-            <button class="artifact-chip" data-type="registry"    data-category="endpoint" onclick="selectArtifact('registry')">REGISTRY</button>
-            <button class="artifact-chip" data-type="task"        data-category="endpoint" onclick="selectArtifact('task')">SCHED TASK</button>
-            <button class="artifact-chip" data-type="mutex"       data-category="endpoint" onclick="selectArtifact('mutex')">MUTEX</button>
-            <button class="artifact-chip" data-type="named-pipe"  data-category="endpoint" onclick="selectArtifact('named-pipe')">NAMED PIPE</button>
-            <button class="artifact-chip" data-type="wmi"         data-category="endpoint" onclick="selectArtifact('wmi')">WMI</button>
-            <button class="artifact-chip" data-type="netshare"    data-category="endpoint" onclick="selectArtifact('netshare')">NET SHARE</button>
-            <button class="artifact-chip" data-type="host"        data-category="endpoint" onclick="selectArtifact('host')">HOST</button>
+            <button class="artifact-chip" data-type="hash"           data-category="endpoint" onclick="selectArtifact('hash')">HASH</button>
+            <button class="artifact-chip" data-type="file_path"      data-category="endpoint" onclick="selectArtifact('file_path')">FILE PATH</button>
+            <button class="artifact-chip" data-type="process"        data-category="endpoint" onclick="selectArtifact('process')">PROCESS</button>
+            <button class="artifact-chip" data-type="process_guid"   data-category="endpoint" onclick="selectArtifact('process_guid')">PROC GUID</button>
+            <button class="artifact-chip" data-type="dll"            data-category="endpoint" onclick="selectArtifact('dll')">DLL</button>
+            <button class="artifact-chip" data-type="driver"         data-category="endpoint" onclick="selectArtifact('driver')">DRIVER</button>
+            <button class="artifact-chip" data-type="service"        data-category="endpoint" onclick="selectArtifact('service')">SERVICE</button>
+            <button class="artifact-chip" data-type="registry"       data-category="endpoint" onclick="selectArtifact('registry')">REGISTRY</button>
+            <button class="artifact-chip" data-type="scheduled_task" data-category="endpoint" onclick="selectArtifact('scheduled_task')">SCHED TASK</button>
+            <button class="artifact-chip" data-type="startup_item"   data-category="endpoint" onclick="selectArtifact('startup_item')">STARTUP</button>
+            <button class="artifact-chip" data-type="mutex"          data-category="endpoint" onclick="selectArtifact('mutex')">MUTEX</button>
+            <button class="artifact-chip" data-type="pipe"           data-category="endpoint" onclick="selectArtifact('pipe')">PIPE</button>
+            <button class="artifact-chip" data-type="host"           data-category="endpoint" onclick="selectArtifact('host')">HOST</button>
+            <button class="artifact-chip" data-type="share"          data-category="endpoint" onclick="selectArtifact('share')">SHARE</button>
+            <button class="artifact-chip" data-type="event_id"       data-category="endpoint" onclick="selectArtifact('event_id')">EVENT ID</button>
           </div>
 
-          <!-- Identity -->
+          <!-- Identity (6) -->
           <div class="chip-section">
             <span class="chip-group-label cat-identity">IDN</span>
-            <button class="artifact-chip" data-type="user"        data-category="identity" onclick="selectArtifact('user')">USER</button>
-            <button class="artifact-chip" data-type="email"       data-category="identity" onclick="selectArtifact('email')">EMAIL</button>
-            <button class="artifact-chip" data-type="credential"  data-category="identity" onclick="selectArtifact('credential')">CRED</button>
+            <button class="artifact-chip" data-type="user"            data-category="identity" onclick="selectArtifact('user')">USER</button>
+            <button class="artifact-chip" data-type="identity"        data-category="identity" onclick="selectArtifact('identity')">IDENTITY</button>
+            <button class="artifact-chip" data-type="logon_session"   data-category="identity" onclick="selectArtifact('logon_session')">LOGON SES</button>
+            <button class="artifact-chip" data-type="kerberos_ticket" data-category="identity" onclick="selectArtifact('kerberos_ticket')">KERB TKT</button>
+            <button class="artifact-chip" data-type="spn"             data-category="identity" onclick="selectArtifact('spn')">SPN</button>
+            <button class="artifact-chip" data-type="rdp_session"     data-category="identity" onclick="selectArtifact('rdp_session')">RDP SES</button>
           </div>
 
-          <!-- Cloud -->
+          <!-- Email (2) -->
+          <div class="chip-section">
+            <span class="chip-group-label cat-email">EML</span>
+            <button class="artifact-chip" data-type="email"      data-category="email" onclick="selectArtifact('email')">EMAIL</button>
+            <button class="artifact-chip" data-type="attachment" data-category="email" onclick="selectArtifact('attachment')">ATTACH</button>
+          </div>
+
+          <!-- Cloud (1) -->
           <div class="chip-section">
             <span class="chip-group-label cat-cloud">CLD</span>
-            <button class="artifact-chip" data-type="cloud"       data-category="cloud"    onclick="selectArtifact('cloud')">CLOUD</button>
-          </div>
-
-          <!-- Threat -->
-          <div class="chip-section">
-            <span class="chip-group-label cat-threat">THR</span>
-            <button class="artifact-chip" data-type="vuln"        data-category="threat"   onclick="selectArtifact('vuln')">VULN</button>
+            <button class="artifact-chip" data-type="cloud_resource" data-category="cloud" onclick="selectArtifact('cloud_resource')">CLOUD RES</button>
           </div>
 
         </div>
@@ -803,8 +820,8 @@
             <div class="legend-item"><div class="legend-dot" style="background:#00d4ff;"></div>NETWORK</div>
             <div class="legend-item"><div class="legend-dot" style="background:#00ff9f;"></div>ENDPOINT</div>
             <div class="legend-item"><div class="legend-dot" style="background:#c084fc;"></div>IDENTITY</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fb923c;"></div>EMAIL</div>
             <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>CLOUD</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#f87171;"></div>THREAT</div>
           </div>
           <div class="legend-divider"></div>
           <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>ENRICHMENT</div>

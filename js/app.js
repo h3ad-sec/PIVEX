@@ -4,8 +4,6 @@
 // ── State ───────────────────────────────────────────────────────────────────
 var cy = null;
 var activeArtifact = null;
-var activeMode = 'reactive';
-var graphMode = 'simple';
 var _flowTimer = null;
 var _flowOffset = 0;
 
@@ -20,12 +18,12 @@ var CAT_COLORS = {
 
 // ── Artifact order (for circular layout, grouped by category) ───────────────
 var ARTIFACT_ORDER = [
-  // network (13)
-  'ip','domain','fqdn','url','dns_query','http_request','asn','dns_record','ssl_cert','ja3','user_agent','port','certificate',
-  // endpoint (15)
-  'hash','file_path','process','process_guid','dll','driver','service','registry','scheduled_task','startup_item','mutex','pipe','host','share','event_id',
-  // identity (6)
-  'user','identity','logon_session','kerberos_ticket','spn','rdp_session',
+  // network (15)
+  'ip','domain','fqdn','url','dns_query','http_request','asn','dns_record','ssl_cert','ja3','user_agent','port','certificate','network_traffic','mac_address',
+  // endpoint (20)
+  'hash','file_path','process','parent_process','command_line','service','registry','scheduled_task','startup_item','dll','mutex','pipe','driver','host','share','event_id','named_pipe','wmi_query','prefetch','vulnerability_id',
+  // identity (3)
+  'user','identity','rdp_session',
   // email (2)
   'email','attachment',
   // cloud (1)
@@ -129,16 +127,6 @@ function initGraph() {
         style: { 'background-color': '#fb923c', 'border-color': '#ea580c', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
       { selector: 'node[type = "artifact"][category = "cloud"]',
         style: { 'background-color': '#60a5fa', 'border-color': '#2563eb', 'color': '#06080f', 'border-width': 2, 'font-size': '11px', 'font-weight': 'bold' }},
-      // ── Non-artifact node types ────────────────────────────────────────
-      { selector: 'node[type = "enrichment"]',  style: { 'background-color': '#3b82f6', 'border-color': '#2563eb', 'color': '#ffffff' }},
-      { selector: 'node[type = "context"]',     style: { 'background-color': '#a855f7', 'border-color': '#9333ea', 'color': '#ffffff' }},
-      { selector: 'node[type = "pivot"]',       style: { 'background-color': '#ffd60a', 'border-color': '#c9a800', 'color': '#06080f' }},
-      { selector: 'node[type = "correlation"]', style: { 'background-color': '#f97316', 'border-color': '#c95d0a', 'color': '#ffffff' }},
-      { selector: 'node[type = "action"]',      style: { 'background-color': '#ec4899', 'border-color': '#c4186e', 'color': '#ffffff' }},
-      { selector: '#dec-malicious',  style: { 'background-color': '#ff3b5c', 'border-color': '#cc2244', 'color': '#ffffff' }},
-      { selector: '#dec-suspicious', style: { 'background-color': '#ffd60a', 'border-color': '#c9a800', 'color': '#06080f' }},
-      { selector: '#dec-benign',     style: { 'background-color': '#00ff9f', 'border-color': '#00cc7a', 'color': '#06080f' }},
-      { selector: '#dec-unknown',    style: { 'background-color': '#7d8fb3', 'border-color': '#5a6e92', 'color': '#ffffff' }},
       // ── Edges ──────────────────────────────────────────────────────────
       { selector: 'edge', style: {
           'width': 1, 'opacity': 0.4,
@@ -161,7 +149,6 @@ function initGraph() {
       { selector: 'node[category = "identity"].highlighted', style: { 'border-color': '#c084fc', 'shadow-color': '#c084fc' }},
       { selector: 'node[category = "email"].highlighted',    style: { 'border-color': '#fb923c', 'shadow-color': '#fb923c' }},
       { selector: 'node[category = "cloud"].highlighted',   style: { 'border-color': '#60a5fa', 'shadow-color': '#60a5fa' }},
-      { selector: 'node[type != "artifact"].highlighted',    style: { 'border-color': '#ffd60a', 'shadow-color': '#ffd60a' }},
       { selector: 'edge.highlighted', style: {
           'opacity': 1, 'width': 2.5,
           'line-color': '#ffd60a', 'target-arrow-color': '#ffd60a',
@@ -169,12 +156,7 @@ function initGraph() {
       }},
       { selector: 'node.dimmed', style: { 'opacity': 0.07 }},
       { selector: 'edge.dimmed', style: { 'opacity': 0.04 }},
-      { selector: 'node.selected', style: { 'border-color': '#ffd60a', 'border-width': 3.5 }},
-      // ── Simple mode hides non-artifact elements ────────────────────────
-      { selector: 'node[type != "artifact"]', style: { 'display': 'none' }},
-      { selector: 'edge[!crossPivot]',        style: { 'display': 'none' }},
-      { selector: 'node.view-full',           style: { 'display': 'element' }},
-      { selector: 'edge.view-full',           style: { 'display': 'element' }}
+      { selector: 'node.selected', style: { 'border-color': '#ffd60a', 'border-width': 3.5 }}
     ],
     layout: { name: 'null' }
   });
@@ -213,38 +195,20 @@ function selectArtifact(type) {
   if (!cy) return;
   updateStats(type);
 
-  if (graphMode === 'simple') {
-    var artNode = cy.getElementById(type);
-    var connEdges = artNode.connectedEdges('[?crossPivot]');
-    var connNodes = connEdges.connectedNodes();
-    cy.batch(function() {
-      cy.nodes('[type = "artifact"]').forEach(function(n) {
-        n.removeClass('highlighted dimmed selected');
-        n.addClass(n.id() === type || connNodes.has(n) ? 'highlighted' : 'dimmed');
-      });
-      cy.edges('[?crossPivot]').forEach(function(e) {
-        e.removeClass('highlighted dimmed');
-        e.addClass(connEdges.has(e) ? 'highlighted' : 'dimmed');
-      });
+  var artNode = cy.getElementById(type);
+  var connEdges = artNode.connectedEdges('[?crossPivot]');
+  var connNodes = connEdges.connectedNodes();
+  cy.batch(function() {
+    cy.nodes().forEach(function(n) {
+      n.removeClass('highlighted dimmed selected');
+      n.addClass(n.id() === type || connNodes.has(n) ? 'highlighted' : 'dimmed');
     });
-    startEdgeFlow();
-  } else {
-    var pathData = ARTIFACT_PATHS[type];
-    if (!pathData) return;
-    var pathNodeIds = pathData.nodes;
-    cy.batch(function() {
-      cy.nodes().forEach(function(n) {
-        n.removeClass('highlighted dimmed selected');
-        n.addClass(pathNodeIds.indexOf(n.data('id')) !== -1 ? 'highlighted' : 'dimmed');
-      });
-      cy.edges().forEach(function(e) {
-        e.removeClass('highlighted dimmed');
-        var src = e.data('source'), tgt = e.data('target');
-        e.addClass(pathNodeIds.indexOf(src) !== -1 && pathNodeIds.indexOf(tgt) !== -1 ? 'highlighted' : 'dimmed');
-      });
+    cy.edges('[?crossPivot]').forEach(function(e) {
+      e.removeClass('highlighted dimmed');
+      e.addClass(connEdges.has(e) ? 'highlighted' : 'dimmed');
     });
-    startEdgeFlow();
-  }
+  });
+  startEdgeFlow();
 
   showArtifactInfo(type);
 }
@@ -275,46 +239,6 @@ function resetHighlight() {
     cy.nodes().removeClass('highlighted dimmed selected');
     cy.edges().removeClass('highlighted dimmed');
   });
-}
-
-// ── setGraphView ─────────────────────────────────────────────────────────────
-function setGraphView(mode) {
-  graphMode = mode;
-  stopEdgeFlow();
-  document.querySelectorAll('.view-btn').forEach(function(b) { b.classList.remove('active'); });
-  var btn = document.getElementById('btn-' + mode);
-  if (btn) btn.classList.add('active');
-  if (!cy) return;
-  resetHighlight();
-  activeArtifact = null;
-  document.querySelectorAll('.artifact-chip').forEach(function(b) { b.classList.remove('active'); });
-  var allChip = document.querySelector('.artifact-chip[data-type="all"]');
-  if (allChip) allChip.classList.add('active');
-  clearNodeInfo();
-  updateStats(null);
-
-  cy.batch(function() {
-    if (mode === 'full') {
-      cy.nodes('[type != "artifact"]').addClass('view-full');
-      cy.edges('[!crossPivot]').addClass('view-full');
-    } else {
-      cy.elements().removeClass('view-full');
-    }
-  });
-
-  if (mode === 'simple') {
-    applyCircularLayout();
-  } else {
-    cy.elements().layout({
-      name: 'cose',
-      animate: false, fit: true, padding: 50,
-      randomize: false,
-      nodeRepulsion: 2048,
-      idealEdgeLength: 80,
-      edgeElasticity: 0.45,
-      gravity: 0.25
-    }).run();
-  }
 }
 
 // ── showNodeInfo ─────────────────────────────────────────────────────────────
@@ -408,14 +332,6 @@ function clearNodeInfo() {
   }
 }
 
-// ── setMode ──────────────────────────────────────────────────────────────────
-function setMode(mode) {
-  activeMode = mode;
-  document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('active'); });
-  var card = document.querySelector('.mode-card[data-mode="' + mode + '"]');
-  if (card) card.classList.add('active');
-}
-
 // ── toggleTheme ──────────────────────────────────────────────────────────────
 function toggleTheme() {
   var isLight = document.body.classList.toggle('light');
@@ -500,5 +416,5 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 window.addEventListener('resize', function() {
-  if (cy && graphMode === 'simple') applyCircularLayout();
+  if (cy) applyCircularLayout();
 });

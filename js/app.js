@@ -1,8 +1,9 @@
-// PIVEX — app.js  v9.1
+// PIVEX — app.js  v9.2
 
 // ── State ───────────────────────────────────────────────────────────────────
 var cy = null;
 var activeArtifact = null;
+var pivotPath = [];
 var _flowTimer = null;
 var _flowOffset = 0;
 var _arcMap = null;
@@ -69,20 +70,24 @@ function applyCategoryArcLayout() {
   var cx = W / 2, cyc = H / 2;
   var radius = Math.min(W, H) * 0.38;
 
-  var totalNodes = ARTIFACT_ORDER.length;
-  var GAP_DEG = 10;
-  var totalGap = ARC_CONFIG.length * GAP_DEG;
-  var available = 360 - totalGap;
+  var totalNodes = ARTIFACT_ORDER.length; // 41
+  var CAT_GAP_DEG = 4;                    // small visual gap between categories
+  var numCats = ARC_CONFIG.length;        // 5
+  var totalGap = numCats * CAT_GAP_DEG;   // 20°
+  var available = 360 - totalGap;         // 340°
+  var perNode = available / totalNodes;   // ~8.29° per node
 
-  // Build arc map
+  // Build arc map — each category gets exactly count * perNode degrees
   _arcMap = {};
-  var cur = -90;
+  var cur = -90; // start at top
   ARC_CONFIG.forEach(function(cfg) {
-    var span = (cfg.count / totalNodes) * available;
+    var span = cfg.count * perNode;
     _arcMap[cfg.category] = {
-      startDeg: cur, spanDeg: span, midDeg: cur + span / 2
+      startDeg: cur,
+      spanDeg: span,
+      midDeg: cur + span / 2
     };
-    cur += span + GAP_DEG;
+    cur += span + CAT_GAP_DEG;
   });
   _arcCenter = { x: cx, y: cyc };
   _arcRadius = radius;
@@ -95,7 +100,7 @@ function applyCategoryArcLayout() {
     if (nd && catLists[nd.data.category]) catLists[nd.data.category].push(id);
   });
 
-  // Position nodes
+  // Position each node with uniform angular spacing within its category arc
   ARTIFACT_ORDER.forEach(function(id) {
     var node = cy.getElementById(id);
     if (!node.length) return;
@@ -107,10 +112,10 @@ function applyCategoryArcLayout() {
     var list = catLists[cat];
     var idx = list.indexOf(id);
     var n = list.length;
-    var pad = n > 1 ? arc.spanDeg * 0.07 : 0;
+    // Node i is centered at startDeg + (i + 0.5) * perNode
     var deg = n === 1
       ? arc.midDeg
-      : arc.startDeg + pad + (idx / (n - 1)) * (arc.spanDeg - 2 * pad);
+      : arc.startDeg + (idx + 0.5) * perNode;
     var rad = deg * Math.PI / 180;
     node.position({ x: cx + radius * Math.cos(rad), y: cyc + radius * Math.sin(rad) });
   });
@@ -164,13 +169,12 @@ function updateStats(selectedType) {
   var el = document.getElementById('graph-stats');
   if (!el) return;
   if (!selectedType) {
-    var n = cy ? cy.nodes().length : 0;
-    var e = cy ? cy.edges().length : 0;
-    el.innerHTML = '<span>' + n + ' artifacts</span><span>' + e + ' pivots</span>';
+    el.innerHTML = '<span>41 artifacts</span><span>200 pivots</span>';
   } else {
     var pathData = ARTIFACT_PATHS[selectedType];
-    var nc = pathData ? pathData.nodes.length : 0;
-    el.innerHTML = '<span>' + (SHORT_LABELS[selectedType] || selectedType) + '</span><span>' + nc + ' connected</span>';
+    var nc = pathData ? pathData.nodes.length - 1 : 0;
+    el.innerHTML = '<span>' + (SHORT_LABELS[selectedType] || selectedType) + '</span>' +
+      '<span>' + nc + ' connected</span>';
   }
 }
 
@@ -201,7 +205,8 @@ function initGraph() {
           'border-width': 1.5,
           'color': '#8bacc8',
           'transition-property': 'opacity shadow-blur shadow-opacity border-color border-width',
-          'transition-duration': '0.18s'
+          'transition-duration': '0.18s',
+          'cursor': 'pointer'
       }},
       // Category colors
       { selector: 'node[category = "network"]',
@@ -214,7 +219,7 @@ function initGraph() {
         style: { 'background-color': '#fb923c', 'border-color': '#ea580c', 'color': '#03060a', 'border-width': 2 }},
       { selector: 'node[category = "cloud"]',
         style: { 'background-color': '#60a5fa', 'border-color': '#2563eb', 'color': '#03060a', 'border-width': 2 }},
-      // Default edges — very subtle so graph is not cluttered
+      // Default edges — very subtle
       { selector: 'edge', style: {
           'width': 1,
           'opacity': 0.07,
@@ -226,7 +231,7 @@ function initGraph() {
           'transition-property': 'opacity width line-color',
           'transition-duration': '0.18s'
       }},
-      // Highlighted state
+      // Highlighted (path or first-hop)
       { selector: 'node.highlighted', style: {
           'opacity': 1,
           'border-width': 3,
@@ -244,10 +249,16 @@ function initGraph() {
           'line-style': 'dashed', 'line-dash-pattern': [6, 3], 'line-dash-offset': 0,
           'arrow-scale': 0.9
       }},
+      // Next pivot — reachable from path endpoint, not yet in path
+      { selector: 'node.next-pivot', style: {
+          'opacity': 0.5,
+          'border-width': 2,
+          'z-index': 5
+      }},
       // Dim state
       { selector: 'node.dimmed', style: { 'opacity': 0.055 }},
       { selector: 'edge.dimmed', style: { 'opacity': 0.015 }},
-      // Selected (node click)
+      // Selected (node in path)
       { selector: 'node.selected', style: { 'border-width': 3.5, 'z-index': 20 }}
     ],
     layout: { name: 'null' },
@@ -261,8 +272,24 @@ function initGraph() {
   applyCategoryArcLayout();
   updateStats(null);
 
-  cy.on('tap', 'node', function(evt) { showNodeInfo(evt.target); });
-  cy.on('tap', function(evt) { if (evt.target === cy) clearNodeInfo(); });
+  cy.on('tap', 'node', function(evt) {
+    var node = evt.target;
+    var id = node.id();
+    // If we have an active path and this node is a reachable next pivot → extend path
+    if (pivotPath.length > 0 && node.hasClass('next-pivot')) {
+      extendPivotPath(id);
+    } else {
+      // Start a new path from this node
+      selectArtifact(id);
+    }
+  });
+
+  cy.on('tap', function(evt) {
+    if (evt.target === cy) {
+      clearPivotPath();
+    }
+  });
+
   cy.on('viewport', function() { drawCategoryLabels(); });
 }
 
@@ -270,71 +297,180 @@ function initGraph() {
 function selectArtifact(type) {
   stopEdgeFlow();
 
-  if (activeArtifact === type) {
+  // Toggle off if same chip clicked and path is just that one node
+  if (pivotPath.length === 1 && pivotPath[0] === type && activeArtifact === type) {
     resetHighlight();
+    pivotPath = [];
     activeArtifact = null;
     _setActiveChip('all');
     updateStats(null);
+    renderPivotPath();
+    _clearPanel();
     return;
   }
 
   activeArtifact = type;
+  pivotPath = [type];
   _setActiveChip(type);
   if (!cy) return;
   updateStats(type);
 
+  _applyPathHighlight();
+  startEdgeFlow();
+
+  // Center the selected node in the viewport
   var artNode = cy.getElementById(type);
-  var connEdges = artNode.connectedEdges();
-  var connNodes = connEdges.connectedNodes();
+  cy.stop();
+  cy.animate({ center: { eles: artNode }, duration: 320, easing: 'ease-in-out-sine' });
 
-  // Get category color of selected node
-  var nd = GRAPH_NODES.find(function(n) { return n.data.id === type; });
-  var catColor = nd && CAT_COLORS[nd.data.category] ? CAT_COLORS[nd.data.category].bg : '#ffd60a';
+  showNodeInfo(artNode);
+  renderPivotPath();
+}
 
-  cy.batch(function() {
-    // Clear all inline styles and classes first
-    cy.elements().removeStyle();
-    cy.nodes().removeClass('highlighted dimmed selected');
-    cy.edges().removeClass('highlighted dimmed');
+// ── extendPivotPath ──────────────────────────────────────────────────────────
+function extendPivotPath(id) {
+  if (!cy) return;
+  // Don't add if already in path
+  if (pivotPath.indexOf(id) >= 0) return;
 
-    // Classify
-    cy.nodes().forEach(function(n) {
-      n.addClass(n.id() === type || connNodes.has(n) ? 'highlighted' : 'dimmed');
-    });
-    cy.edges().forEach(function(e) {
-      e.addClass(connEdges.has(e) ? 'highlighted' : 'dimmed');
-    });
+  pivotPath.push(id);
+  activeArtifact = id;
+  _setActiveChip(id);
+  updateStats(id);
 
-    // Category-colored edges and glows (inline style overrides)
-    connEdges.style({ 'line-color': catColor, 'target-arrow-color': catColor });
+  stopEdgeFlow();
+  _applyPathHighlight();
+  startEdgeFlow();
 
-    // Selected node: stronger glow
-    artNode.style({
-      'shadow-color': catColor, 'shadow-blur': 32, 'shadow-opacity': 0.9, 'border-width': 3.5
-    });
-    // Connected nodes: subtle glow in same color
-    connNodes.not(artNode).style({
-      'shadow-color': catColor, 'shadow-blur': 10, 'shadow-opacity': 0.35
-    });
+  // Center on the new endpoint
+  var node = cy.getElementById(id);
+  cy.stop();
+  cy.animate({ center: { eles: node }, duration: 320, easing: 'ease-in-out-sine' });
+
+  showNodeInfo(node);
+  renderPivotPath();
+}
+
+// ── _applyPathHighlight ──────────────────────────────────────────────────────
+function _applyPathHighlight() {
+  if (!cy || pivotPath.length === 0) return;
+
+  var lastId = pivotPath[pivotPath.length - 1];
+  var lastNode = cy.getElementById(lastId);
+
+  // Collect path node set
+  var pathNodeSet = cy.collection();
+  pivotPath.forEach(function(id) {
+    pathNodeSet = pathNodeSet.union(cy.getElementById(id));
   });
 
-  startEdgeFlow();
-  showArtifactInfo(type);
+  // Collect path edge set (consecutive pairs in path)
+  var pathEdgeSet = cy.collection();
+  for (var i = 0; i < pivotPath.length - 1; i++) {
+    var a = pivotPath[i], b = pivotPath[i + 1];
+    var fwd = cy.edges('[source = "' + a + '"][target = "' + b + '"]');
+    var rev = cy.edges('[source = "' + b + '"][target = "' + a + '"]');
+    pathEdgeSet = pathEdgeSet.union(fwd).union(rev);
+  }
+
+  // Next pivots: neighbors of last node not already in path
+  var lastConnEdges = lastNode.connectedEdges();
+  var lastConnNodes = lastConnEdges.connectedNodes();
+  var nextPivotSet = lastConnNodes.difference(pathNodeSet);
+
+  // Edges from last node to next pivots
+  var nextPivotEdges = lastConnEdges.filter(function(e) {
+    return nextPivotSet.has(e.source()) || nextPivotSet.has(e.target());
+  });
+
+  var lastNd = GRAPH_NODES.find(function(n) { return n.data.id === lastId; });
+  var lastColor = lastNd && CAT_COLORS[lastNd.data.category]
+    ? CAT_COLORS[lastNd.data.category].bg : '#ffd60a';
+
+  cy.batch(function() {
+    cy.elements().removeStyle();
+    cy.nodes().removeClass('highlighted dimmed selected next-pivot');
+    cy.edges().removeClass('highlighted dimmed');
+
+    // Path nodes: highlighted
+    pathNodeSet.addClass('highlighted');
+    // Path edges: highlighted + colored per source category
+    pathEdgeSet.addClass('highlighted');
+
+    // Color each path edge by its source node's category
+    for (var j = 0; j < pivotPath.length - 1; j++) {
+      var srcId = pivotPath[j];
+      var tgtId = pivotPath[j + 1];
+      var srcNd = GRAPH_NODES.find(function(n) { return n.data.id === srcId; });
+      var edgeColor = srcNd && CAT_COLORS[srcNd.data.category]
+        ? CAT_COLORS[srcNd.data.category].bg : '#ffd60a';
+      var edges = cy.edges('[source = "' + srcId + '"][target = "' + tgtId + '"]')
+        .union(cy.edges('[source = "' + tgtId + '"][target = "' + srcId + '"]'));
+      edges.style({ 'line-color': edgeColor, 'target-arrow-color': edgeColor });
+    }
+
+    // Next pivot nodes: semi-visible
+    nextPivotSet.addClass('next-pivot');
+
+    // Next pivot edges: subtle in last node's color
+    nextPivotEdges.style({
+      'opacity': 0.3,
+      'line-color': lastColor,
+      'target-arrow-color': lastColor
+    });
+
+    // Dim everything else
+    cy.nodes().difference(pathNodeSet).difference(nextPivotSet).addClass('dimmed');
+    cy.edges().difference(pathEdgeSet).difference(nextPivotEdges).addClass('dimmed');
+
+    // Last node in path: strongest glow
+    lastNode.style({
+      'shadow-color': lastColor,
+      'shadow-blur': 32,
+      'shadow-opacity': 0.9,
+      'border-width': 3.5
+    });
+
+    // Earlier path nodes: moderate glow
+    pathNodeSet.difference(lastNode).forEach(function(n) {
+      var nd = GRAPH_NODES.find(function(g) { return g.data.id === n.id(); });
+      var c = nd && CAT_COLORS[nd.data.category] ? CAT_COLORS[nd.data.category].bg : '#ffd60a';
+      n.style({ 'shadow-color': c, 'shadow-blur': 12, 'shadow-opacity': 0.55 });
+    });
+  });
 }
 
 function _setActiveChip(type) {
   document.querySelectorAll('.artifact-chip').forEach(function(b) { b.classList.remove('active'); });
   var chip = document.querySelector('.artifact-chip[data-type="' + type + '"]');
-  if (chip) chip.classList.add('active');
+  if (chip) {
+    chip.classList.add('active');
+    // Scroll the chip into view in the topbar
+    chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
 }
 
 // ── selectAll ───────────────────────────────────────────────────────────────
 function selectAll() {
   stopEdgeFlow();
   resetHighlight();
+  pivotPath = [];
   activeArtifact = null;
   _setActiveChip('all');
   updateStats(null);
+  renderPivotPath();
+  _clearPanel();
+}
+
+// ── clearPivotPath ───────────────────────────────────────────────────────────
+function clearPivotPath() {
+  stopEdgeFlow();
+  resetHighlight();
+  pivotPath = [];
+  activeArtifact = null;
+  _setActiveChip('all');
+  updateStats(null);
+  renderPivotPath();
   _clearPanel();
 }
 
@@ -343,9 +479,35 @@ function resetHighlight() {
   if (!cy) return;
   cy.batch(function() {
     cy.elements().removeStyle();
-    cy.nodes().removeClass('highlighted dimmed selected');
+    cy.nodes().removeClass('highlighted dimmed selected next-pivot');
     cy.edges().removeClass('highlighted dimmed');
   });
+}
+
+// ── renderPivotPath ──────────────────────────────────────────────────────────
+function renderPivotPath() {
+  var bar   = document.getElementById('pivotPathBar');
+  var trail = document.getElementById('pivotPathTrail');
+  if (!bar || !trail) return;
+
+  if (pivotPath.length < 2) {
+    bar.classList.remove('visible');
+    trail.innerHTML = '';
+    return;
+  }
+
+  bar.classList.add('visible');
+  trail.innerHTML = pivotPath.map(function(id, i) {
+    var nd = GRAPH_NODES.find(function(n) { return n.data.id === id; });
+    var label = nd ? nd.data.label : id;
+    var cat   = nd ? nd.data.category : '';
+    var color = CAT_COLORS[cat] ? CAT_COLORS[cat].bg : '#e2eeff';
+    var isLast = i === pivotPath.length - 1;
+    var cls = isLast ? 'path-node path-node-active' : 'path-node path-node-visited';
+    var html = '<span class="' + cls + '" style="color:' + color + '">' + escHtml(label) + '</span>';
+    if (!isLast) html += '<span class="path-arrow">&#8594;</span>';
+    return html;
+  }).join('');
 }
 
 // ── showNodeInfo ─────────────────────────────────────────────────────────────
@@ -376,43 +538,16 @@ function showNodeInfo(node) {
   var html = '<div class="info-header">' +
     '<span class="info-type-badge info-type-artifact">Artifact</span>' +
     catBadge +
-    '<button class="info-close" onclick="clearNodeInfo()">&#x2715;</button>' +
+    '<button class="info-close" onclick="clearPivotPath()">&#x2715;</button>' +
     '</div>' +
+    '<div class="info-inner">' +
     '<div class="info-title">' + escHtml(d.label || d.id) + '</div>';
   if (d.desc) html += '<div class="info-desc">' + escHtml(d.desc) + '</div>';
   html += sourcesHtml + pivotsHtml;
-
-  var panel = document.getElementById('info-panel');
-  if (panel) { panel.innerHTML = html; panel.classList.add('visible'); }
-}
-
-// ── showArtifactInfo ─────────────────────────────────────────────────────────
-function showArtifactInfo(type) {
-  var p = ARTIFACT_PATHS[type];
-  if (!p) return;
-  var nd = GRAPH_NODES.find(function(n) { return n.data && n.data.id === type; });
-  var catColor = nd && CAT_COLORS[nd.data.category] ? CAT_COLORS[nd.data.category].bg : '';
-  var cat = nd ? nd.data.category : '';
-
-  var html = '<div class="info-header">' +
-    '<span class="info-type-badge info-type-artifact">Path</span>' +
-    (catColor ? '<span class="info-cat-badge" style="background:' + catColor + ';color:#03060a">' + cat + '</span>' : '') +
-    '<button class="info-close" onclick="clearNodeInfo()">&#x2715;</button>' +
-    '</div>' +
-    '<div class="info-title">' + escHtml(p.label) + '</div>' +
-    '<div class="info-section">' +
-      '<div class="info-section-label">CONNECTED</div>' +
-      '<div class="info-stat">' + (p.nodes.length - 1) + ' artifacts</div>' +
-    '</div>' +
-    '<div class="info-section">' +
-      '<div class="info-section-label">MITRE ATT&amp;CK</div>' +
-      '<div class="info-mitre">' + escHtml(p.mitre) + '</div>' +
-    '</div>' +
-    '<div class="info-section">' +
-      '<div class="info-section-label">KEY SOURCES</div>' +
-      '<div class="info-sources">' + escHtml(p.sources) + '</div>' +
-    '</div>' +
-    '<div class="info-hint">Click a highlighted node for details.</div>';
+  if (pivotPath.length > 0) {
+    html += '<div class="info-hint">Click a highlighted node to extend pivot path.</div>';
+  }
+  html += '</div>';
 
   var panel = document.getElementById('info-panel');
   if (panel) { panel.innerHTML = html; panel.classList.add('visible'); }
@@ -504,7 +639,5 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 window.addEventListener('resize', function() {
-  if (cy) {
-    applyCategoryArcLayout();
-  }
+  if (cy) applyCategoryArcLayout();
 });

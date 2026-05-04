@@ -22,7 +22,6 @@
       --border: #1e3050;
       --border-dim: #121e30;
       --nav-h: 48px;
-      --sidebar-w: 176px;
     }
     body.light {
       --bg: #eef2f8; --panel: #ffffff; --panel-alt: #e4ecf6;
@@ -142,21 +141,25 @@
     .piv-topbar {
       background: linear-gradient(180deg, var(--panel-alt) 0%, rgba(11,16,24,0) 100%);
       border-bottom: 1px solid var(--border);
-      padding: 14px 20px 12px;
-      display: flex; align-items: flex-end;
+      padding: 10px 20px 10px;
+      display: flex; align-items: center;
       justify-content: space-between; gap: 16px; flex-wrap: wrap;
+      flex-shrink: 0;
     }
     .piv-breadcrumb {
       font-family: 'Share Tech Mono', monospace; font-size: 10px;
-      color: var(--muted); letter-spacing: 0.06em; margin-bottom: 5px;
+      color: var(--muted); letter-spacing: 0.06em; margin-bottom: 3px;
     }
     .piv-breadcrumb a { color: var(--muted); }
     .piv-breadcrumb a:hover { color: var(--accent); opacity: 1; }
     .piv-breadcrumb span { color: var(--accent); opacity: 0.6; margin: 0 5px; }
-    .piv-title-row { display: flex; align-items: baseline; gap: 12px; }
-    .hero-piv { font-family: 'Share Tech Mono', monospace; font-size: 28px; color: var(--accent); letter-spacing: 0.02em; }
-    .hero-ex  { font-family: 'Share Tech Mono', monospace; font-size: 28px; color: var(--text-dim); letter-spacing: 0.02em; }
-    .piv-tagline { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.07em; }
+    .piv-title-row {
+      display: flex; align-items: baseline; gap: 0;
+      text-decoration: none; line-height: 1;
+    }
+    .hero-piv { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--accent); letter-spacing: 0.12em; }
+    .hero-ex  { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--text);  letter-spacing: 0.12em; }
+    .piv-tagline { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.07em; margin-top: 2px; }
     .topbar-right { display: flex; align-items: center; gap: 10px; }
     .piv-version {
       font-family: 'Share Tech Mono', monospace; font-size: 10px;
@@ -166,97 +169,119 @@
     }
     body.light .piv-version { background: rgba(0,77,184,0.08); border-color: rgba(0,77,184,0.25); }
 
-    /* ── Main layout: sidebar + graph ───────────────────────────────────── */
-    .piv-main-layout {
-      display: flex;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    /* ── Chip sidebar ────────────────────────────────────────────────────── */
-    .chip-sidebar {
-      width: var(--sidebar-w);
-      min-width: var(--sidebar-w);
-      flex-shrink: 0;
+    /* ── Chip topbar ─────────────────────────────────────────────────────── */
+    .chip-topbar {
       background: var(--panel);
-      border-right: 1px solid var(--border);
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 10px 8px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      /* height fills graph panel */
-      height: 78vh;
-      min-height: 500px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      overflow-x: auto; overflow-y: hidden;
+      padding: 6px 12px; gap: 2px;
+      flex-shrink: 0; flex-wrap: nowrap;
+      min-height: 42px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--muted-dim) transparent;
     }
-    /* Custom thin scrollbar */
-    .chip-sidebar::-webkit-scrollbar { width: 3px; }
-    .chip-sidebar::-webkit-scrollbar-track { background: transparent; }
-    .chip-sidebar::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
+    .chip-topbar::-webkit-scrollbar { height: 3px; }
+    .chip-topbar::-webkit-scrollbar-track { background: transparent; }
+    .chip-topbar::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
 
     .chip-all {
-      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
       letter-spacing: 0.08em; background: var(--panel-alt); color: var(--muted);
       border: 1px solid var(--border); border-radius: 4px;
-      padding: 6px 10px; cursor: pointer; text-align: left;
+      padding: 4px 10px; cursor: pointer; text-align: left;
       transition: color 0.15s, background 0.15s, border-color 0.15s;
-      margin-bottom: 6px; width: 100%;
+      white-space: nowrap; flex-shrink: 0; margin-right: 6px;
     }
     .chip-all:hover { color: var(--text); border-color: var(--accent); }
     .chip-all.active { background: rgba(0,255,159,0.1); border-color: var(--accent); color: var(--accent); }
 
-    .chip-cat-section { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
-    .chip-cat-header {
-      font-family: 'Share Tech Mono', monospace; font-size: 8px;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      padding: 4px 6px 2px;
-      display: flex; align-items: center; gap: 6px;
-      opacity: 0.85;
+    /* Category divider between groups */
+    .chip-cat-divider {
+      width: 1px; height: 18px; flex-shrink: 0; margin: 0 6px; opacity: 0.45;
     }
-    .chip-cat-header::after {
-      content: ''; flex: 1; height: 1px; background: currentColor; opacity: 0.2;
-    }
-    .chip-cat-network  { color: #00d4ff; }
-    .chip-cat-endpoint { color: #00ff9f; }
-    .chip-cat-identity { color: #c084fc; }
-    .chip-cat-email    { color: #fb923c; }
-    .chip-cat-cloud    { color: #60a5fa; }
+    .chip-cat-divider-net  { background: #00d4ff; }
+    .chip-cat-divider-ept  { background: #00ff9f; }
+    .chip-cat-divider-idn  { background: #c084fc; }
+    .chip-cat-divider-eml  { background: #fb923c; }
+    .chip-cat-divider-cld  { background: #60a5fa; }
 
-    /* Artifact chip base */
+    /* Flatten chip-cat-section in topbar */
+    .chip-topbar .chip-cat-section { display: contents; }
+    .chip-topbar .chip-cat-header  { display: none; }
+
+    /* Artifact chip */
     .artifact-chip {
       font-family: 'Share Tech Mono', monospace; font-size: 9.5px;
       letter-spacing: 0.05em; background: transparent; color: var(--muted);
-      border: none; border-left: 2.5px solid transparent;
-      border-radius: 0 3px 3px 0; padding: 4px 8px;
-      cursor: pointer; text-align: left; width: 100%;
+      border: none; border-bottom: 2px solid transparent;
+      border-radius: 0; padding: 5px 8px;
+      cursor: pointer; text-align: left;
       transition: color 0.12s, background 0.12s, border-color 0.12s;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; flex-shrink: 0;
     }
     .artifact-chip:hover { color: var(--text); background: var(--panel-alt); }
 
-    .artifact-chip[data-category="network"]  { border-left-color: rgba(0,212,255,0.3); }
-    .artifact-chip[data-category="endpoint"] { border-left-color: rgba(0,255,159,0.3); }
-    .artifact-chip[data-category="identity"] { border-left-color: rgba(192,132,252,0.3); }
-    .artifact-chip[data-category="email"]    { border-left-color: rgba(251,146,60,0.3); }
-    .artifact-chip[data-category="cloud"]    { border-left-color: rgba(96,165,250,0.3); }
+    .artifact-chip[data-category="network"]  { border-bottom-color: rgba(0,212,255,0.25); }
+    .artifact-chip[data-category="endpoint"] { border-bottom-color: rgba(0,255,159,0.25); }
+    .artifact-chip[data-category="identity"] { border-bottom-color: rgba(192,132,252,0.25); }
+    .artifact-chip[data-category="email"]    { border-bottom-color: rgba(251,146,60,0.25); }
+    .artifact-chip[data-category="cloud"]    { border-bottom-color: rgba(96,165,250,0.25); }
 
-    .artifact-chip[data-category="network"].active  { border-left-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.07); }
-    .artifact-chip[data-category="endpoint"].active { border-left-color: #00ff9f; color: #00ff9f; background: rgba(0,255,159,0.07); }
-    .artifact-chip[data-category="identity"].active { border-left-color: #c084fc; color: #c084fc; background: rgba(192,132,252,0.07); }
-    .artifact-chip[data-category="email"].active    { border-left-color: #fb923c; color: #fb923c; background: rgba(251,146,60,0.07); }
-    .artifact-chip[data-category="cloud"].active    { border-left-color: #60a5fa; color: #60a5fa; background: rgba(96,165,250,0.07); }
+    .artifact-chip[data-category="network"].active  { border-bottom-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.07); }
+    .artifact-chip[data-category="endpoint"].active { border-bottom-color: #00ff9f; color: #00ff9f; background: rgba(0,255,159,0.07); }
+    .artifact-chip[data-category="identity"].active { border-bottom-color: #c084fc; color: #c084fc; background: rgba(192,132,252,0.07); }
+    .artifact-chip[data-category="email"].active    { border-bottom-color: #fb923c; color: #fb923c; background: rgba(251,146,60,0.07); }
+    .artifact-chip[data-category="cloud"].active    { border-bottom-color: #60a5fa; color: #60a5fa; background: rgba(96,165,250,0.07); }
 
     body.light .artifact-chip { color: var(--muted); }
     body.light .artifact-chip:hover { background: var(--panel-alt); color: var(--text); }
+
+    /* ── Pivot path breadcrumb bar ───────────────────────────────────────── */
+    .pivot-path-bar {
+      display: none;
+      background: var(--panel-alt); border-bottom: 1px solid var(--border);
+      padding: 5px 14px; align-items: center; gap: 10px;
+      flex-shrink: 0; overflow-x: auto;
+      scrollbar-width: thin; scrollbar-color: var(--muted-dim) transparent;
+    }
+    .pivot-path-bar.visible { display: flex; }
+    .pivot-path-bar::-webkit-scrollbar { height: 3px; }
+    .pivot-path-bar::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
+    .pivot-path-trail {
+      display: flex; align-items: center; flex-wrap: nowrap;
+      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      gap: 0; flex: 1; min-width: 0;
+    }
+    .path-node {
+      white-space: nowrap; font-weight: bold; padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .path-node-visited { opacity: 0.6; }
+    .path-node-active  { opacity: 1; }
+    .path-arrow { color: var(--muted); margin: 0 4px; flex-shrink: 0; font-size: 11px; }
+    .pivot-path-clear {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      padding: 2px 8px; border-radius: 3px; cursor: pointer;
+      flex-shrink: 0; letter-spacing: 0.08em;
+      transition: color 0.12s, border-color 0.12s; white-space: nowrap;
+    }
+    .pivot-path-clear:hover { color: var(--text); border-color: var(--accent); }
+
+    /* ── Main layout ───────────────────────────────────────────────────── */
+    .piv-main-layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
 
     /* ── Graph panel ─────────────────────────────────────────────────────── */
     .graph-panel {
       flex: 1;
       position: relative;
-      height: 78vh;
-      min-height: 500px;
+      height: 74vh;
+      min-height: 460px;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
       overflow: hidden;
@@ -293,32 +318,34 @@
 
     /* ── Info panel ─────────────────────────────────────────────────────── */
     .info-panel {
-      width: 100%;
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
       background: var(--panel);
       border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
+      padding: 0 20px;
       max-height: 0;
       overflow: hidden;
       opacity: 0;
       pointer-events: none;
-      transition: max-height 0.28s ease, opacity 0.2s;
+      transition: max-height 0.28s ease, opacity 0.2s, padding 0.2s;
+      z-index: 15;
     }
     .info-panel.visible {
-      max-height: 500px;
+      max-height: 200px;
       opacity: 1;
       pointer-events: auto;
+      padding: 12px 20px;
     }
 
     .info-placeholder {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; min-height: 160px; gap: 10px; text-align: center;
+      justify-content: center; min-height: 80px; gap: 8px; text-align: center;
     }
-    .info-ph-icon { font-size: 22px; color: var(--muted-dim); }
-    .info-ph-text { font-size: 11px; color: var(--muted); line-height: 1.7; max-width: 190px; }
+    .info-ph-icon { font-size: 18px; color: var(--muted-dim); }
+    .info-ph-text { font-size: 11px; color: var(--muted); line-height: 1.7; max-width: 220px; }
     .info-header {
       display: flex; align-items: center; gap: 6px;
-      justify-content: space-between; margin-bottom: 9px; flex-wrap: wrap;
+      justify-content: space-between; margin-bottom: 7px; flex-wrap: wrap;
     }
     .info-type-badge {
       font-family: 'Share Tech Mono', monospace; font-size: 8px;
@@ -337,25 +364,28 @@
     }
     .info-close:hover { color: var(--text); }
     .info-title {
-      font-family: 'Share Tech Mono', monospace; font-size: 13px;
-      color: var(--text); margin-bottom: 10px; line-height: 1.4;
+      font-family: 'Share Tech Mono', monospace; font-size: 12px;
+      color: var(--text); margin-bottom: 6px; line-height: 1.4;
     }
-    .info-desc { font-size: 11.5px; color: var(--text-dim); line-height: 1.65; margin-bottom: 12px; }
-    .info-section { margin-bottom: 11px; }
+    .info-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
+    .info-section { margin-bottom: 8px; }
     .info-section-label {
       font-family: 'Share Tech Mono', monospace; font-size: 8px;
-      letter-spacing: 0.12em; color: var(--accent); margin-bottom: 4px;
+      letter-spacing: 0.12em; color: var(--accent); margin-bottom: 3px;
     }
     .info-sources { font-size: 11px; color: var(--text-dim); line-height: 1.65; }
     .info-mitre { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; color: var(--text-dim); line-height: 1.7; }
     .info-list { list-style: none; padding: 0; }
     .info-list li {
-      font-size: 11px; color: var(--text-dim); padding: 3px 0 3px 11px;
+      font-size: 11px; color: var(--text-dim); padding: 2px 0 2px 11px;
       position: relative; border-bottom: 1px solid var(--border-dim);
     }
     .info-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 9px; }
-    .info-stat { font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--accent); margin-top: 2px; }
-    .info-hint { font-size: 9.5px; color: var(--muted); font-style: italic; margin-top: 8px; }
+    .info-stat { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--accent); margin-top: 2px; }
+    .info-hint { font-size: 9.5px; color: var(--muted); font-style: italic; margin-top: 6px; }
+    .info-inner { overflow-y: auto; max-height: 160px; }
+    .info-inner::-webkit-scrollbar { width: 3px; }
+    .info-inner::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
 
     /* ── Graph stats overlay ─────────────────────────────────────────────── */
     .graph-stats {
@@ -435,64 +465,22 @@
     }
 
     /* ── Responsive ─────────────────────────────────────────────────────── */
-    @media (max-width: 960px) {
-      /* Stack sidebar above graph */
-      .piv-main-layout { flex-direction: column; }
-      .chip-sidebar {
-        width: 100%; min-width: 0; height: auto; min-height: 0;
-        border-right: none; border-bottom: 1px solid var(--border);
-        flex-direction: row; flex-wrap: nowrap;
-        overflow-x: auto; overflow-y: hidden;
-        padding: 8px 10px; gap: 0; align-items: center;
-        /* thin horizontal scrollbar */
-      }
-      .chip-sidebar::-webkit-scrollbar { height: 3px; width: auto; }
-      .chip-all {
-        width: auto; margin-bottom: 0; margin-right: 8px; flex-shrink: 0; padding: 4px 10px;
-      }
-      .chip-cat-section {
-        display: contents; /* flatten so all chips sit in one row */
-      }
-      .chip-cat-header { display: none; }
-      .artifact-chip {
-        width: auto; border-left: none; border-bottom: 2px solid transparent;
-        border-radius: 3px 3px 0 0; padding: 4px 8px;
-        flex-shrink: 0; font-size: 9px;
-      }
-      .artifact-chip[data-category="network"]  { border-bottom-color: rgba(0,212,255,0.3); }
-      .artifact-chip[data-category="endpoint"] { border-bottom-color: rgba(0,255,159,0.3); }
-      .artifact-chip[data-category="identity"] { border-bottom-color: rgba(192,132,252,0.3); }
-      .artifact-chip[data-category="email"]    { border-bottom-color: rgba(251,146,60,0.3); }
-      .artifact-chip[data-category="cloud"]    { border-bottom-color: rgba(96,165,250,0.3); }
-      .artifact-chip[data-category="network"].active  { border-bottom-color: #00d4ff; }
-      .artifact-chip[data-category="endpoint"].active { border-bottom-color: #00ff9f; }
-      .artifact-chip[data-category="identity"].active { border-bottom-color: #c084fc; }
-      .artifact-chip[data-category="email"].active    { border-bottom-color: #fb923c; }
-      .artifact-chip[data-category="cloud"].active    { border-bottom-color: #60a5fa; }
-      .graph-panel { height: 62vh; min-height: 420px; }
-      .tables-grid { grid-template-columns: 1fr; }
-    }
     @media (max-width: 600px) {
-      .piv-topbar { padding: 10px 14px; }
-      .hero-piv, .hero-ex { font-size: 22px; }
+      .piv-topbar { padding: 8px 12px; }
+      .hero-piv, .hero-ex { font-size: 17px; }
       .piv-tagline { display: none; }
-      .graph-panel { height: 54vh; min-height: 340px; }
-      .info-panel {
-        position: fixed;
-        top: auto; right: 0; left: 0; bottom: 0;
-        width: 100%; max-height: 52vh;
-        border-radius: 10px 10px 0 0;
-        transform: translateY(8px);
-        z-index: 50;
-      }
-      .info-panel.visible { transform: translateY(0); }
+      .graph-panel { height: 55vh; min-height: 320px; }
+      .info-panel.visible { max-height: 52vh; }
       .cat-arc-label { font-size: 7.5px; padding: 1px 5px; }
       .piv-below { padding: 20px 12px 48px; gap: 26px; }
+      .artifact-chip { font-size: 9px; padding: 4px 7px; }
+      .chip-topbar { padding: 5px 8px; min-height: 38px; }
+      .tables-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 400px) {
       .topbar-right { display: none; }
-      .hero-piv, .hero-ex { font-size: 18px; }
-      .graph-panel { height: 48vh; min-height: 300px; }
+      .hero-piv, .hero-ex { font-size: 15px; }
+      .graph-panel { height: 50vh; min-height: 280px; }
     }
   </style>
 </head>
@@ -563,7 +551,7 @@
   <!-- ── Page wrapper ──────────────────────────────────────────────────── -->
   <div class="page-wrap">
 
-    <!-- ── Topbar ──────────────────────────────────────────────────────── -->
+    <!-- ── Topbar (branding only) ─────────────────────────────────────── -->
     <div class="piv-topbar">
       <div class="topbar-left">
         <div class="piv-breadcrumb">
@@ -572,91 +560,102 @@
           <a href="https://h3ad-sec.github.io/H3AD-HUNT/" target="_blank" rel="noopener">H3AD-HUNT</a>
           <span>›</span>PIVEX
         </div>
-        <div class="piv-title-row">
-          <div><span class="hero-piv">PIV</span><span class="hero-ex">EX</span></div>
-          <div class="piv-tagline">Pivot Across Every Artifact</div>
-        </div>
+        <a class="piv-title-row" href="https://h3ad-sec.github.io/PIVEX/">
+          <span class="hero-piv">PIV</span><span class="hero-ex">EX</span>
+        </a>
+        <div class="piv-tagline">Pivot Across Every Artifact</div>
       </div>
       <div class="topbar-right">
-        <span class="piv-version">v9.1 &middot; 41 ARTIFACTS</span>
+        <span class="piv-version">v9.2 &middot; 41 ARTIFACTS</span>
       </div>
+    </div>
+
+    <!-- ── Artifact selector (top bar) ───────────────────────────────── -->
+    <div class="chip-topbar" id="chipTopbar">
+
+      <button class="artifact-chip chip-all active" data-type="all" onclick="selectAll()">ALL &middot; 41</button>
+
+      <!-- Network (15) -->
+      <span class="chip-cat-divider chip-cat-divider-net" title="NETWORK · 15"></span>
+      <div class="chip-cat-section">
+        <div class="chip-cat-header chip-cat-network">NET &middot; 15</div>
+        <button class="artifact-chip" data-type="ip"              data-category="network" onclick="selectArtifact('ip')">IP Address</button>
+        <button class="artifact-chip" data-type="domain"          data-category="network" onclick="selectArtifact('domain')">Domain</button>
+        <button class="artifact-chip" data-type="fqdn"            data-category="network" onclick="selectArtifact('fqdn')">FQDN</button>
+        <button class="artifact-chip" data-type="url"             data-category="network" onclick="selectArtifact('url')">URL</button>
+        <button class="artifact-chip" data-type="dns_query"       data-category="network" onclick="selectArtifact('dns_query')">DNS Query</button>
+        <button class="artifact-chip" data-type="http_request"    data-category="network" onclick="selectArtifact('http_request')">HTTP Request</button>
+        <button class="artifact-chip" data-type="asn"             data-category="network" onclick="selectArtifact('asn')">ASN</button>
+        <button class="artifact-chip" data-type="dns_record"      data-category="network" onclick="selectArtifact('dns_record')">DNS Record</button>
+        <button class="artifact-chip" data-type="ssl_cert"        data-category="network" onclick="selectArtifact('ssl_cert')">SSL Cert</button>
+        <button class="artifact-chip" data-type="ja3"             data-category="network" onclick="selectArtifact('ja3')">JA3 Hash</button>
+        <button class="artifact-chip" data-type="user_agent"      data-category="network" onclick="selectArtifact('user_agent')">User Agent</button>
+        <button class="artifact-chip" data-type="port"            data-category="network" onclick="selectArtifact('port')">Port</button>
+        <button class="artifact-chip" data-type="certificate"     data-category="network" onclick="selectArtifact('certificate')">Code-Sign Cert</button>
+        <button class="artifact-chip" data-type="network_traffic" data-category="network" onclick="selectArtifact('network_traffic')">Net Traffic</button>
+        <button class="artifact-chip" data-type="mac_address"     data-category="network" onclick="selectArtifact('mac_address')">MAC Address</button>
+      </div>
+
+      <!-- Endpoint (20) -->
+      <span class="chip-cat-divider chip-cat-divider-ept" title="ENDPOINT · 20"></span>
+      <div class="chip-cat-section">
+        <div class="chip-cat-header chip-cat-endpoint">EPT &middot; 20</div>
+        <button class="artifact-chip" data-type="hash"             data-category="endpoint" onclick="selectArtifact('hash')">File Hash</button>
+        <button class="artifact-chip" data-type="file_path"        data-category="endpoint" onclick="selectArtifact('file_path')">File Path</button>
+        <button class="artifact-chip" data-type="process"          data-category="endpoint" onclick="selectArtifact('process')">Process</button>
+        <button class="artifact-chip" data-type="parent_process"   data-category="endpoint" onclick="selectArtifact('parent_process')">Parent Process</button>
+        <button class="artifact-chip" data-type="command_line"     data-category="endpoint" onclick="selectArtifact('command_line')">Command Line</button>
+        <button class="artifact-chip" data-type="service"          data-category="endpoint" onclick="selectArtifact('service')">Service</button>
+        <button class="artifact-chip" data-type="registry"         data-category="endpoint" onclick="selectArtifact('registry')">Registry Key</button>
+        <button class="artifact-chip" data-type="scheduled_task"   data-category="endpoint" onclick="selectArtifact('scheduled_task')">Sched. Task</button>
+        <button class="artifact-chip" data-type="startup_item"     data-category="endpoint" onclick="selectArtifact('startup_item')">Startup Item</button>
+        <button class="artifact-chip" data-type="dll"              data-category="endpoint" onclick="selectArtifact('dll')">DLL</button>
+        <button class="artifact-chip" data-type="mutex"            data-category="endpoint" onclick="selectArtifact('mutex')">Mutex</button>
+        <button class="artifact-chip" data-type="pipe"             data-category="endpoint" onclick="selectArtifact('pipe')">Pipe</button>
+        <button class="artifact-chip" data-type="driver"           data-category="endpoint" onclick="selectArtifact('driver')">Driver</button>
+        <button class="artifact-chip" data-type="host"             data-category="endpoint" onclick="selectArtifact('host')">Host</button>
+        <button class="artifact-chip" data-type="share"            data-category="endpoint" onclick="selectArtifact('share')">Network Share</button>
+        <button class="artifact-chip" data-type="event_id"         data-category="endpoint" onclick="selectArtifact('event_id')">Event ID</button>
+        <button class="artifact-chip" data-type="named_pipe"       data-category="endpoint" onclick="selectArtifact('named_pipe')">Named Pipe</button>
+        <button class="artifact-chip" data-type="wmi_query"        data-category="endpoint" onclick="selectArtifact('wmi_query')">WMI Query</button>
+        <button class="artifact-chip" data-type="prefetch"         data-category="endpoint" onclick="selectArtifact('prefetch')">Prefetch</button>
+        <button class="artifact-chip" data-type="vulnerability_id" data-category="endpoint" onclick="selectArtifact('vulnerability_id')">Vuln ID (CVE)</button>
+      </div>
+
+      <!-- Identity (3) -->
+      <span class="chip-cat-divider chip-cat-divider-idn" title="IDENTITY · 3"></span>
+      <div class="chip-cat-section">
+        <div class="chip-cat-header chip-cat-identity">IDN &middot; 3</div>
+        <button class="artifact-chip" data-type="user"        data-category="identity" onclick="selectArtifact('user')">User</button>
+        <button class="artifact-chip" data-type="identity"    data-category="identity" onclick="selectArtifact('identity')">Identity</button>
+        <button class="artifact-chip" data-type="rdp_session" data-category="identity" onclick="selectArtifact('rdp_session')">RDP Session</button>
+      </div>
+
+      <!-- Email (2) -->
+      <span class="chip-cat-divider chip-cat-divider-eml" title="EMAIL · 2"></span>
+      <div class="chip-cat-section">
+        <div class="chip-cat-header chip-cat-email">EML &middot; 2</div>
+        <button class="artifact-chip" data-type="email"      data-category="email" onclick="selectArtifact('email')">Email</button>
+        <button class="artifact-chip" data-type="attachment" data-category="email" onclick="selectArtifact('attachment')">Attachment</button>
+      </div>
+
+      <!-- Cloud (1) -->
+      <span class="chip-cat-divider chip-cat-divider-cld" title="CLOUD · 1"></span>
+      <div class="chip-cat-section">
+        <div class="chip-cat-header chip-cat-cloud">CLD &middot; 1</div>
+        <button class="artifact-chip" data-type="cloud_resource" data-category="cloud" onclick="selectArtifact('cloud_resource')">Cloud Resource</button>
+      </div>
+
+    </div><!-- /chip-topbar -->
+
+    <!-- ── Pivot path breadcrumb ──────────────────────────────────────── -->
+    <div class="pivot-path-bar" id="pivotPathBar">
+      <div class="pivot-path-trail" id="pivotPathTrail"></div>
+      <button class="pivot-path-clear" onclick="clearPivotPath()">&#x2715; CLEAR</button>
     </div>
 
     <!-- ── Main layout ───────────────────────────────────────────────────── -->
     <div class="piv-main-layout">
-
-      <!-- ── Chip sidebar ─────────────────────────────────────────────── -->
-      <div class="chip-sidebar">
-
-        <button class="artifact-chip chip-all active" data-type="all" onclick="selectAll()">ALL &middot; 41</button>
-
-        <!-- Network (15) -->
-        <div class="chip-cat-section">
-          <div class="chip-cat-header chip-cat-network">NET &middot; 15</div>
-          <button class="artifact-chip" data-type="ip"              data-category="network" onclick="selectArtifact('ip')">IP Address</button>
-          <button class="artifact-chip" data-type="domain"          data-category="network" onclick="selectArtifact('domain')">Domain</button>
-          <button class="artifact-chip" data-type="fqdn"            data-category="network" onclick="selectArtifact('fqdn')">FQDN</button>
-          <button class="artifact-chip" data-type="url"             data-category="network" onclick="selectArtifact('url')">URL</button>
-          <button class="artifact-chip" data-type="dns_query"       data-category="network" onclick="selectArtifact('dns_query')">DNS Query</button>
-          <button class="artifact-chip" data-type="http_request"    data-category="network" onclick="selectArtifact('http_request')">HTTP Request</button>
-          <button class="artifact-chip" data-type="asn"             data-category="network" onclick="selectArtifact('asn')">ASN</button>
-          <button class="artifact-chip" data-type="dns_record"      data-category="network" onclick="selectArtifact('dns_record')">DNS Record</button>
-          <button class="artifact-chip" data-type="ssl_cert"        data-category="network" onclick="selectArtifact('ssl_cert')">SSL Cert</button>
-          <button class="artifact-chip" data-type="ja3"             data-category="network" onclick="selectArtifact('ja3')">JA3 Hash</button>
-          <button class="artifact-chip" data-type="user_agent"      data-category="network" onclick="selectArtifact('user_agent')">User Agent</button>
-          <button class="artifact-chip" data-type="port"            data-category="network" onclick="selectArtifact('port')">Port</button>
-          <button class="artifact-chip" data-type="certificate"     data-category="network" onclick="selectArtifact('certificate')">Code-Sign Cert</button>
-          <button class="artifact-chip" data-type="network_traffic" data-category="network" onclick="selectArtifact('network_traffic')">Net Traffic</button>
-          <button class="artifact-chip" data-type="mac_address"     data-category="network" onclick="selectArtifact('mac_address')">MAC Address</button>
-        </div>
-
-        <!-- Endpoint (20) -->
-        <div class="chip-cat-section">
-          <div class="chip-cat-header chip-cat-endpoint">EPT &middot; 20</div>
-          <button class="artifact-chip" data-type="hash"             data-category="endpoint" onclick="selectArtifact('hash')">File Hash</button>
-          <button class="artifact-chip" data-type="file_path"        data-category="endpoint" onclick="selectArtifact('file_path')">File Path</button>
-          <button class="artifact-chip" data-type="process"          data-category="endpoint" onclick="selectArtifact('process')">Process</button>
-          <button class="artifact-chip" data-type="parent_process"   data-category="endpoint" onclick="selectArtifact('parent_process')">Parent Process</button>
-          <button class="artifact-chip" data-type="command_line"     data-category="endpoint" onclick="selectArtifact('command_line')">Command Line</button>
-          <button class="artifact-chip" data-type="service"          data-category="endpoint" onclick="selectArtifact('service')">Service</button>
-          <button class="artifact-chip" data-type="registry"         data-category="endpoint" onclick="selectArtifact('registry')">Registry Key</button>
-          <button class="artifact-chip" data-type="scheduled_task"   data-category="endpoint" onclick="selectArtifact('scheduled_task')">Sched. Task</button>
-          <button class="artifact-chip" data-type="startup_item"     data-category="endpoint" onclick="selectArtifact('startup_item')">Startup Item</button>
-          <button class="artifact-chip" data-type="dll"              data-category="endpoint" onclick="selectArtifact('dll')">DLL</button>
-          <button class="artifact-chip" data-type="mutex"            data-category="endpoint" onclick="selectArtifact('mutex')">Mutex</button>
-          <button class="artifact-chip" data-type="pipe"             data-category="endpoint" onclick="selectArtifact('pipe')">Pipe</button>
-          <button class="artifact-chip" data-type="driver"           data-category="endpoint" onclick="selectArtifact('driver')">Driver</button>
-          <button class="artifact-chip" data-type="host"             data-category="endpoint" onclick="selectArtifact('host')">Host</button>
-          <button class="artifact-chip" data-type="share"            data-category="endpoint" onclick="selectArtifact('share')">Network Share</button>
-          <button class="artifact-chip" data-type="event_id"         data-category="endpoint" onclick="selectArtifact('event_id')">Event ID</button>
-          <button class="artifact-chip" data-type="named_pipe"       data-category="endpoint" onclick="selectArtifact('named_pipe')">Named Pipe</button>
-          <button class="artifact-chip" data-type="wmi_query"        data-category="endpoint" onclick="selectArtifact('wmi_query')">WMI Query</button>
-          <button class="artifact-chip" data-type="prefetch"         data-category="endpoint" onclick="selectArtifact('prefetch')">Prefetch</button>
-          <button class="artifact-chip" data-type="vulnerability_id" data-category="endpoint" onclick="selectArtifact('vulnerability_id')">Vuln ID (CVE)</button>
-        </div>
-
-        <!-- Identity (3) -->
-        <div class="chip-cat-section">
-          <div class="chip-cat-header chip-cat-identity">IDN &middot; 3</div>
-          <button class="artifact-chip" data-type="user"        data-category="identity" onclick="selectArtifact('user')">User</button>
-          <button class="artifact-chip" data-type="identity"    data-category="identity" onclick="selectArtifact('identity')">Identity</button>
-          <button class="artifact-chip" data-type="rdp_session" data-category="identity" onclick="selectArtifact('rdp_session')">RDP Session</button>
-        </div>
-
-        <!-- Email (2) -->
-        <div class="chip-cat-section">
-          <div class="chip-cat-header chip-cat-email">EML &middot; 2</div>
-          <button class="artifact-chip" data-type="email"      data-category="email" onclick="selectArtifact('email')">Email</button>
-          <button class="artifact-chip" data-type="attachment" data-category="email" onclick="selectArtifact('attachment')">Attachment</button>
-        </div>
-
-        <!-- Cloud (1) -->
-        <div class="chip-cat-section">
-          <div class="chip-cat-header chip-cat-cloud">CLD &middot; 1</div>
-          <button class="artifact-chip" data-type="cloud_resource" data-category="cloud" onclick="selectArtifact('cloud_resource')">Cloud Resource</button>
-        </div>
-
-      </div><!-- /chip-sidebar -->
 
       <!-- ── Graph panel ─────────────────────────────────────────────── -->
       <div class="graph-panel">
@@ -667,17 +666,17 @@
         <!-- Category arc labels -->
         <div id="cat-labels"></div>
 
-        <!-- Info panel -->
+        <!-- Info panel (slides up from bottom of graph) -->
         <div id="info-panel" class="info-panel">
           <div class="info-placeholder">
             <div class="info-ph-icon">&#9672;</div>
-            <div class="info-ph-text">Select an artifact or click any node to see investigation details.</div>
+            <div class="info-ph-text">Select an artifact or click any node.</div>
           </div>
         </div>
 
         <!-- Stats overlay -->
         <div id="graph-stats" class="graph-stats">
-          <span>41 artifacts</span><span>loading&hellip;</span>
+          <span>41 artifacts</span><span>200 pivots</span>
         </div>
 
       </div><!-- /graph-panel -->
@@ -774,7 +773,7 @@
           <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>CLOUD (1)</div>
           <div class="legend-divider"></div>
           <div class="legend-item" style="color:var(--muted);font-size:9px;">
-            Select node in sidebar &rarr; highlights pivot path in category color &middot; Animated dashed edges = direction &middot; Click node for detail
+            Click chip or node &rarr; centers artifact, highlights next pivots &middot; Click highlighted node &rarr; extends path &middot; Breadcrumb tracks traversal
           </div>
         </div>
       </section>

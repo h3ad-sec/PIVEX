@@ -814,17 +814,22 @@
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>SSL Certificate</td><td><span class="ref-arrow">&#8594;</span>Domain / IP</td><td>issued_to / used_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>JA3</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>observed_on / connects_to</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>User Agent</td><td><span class="ref-arrow">&#8594;</span>URL / Net Session</td><td>accesses / part_of</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>DNS Query</td><td><span class="ref-arrow">&#8594;</span>Domain / IP / Host</td><td>queries / resolves_to / originates_from</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Network Traffic</td><td><span class="ref-arrow">&#8594;</span>IP / Net Session</td><td>involves / part_of — Traffic scope</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>File</td><td>identifies — File artifact lookup</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>URL / IP / Domain</td><td>downloaded_from / hosted_on / associated_with</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by — Execution chain</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Hash / Process</td><td>has_hash / executed_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>exists_on / owned_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>File</td><td>points_to — On-disk lookup</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Command Line</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by — LOLBin / cmdline trace</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Event ID</td><td><span class="ref-arrow">&#8594;</span>Process / Host</td><td>observed_on / part_of — Event context</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Command Line</td><td>executed_with — LOLBin analysis</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Registry</td><td>modifies — Persistence write</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Sched. Task / Startup Item</td><td>creates — Persistence chain</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>spawned_by / spawns — Tree walk</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>File / User / Host</td><td>runs / executed_as / runs_on</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Share</td><td><span class="ref-arrow">&#8594;</span>Host / File / User</td><td>exists_on / contains / accessed_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Process / File / User</td><td>runs / stores / used_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>generates — Session scope</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Vuln ID</td><td><span class="ref-arrow">&#8594;</span>Host</td><td>affects — Affected asset scope</td></tr>

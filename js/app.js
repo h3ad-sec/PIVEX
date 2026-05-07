@@ -143,13 +143,21 @@ function initGraph() {
       { selector: 'edge', style: {
           'width': 1.2,
           'opacity': 0.28,
-          'line-color': '#2e4d6e',
-          'target-arrow-color': '#2e4d6e',
-          'target-arrow-shape': 'triangle',
+          'line-color': 'data(srcColor)',
+          'target-arrow-color': 'data(srcColor)',
+          'target-arrow-shape': 'data(arrowShape)',
           'arrow-scale': 0.7,
           'curve-style': 'bezier',
+          'control-point-step-size': 40,
           'transition-property': 'opacity width line-color',
           'transition-duration': '0.18s'
+      }},
+      // Self-loops (process→process)
+      { selector: 'edge[source = "process"][target = "process"]', style: {
+          'curve-style': 'loop',
+          'loop-direction': '-45deg',
+          'loop-sweep': '45deg',
+          'control-point-step-size': 40
       }},
       // Edge labels (shown on highlighted / next-pivot edges only)
       { selector: 'edge.highlighted', style: {
@@ -711,7 +719,7 @@ function escHtml(str) {
   setInterval(draw, 55);
 })();
 
-// ── Node sizes by connectivity ───────────────────────────────────────────────
+// ── Node sizes + edge metadata ───────────────────────────────────────────────
 (function() {
   var counts = {};
   GRAPH_NODES.forEach(function(n) { counts[n.data.id] = 0; });
@@ -724,6 +732,19 @@ function escHtml(str) {
   GRAPH_NODES.forEach(function(n) {
     var c = counts[n.data.id] || 0;
     n.data.nodeSize = Math.round(42 + (c / maxC) * 34);
+  });
+
+  var CAT_HEX = { network:'#00d4ff', endpoint:'#00ff9f', identity:'#c084fc', email:'#fb923c', cloud:'#60a5fa' };
+  var VEE_LABELS   = { 'spawned_by':1,'spawns':1,'executed_by':1,'runs':1,'executed_as':1,'executed_with':1,'executes':1 };
+  var SQ_LABELS    = { 'has_hash':1,'stores':1,'contains':1,'identified_by':1,'points_to':1,'has_record':1,'owned_by':1,'delivers':1 };
+  var CIRC_LABELS  = { 'observed_in':1,'observed_on':1,'observed_from':1,'part_of':1,'associated_with':1,'mapped_to':1,'located_in':1 };
+
+  GRAPH_EDGES.forEach(function(e) {
+    var srcNode = GRAPH_NODES.find(function(n) { return n.data.id === e.data.source; });
+    var cat = srcNode ? srcNode.data.category : null;
+    e.data.srcColor = (cat && CAT_HEX[cat]) ? CAT_HEX[cat] : '#3a5470';
+    var lbl = e.data.label || '';
+    e.data.arrowShape = VEE_LABELS[lbl] ? 'vee' : SQ_LABELS[lbl] ? 'square' : CIRC_LABELS[lbl] ? 'circle' : 'triangle';
   });
 })();
 

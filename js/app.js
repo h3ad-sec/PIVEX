@@ -60,97 +60,11 @@ var ARTIFACT_ORDER = [
 // ── applyCategoryArcLayout ───────────────────────────────────────────────────
 function applyCategoryArcLayout() {
   if (!cy) return;
-  var container = document.getElementById('cy');
-  if (!container) return;
-  var W = container.offsetWidth;
-  var H = container.offsetHeight;
-  if (!W || !H) return;
-  var cx = W / 2, cyc = H / 2;
-  var radiusX = W * 0.43;
-  var radiusY = H * 0.43;
-  var radius = Math.min(radiusX, radiusY);
-  _arcRadiusX = radiusX;
-  _arcRadiusY = radiusY;
-
-  var totalNodes = ARTIFACT_ORDER.length; // 30
-  var CAT_GAP_DEG = 4;                    // small visual gap between categories
-  var numCats = ARC_CONFIG.length;        // 5
-  var totalGap = numCats * CAT_GAP_DEG;   // 20°
-  var available = 360 - totalGap;         // 340°
-  var perNode = available / totalNodes;   // ~8.29° per node
-
-  // Build arc map — each category gets exactly count * perNode degrees
-  _arcMap = {};
-  var cur = -90; // start at top
-  ARC_CONFIG.forEach(function(cfg) {
-    var span = cfg.count * perNode;
-    _arcMap[cfg.category] = {
-      startDeg: cur,
-      spanDeg: span,
-      midDeg: cur + span / 2
-    };
-    cur += span + CAT_GAP_DEG;
-  });
-  _arcCenter = { x: cx, y: cyc };
-  _arcRadius = radius;
-
-  // Per-category node lists preserving ARTIFACT_ORDER
-  var catLists = {};
-  ARC_CONFIG.forEach(function(cfg) { catLists[cfg.category] = []; });
-  ARTIFACT_ORDER.forEach(function(id) {
-    var nd = GRAPH_NODES.find(function(n) { return n.data.id === id; });
-    if (nd && catLists[nd.data.category]) catLists[nd.data.category].push(id);
-  });
-
-  // Position each node with uniform angular spacing within its category arc
-  ARTIFACT_ORDER.forEach(function(id) {
-    var node = cy.getElementById(id);
-    if (!node.length) return;
-    var nd = GRAPH_NODES.find(function(n) { return n.data.id === id; });
-    if (!nd) return;
-    var cat = nd.data.category;
-    var arc = _arcMap[cat];
-    if (!arc) return;
-    var list = catLists[cat];
-    var idx = list.indexOf(id);
-    var n = list.length;
-    // Node i is centered at startDeg + (i + 0.5) * perNode
-    var deg = n === 1
-      ? arc.midDeg
-      : arc.startDeg + (idx + 0.5) * perNode;
-    var rad = deg * Math.PI / 180;
-    node.position({ x: cx + radiusX * Math.cos(rad), y: cyc + radiusY * Math.sin(rad) });
-  });
-
-  cy.fit(cy.nodes(), 18);
-  drawCategoryLabels();
+  cy.fit(cy.nodes(), 22);
 }
 
 // ── drawCategoryLabels ───────────────────────────────────────────────────────
-function drawCategoryLabels() {
-  var overlay = document.getElementById('cat-labels');
-  if (!overlay || !cy || !_arcMap || !_arcCenter) return;
-  overlay.innerHTML = '';
-  var labelRX = _arcRadiusX * 1.16;
-  var labelRY = _arcRadiusY * 1.16;
-  var counts = {};
-  ARC_CONFIG.forEach(function(c) { counts[c.category] = c.count; });
-
-  Object.keys(_arcMap).forEach(function(cat) {
-    var arc = _arcMap[cat];
-    var midRad = arc.midDeg * Math.PI / 180;
-    var mx = _arcCenter.x + labelRX * Math.cos(midRad);
-    var my = _arcCenter.y + labelRY * Math.sin(midRad);
-    var rendered = cy.modelToRenderedPosition({ x: mx, y: my });
-    var el = document.createElement('div');
-    el.className = 'cat-arc-label cat-arc-' + cat;
-    el.style.left = rendered.x + 'px';
-    el.style.top  = rendered.y + 'px';
-    el.innerHTML = cat.toUpperCase() +
-      '<span class="cat-arc-count">&thinsp;&middot;&thinsp;' + counts[cat] + '</span>';
-    overlay.appendChild(el);
-  });
-}
+function drawCategoryLabels() { /* no-op: arc layout replaced by force layout */ }
 
 // ── startEdgeFlow / stopEdgeFlow ─────────────────────────────────────────────
 function startEdgeFlow() {
@@ -190,22 +104,22 @@ function initGraph() {
     container: container,
     elements: GRAPH_NODES.concat(GRAPH_EDGES),
     style: [
-      // Base node
+      // Base node — Neo4j style circles
       { selector: 'node', style: {
-          'shape': 'roundrectangle',
+          'shape': 'ellipse',
           'label': function(n) { return SHORT_LABELS[n.data('id')] || n.data('label'); },
           'font-family': 'Share Tech Mono, monospace',
-          'font-size': '9px',
+          'font-size': '8px',
           'font-weight': 'bold',
-          'letter-spacing': '0.04em',
-          'padding': '5px 8px',
-          'width': 'label',
-          'height': 'label',
+          'width': 56,
+          'height': 56,
           'text-valign': 'center',
           'text-halign': 'center',
+          'text-wrap': 'wrap',
+          'text-max-width': 48,
           'background-color': '#0e1a2c',
           'border-color': '#2a4060',
-          'border-width': 1.5,
+          'border-width': 2,
           'color': '#8bacc8',
           'transition-property': 'opacity shadow-blur shadow-opacity border-color border-width',
           'transition-duration': '0.18s',
@@ -222,12 +136,12 @@ function initGraph() {
         style: { 'background-color': '#fb923c', 'border-color': '#ea580c', 'color': '#03060a', 'border-width': 2 }},
       { selector: 'node[category = "cloud"]',
         style: { 'background-color': '#60a5fa', 'border-color': '#2563eb', 'color': '#03060a', 'border-width': 2 }},
-      // Default edges — very subtle
+      // Default edges
       { selector: 'edge', style: {
-          'width': 1,
-          'opacity': 0.07,
-          'line-color': '#3a5470',
-          'target-arrow-color': '#3a5470',
+          'width': 1.2,
+          'opacity': 0.28,
+          'line-color': '#2e4d6e',
+          'target-arrow-color': '#2e4d6e',
           'target-arrow-shape': 'triangle',
           'arrow-scale': 0.7,
           'curve-style': 'bezier',
@@ -298,7 +212,23 @@ function initGraph() {
       // Selected (node in path)
       { selector: 'node.selected', style: { 'border-width': 3.5, 'z-index': 20 }}
     ],
-    layout: { name: 'null' },
+    layout: {
+      name: 'cose',
+      animate: true,
+      animationDuration: 900,
+      nodeRepulsion: function() { return 10000; },
+      nodeOverlap: 24,
+      idealEdgeLength: function() { return 90; },
+      edgeElasticity: function() { return 100; },
+      gravity: 50,
+      numIter: 1000,
+      initialTemp: 200,
+      coolingFactor: 0.95,
+      minTemp: 1.0,
+      randomize: true,
+      fit: true,
+      padding: 22
+    },
     userZoomingEnabled: true,
     userPanningEnabled: true,
     boxSelectionEnabled: false,
@@ -327,7 +257,6 @@ function initGraph() {
     }
   });
 
-  cy.on('viewport', function() { drawCategoryLabels(); });
 }
 
 // ── selectArtifact ──────────────────────────────────────────────────────────

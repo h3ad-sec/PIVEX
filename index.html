@@ -566,59 +566,48 @@
         <div class="piv-tagline">Pivot Across Every Artifact</div>
       </div>
       <div class="topbar-right">
-        <span class="piv-version">v9.2 &middot; 41 ARTIFACTS</span>
+        <span class="piv-version">v9.3 &middot; 30 ARTIFACTS</span>
       </div>
     </div>
 
     <!-- ── Artifact selector (top bar) ───────────────────────────────── -->
     <div class="chip-topbar" id="chipTopbar">
 
-      <button class="artifact-chip chip-all active" data-type="all" onclick="selectAll()">ALL &middot; 41</button>
+      <button class="artifact-chip chip-all active" data-type="all" onclick="selectAll()">ALL &middot; 30</button>
 
-      <!-- Network (15) -->
-      <span class="chip-cat-divider chip-cat-divider-net" title="NETWORK · 15"></span>
+      <!-- Network (12) -->
+      <span class="chip-cat-divider chip-cat-divider-net" title="NETWORK · 12"></span>
       <div class="chip-cat-section">
-        <div class="chip-cat-header chip-cat-network">NET &middot; 15</div>
+        <div class="chip-cat-header chip-cat-network">NET &middot; 12</div>
         <button class="artifact-chip" data-type="ip"              data-category="network" onclick="selectArtifact('ip')">IP Address</button>
         <button class="artifact-chip" data-type="domain"          data-category="network" onclick="selectArtifact('domain')">Domain</button>
         <button class="artifact-chip" data-type="fqdn"            data-category="network" onclick="selectArtifact('fqdn')">FQDN</button>
         <button class="artifact-chip" data-type="url"             data-category="network" onclick="selectArtifact('url')">URL</button>
         <button class="artifact-chip" data-type="dns_query"       data-category="network" onclick="selectArtifact('dns_query')">DNS Query</button>
         <button class="artifact-chip" data-type="http_request"    data-category="network" onclick="selectArtifact('http_request')">HTTP Request</button>
-        <button class="artifact-chip" data-type="asn"             data-category="network" onclick="selectArtifact('asn')">ASN</button>
-        <button class="artifact-chip" data-type="dns_record"      data-category="network" onclick="selectArtifact('dns_record')">DNS Record</button>
         <button class="artifact-chip" data-type="ssl_cert"        data-category="network" onclick="selectArtifact('ssl_cert')">SSL Cert</button>
+        <button class="artifact-chip" data-type="ssl_certificate" data-category="network" onclick="selectArtifact('ssl_certificate')">SSL Certificate</button>
         <button class="artifact-chip" data-type="ja3"             data-category="network" onclick="selectArtifact('ja3')">JA3 Hash</button>
         <button class="artifact-chip" data-type="user_agent"      data-category="network" onclick="selectArtifact('user_agent')">User Agent</button>
-        <button class="artifact-chip" data-type="port"            data-category="network" onclick="selectArtifact('port')">Port</button>
-        <button class="artifact-chip" data-type="certificate"     data-category="network" onclick="selectArtifact('certificate')">Code-Sign Cert</button>
         <button class="artifact-chip" data-type="network_traffic" data-category="network" onclick="selectArtifact('network_traffic')">Net Traffic</button>
-        <button class="artifact-chip" data-type="mac_address"     data-category="network" onclick="selectArtifact('mac_address')">MAC Address</button>
+        <button class="artifact-chip" data-type="network_session" data-category="network" onclick="selectArtifact('network_session')">Net Session</button>
       </div>
 
-      <!-- Endpoint (20) -->
-      <span class="chip-cat-divider chip-cat-divider-ept" title="ENDPOINT · 20"></span>
+      <!-- Endpoint (12) -->
+      <span class="chip-cat-divider chip-cat-divider-ept" title="ENDPOINT · 12"></span>
       <div class="chip-cat-section">
-        <div class="chip-cat-header chip-cat-endpoint">EPT &middot; 20</div>
+        <div class="chip-cat-header chip-cat-endpoint">EPT &middot; 12</div>
         <button class="artifact-chip" data-type="hash"             data-category="endpoint" onclick="selectArtifact('hash')">File Hash</button>
+        <button class="artifact-chip" data-type="file"             data-category="endpoint" onclick="selectArtifact('file')">File</button>
         <button class="artifact-chip" data-type="file_path"        data-category="endpoint" onclick="selectArtifact('file_path')">File Path</button>
         <button class="artifact-chip" data-type="process"          data-category="endpoint" onclick="selectArtifact('process')">Process</button>
-        <button class="artifact-chip" data-type="parent_process"   data-category="endpoint" onclick="selectArtifact('parent_process')">Parent Process</button>
         <button class="artifact-chip" data-type="command_line"     data-category="endpoint" onclick="selectArtifact('command_line')">Command Line</button>
-        <button class="artifact-chip" data-type="service"          data-category="endpoint" onclick="selectArtifact('service')">Service</button>
         <button class="artifact-chip" data-type="registry"         data-category="endpoint" onclick="selectArtifact('registry')">Registry Key</button>
         <button class="artifact-chip" data-type="scheduled_task"   data-category="endpoint" onclick="selectArtifact('scheduled_task')">Sched. Task</button>
         <button class="artifact-chip" data-type="startup_item"     data-category="endpoint" onclick="selectArtifact('startup_item')">Startup Item</button>
-        <button class="artifact-chip" data-type="dll"              data-category="endpoint" onclick="selectArtifact('dll')">DLL</button>
-        <button class="artifact-chip" data-type="mutex"            data-category="endpoint" onclick="selectArtifact('mutex')">Mutex</button>
-        <button class="artifact-chip" data-type="pipe"             data-category="endpoint" onclick="selectArtifact('pipe')">Pipe</button>
-        <button class="artifact-chip" data-type="driver"           data-category="endpoint" onclick="selectArtifact('driver')">Driver</button>
         <button class="artifact-chip" data-type="host"             data-category="endpoint" onclick="selectArtifact('host')">Host</button>
         <button class="artifact-chip" data-type="share"            data-category="endpoint" onclick="selectArtifact('share')">Network Share</button>
         <button class="artifact-chip" data-type="event_id"         data-category="endpoint" onclick="selectArtifact('event_id')">Event ID</button>
-        <button class="artifact-chip" data-type="named_pipe"       data-category="endpoint" onclick="selectArtifact('named_pipe')">Named Pipe</button>
-        <button class="artifact-chip" data-type="wmi_query"        data-category="endpoint" onclick="selectArtifact('wmi_query')">WMI Query</button>
-        <button class="artifact-chip" data-type="prefetch"         data-category="endpoint" onclick="selectArtifact('prefetch')">Prefetch</button>
         <button class="artifact-chip" data-type="vulnerability_id" data-category="endpoint" onclick="selectArtifact('vulnerability_id')">Vuln ID (CVE)</button>
       </div>
 
@@ -676,7 +665,7 @@
 
         <!-- Stats overlay -->
         <div id="graph-stats" class="graph-stats">
-          <span>41 artifacts</span><span>200 pivots</span>
+          <span>30 artifacts</span><span>83 pivots</span>
         </div>
 
       </div><!-- /graph-panel -->
@@ -703,17 +692,16 @@
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>Hash</td><td>Payload download chain</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>HTTP Req</td><td><span class="ref-arrow">&#8594;</span>JA3 / UA</td><td>TLS fingerprint &amp; tool ID</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>SSL Cert</td><td><span class="ref-arrow">&#8594;</span>JA3</td><td>TLS client fingerprint</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Net Traffic</td><td><span class="ref-arrow">&#8594;</span>Port / JA3</td><td>Flow-level analysis</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>Process / DLL</td><td>Execution &amp; load chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>Prefetch</td><td>Execution history evidence</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>Active session pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>File</td><td>Payload download chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Net Session</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>Session attribution</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>File / Process</td><td>Execution &amp; artifact chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>File</td><td>On-disk artifact lookup</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Cmd Line</td><td>LOLBin &amp; arg analysis</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Registry</td><td>Persistence write</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Named Pipe</td><td>C2 channel (e.g. CS pipe)</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Cmd Line</td><td><span class="ref-arrow">&#8594;</span>WMI Query</td><td>Lateral execution &amp; persist</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Registry</td><td><span class="ref-arrow">&#8594;</span>Sched Task</td><td>Persistence mechanism</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Service</td><td><span class="ref-arrow">&#8594;</span>Vuln ID</td><td>Exploited service pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Sched. Task</td><td>Persistence creation</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Vuln ID</td><td>Patch state pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Prefetch</td><td><span class="ref-arrow">&#8594;</span>Hash / DLL</td><td>Deleted binary recovery</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>Scope affected assets</td></tr>
                   <tr><td><span class="ref-cat ref-cat-idn">IDN</span>User</td><td><span class="ref-arrow">&#8594;</span>Host / Identity</td><td>Lateral move &amp; cloud pivot</td></tr>
                   <tr><td><span class="ref-cat ref-cat-idn">IDN</span>RDP Session</td><td><span class="ref-arrow">&#8594;</span>Host / IP</td><td>Lateral movement tracking</td></tr>
                   <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Attach / URL</td><td>Phishing chain</td></tr>
@@ -736,18 +724,15 @@
                   <tr><td>URL</td><td>Proxy &middot; Email Gateway &middot; Browser history &middot; EDR</td></tr>
                   <tr><td>DNS Query</td><td>DNS logs &middot; Sysmon Event 22 &middot; EDR &middot; Network tap</td></tr>
                   <tr><td>HTTP Request / UA</td><td>Proxy &middot; Zeek &middot; Suricata &middot; Network sensor</td></tr>
-                  <tr><td>SSL Cert / JA3</td><td>Censys &middot; Shodan &middot; crt.sh &middot; Network PCAP</td></tr>
-                  <tr><td>ASN / Net Traffic / MAC</td><td>BGP data &middot; DHCP logs &middot; NetFlow &middot; Switch ARP</td></tr>
-                  <tr><td>Port / Code-Sign Cert</td><td>Shodan &middot; Nmap &middot; VT code-signing &middot; Masscan</td></tr>
+                  <tr><td>SSL Cert / SSL Certificate</td><td>Censys &middot; Shodan &middot; crt.sh &middot; JARM</td></tr>
+                  <tr><td>JA3 Hash</td><td>Network sensor &middot; Zeek &middot; Suricata &middot; PCAP</td></tr>
+                  <tr><td>Net Traffic / Net Session</td><td>NetFlow &middot; Zeek &middot; Firewall &middot; Proxy</td></tr>
                   <tr><td>File Hash</td><td>EDR &middot; AV &middot; Sandbox &middot; MalwareBazaar &middot; VT</td></tr>
-                  <tr><td>File Path / Prefetch</td><td>EDR &middot; Sysmon Event 11 &middot; KAPE &middot; MFT</td></tr>
-                  <tr><td>Process / Parent Process</td><td>EDR &middot; Sysmon Event 1 &middot; WinEvent 4688</td></tr>
+                  <tr><td>File / File Path</td><td>EDR &middot; Sysmon Event 11 &middot; MFT &middot; File system audit</td></tr>
+                  <tr><td>Process</td><td>EDR &middot; Sysmon Event 1 &middot; WinEvent 4688</td></tr>
                   <tr><td>Command Line</td><td>EDR &middot; Sysmon Event 1 &middot; PowerShell Script Block log</td></tr>
-                  <tr><td>DLL / Driver</td><td>Sysmon Event 6-7 &middot; EDR &middot; PE analysis &middot; VT</td></tr>
                   <tr><td>Registry</td><td>Sysmon 12-14 &middot; EDR &middot; WinEvent 4657 &middot; Autoruns</td></tr>
                   <tr><td>Sched. Task / Startup Item</td><td>WinEvent 4698 &middot; Autoruns &middot; EDR &middot; Task Scheduler logs</td></tr>
-                  <tr><td>Mutex / Pipe / Named Pipe</td><td>EDR &middot; Sysmon 17-18 &middot; Process Monitor &middot; Sandbox</td></tr>
-                  <tr><td>Service / WMI Query</td><td>WinEvent 7045 &middot; Sysmon 19-21 &middot; EDR &middot; WMI-Activity</td></tr>
                   <tr><td>Host / Network Share</td><td>EDR &middot; CMDB &middot; AD &middot; WinEvent 5140/5145</td></tr>
                   <tr><td>Event ID</td><td>Windows Event Log &middot; SIEM &middot; Splunk &middot; Elastic</td></tr>
                   <tr><td>Vuln ID (CVE)</td><td>NVD &middot; CISA KEV &middot; Tenable &middot; Qualys &middot; Shodan</td></tr>
@@ -766,8 +751,8 @@
       <section>
         <div class="section-label">NODE LEGEND</div>
         <div class="legend-row">
-          <div class="legend-item"><div class="legend-dot" style="background:#00d4ff;"></div>NETWORK (15)</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#00ff9f;"></div>ENDPOINT (20)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00d4ff;"></div>NETWORK (12)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00ff9f;"></div>ENDPOINT (12)</div>
           <div class="legend-item"><div class="legend-dot" style="background:#c084fc;"></div>IDENTITY (3)</div>
           <div class="legend-item"><div class="legend-dot" style="background:#fb923c;"></div>EMAIL (2)</div>
           <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>CLOUD (1)</div>

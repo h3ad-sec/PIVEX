@@ -22,17 +22,13 @@ var CAT_COLORS = {
 // ── Short labels for graph display ───────────────────────────────────────────
 var SHORT_LABELS = {
   ip:'IP', domain:'DOMAIN', fqdn:'FQDN', url:'URL',
-  dns_query:'DNS-Q', http_request:'HTTP', asn:'ASN',
-  dns_record:'DNS-R', ssl_cert:'SSL', ja3:'JA3',
-  user_agent:'UA', port:'PORT', certificate:'CODESIG',
-  network_traffic:'NETFLOW', mac_address:'MAC',
-  hash:'HASH', file_path:'FILE', process:'PROC',
-  parent_process:'P-PROC', command_line:'CMD',
-  service:'SVC', registry:'REG', scheduled_task:'S-TASK',
-  startup_item:'STARTUP', dll:'DLL', mutex:'MUTEX',
-  pipe:'PIPE', driver:'DRIVER', host:'HOST', share:'SHARE',
-  event_id:'EVT-ID', named_pipe:'N-PIPE', wmi_query:'WMI',
-  prefetch:'PFETCH', vulnerability_id:'CVE',
+  dns_query:'DNS-Q', http_request:'HTTP',
+  ssl_cert:'SSL', ssl_certificate:'SSL-CERT', ja3:'JA3',
+  user_agent:'UA', network_traffic:'NETFLOW', network_session:'NET-SES',
+  hash:'HASH', file:'FILE', file_path:'F-PATH', process:'PROC',
+  command_line:'CMD', registry:'REG', scheduled_task:'S-TASK',
+  startup_item:'STARTUP', host:'HOST', share:'SHARE',
+  event_id:'EVT-ID', vulnerability_id:'CVE',
   user:'USER', identity:'IDENT', rdp_session:'RDP',
   email:'EMAIL', attachment:'ATTACH',
   cloud_resource:'CLOUD'
@@ -40,8 +36,8 @@ var SHORT_LABELS = {
 
 // ── Arc layout config ────────────────────────────────────────────────────────
 var ARC_CONFIG = [
-  { category: 'network',  count: 15 },
-  { category: 'endpoint', count: 20 },
+  { category: 'network',  count: 12 },
+  { category: 'endpoint', count: 12 },
   { category: 'identity', count: 3  },
   { category: 'email',    count: 2  },
   { category: 'cloud',    count: 1  }
@@ -49,11 +45,10 @@ var ARC_CONFIG = [
 
 // ── Artifact order (grouped by category, clockwise) ──────────────────────────
 var ARTIFACT_ORDER = [
-  'ip','domain','fqdn','url','dns_query','http_request','asn','dns_record',
-  'ssl_cert','ja3','user_agent','port','certificate','network_traffic','mac_address',
-  'hash','file_path','process','parent_process','command_line','service','registry',
-  'scheduled_task','startup_item','dll','mutex','pipe','driver','host','share',
-  'event_id','named_pipe','wmi_query','prefetch','vulnerability_id',
+  'ip','domain','fqdn','url','dns_query','http_request',
+  'ssl_cert','ssl_certificate','ja3','user_agent','network_traffic','network_session',
+  'hash','file','file_path','process','command_line','registry',
+  'scheduled_task','startup_item','host','share','event_id','vulnerability_id',
   'user','identity','rdp_session',
   'email','attachment',
   'cloud_resource'
@@ -70,7 +65,7 @@ function applyCategoryArcLayout() {
   var cx = W / 2, cyc = H / 2;
   var radius = Math.min(W, H) * 0.38;
 
-  var totalNodes = ARTIFACT_ORDER.length; // 41
+  var totalNodes = ARTIFACT_ORDER.length; // 30
   var CAT_GAP_DEG = 4;                    // small visual gap between categories
   var numCats = ARC_CONFIG.length;        // 5
   var totalGap = numCats * CAT_GAP_DEG;   // 20°
@@ -169,7 +164,7 @@ function updateStats(selectedType) {
   var el = document.getElementById('graph-stats');
   if (!el) return;
   if (!selectedType) {
-    el.innerHTML = '<span>41 artifacts</span><span>200 pivots</span>';
+    el.innerHTML = '<span>30 artifacts</span><span>83 pivots</span>';
   } else {
     var pathData = ARTIFACT_PATHS[selectedType];
     var nc = pathData ? pathData.nodes.length - 1 : 0;

@@ -1,0 +1,510 @@
+{
+    "ip": [
+        {
+            "to": "domain",
+            "relationship": "resolves_to"
+        },
+        {
+            "to": "fqdn",
+            "relationship": "resolves_to"
+        },
+        {
+            "to": "url",
+            "relationship": "hosts"
+        },
+        {
+            "to": "asn",
+            "relationship": "belongs_to"
+        },
+        {
+            "to": "geo",
+            "relationship": "located_in"
+        },
+        {
+            "to": "reputation",
+            "relationship": "flagged_as"
+        },
+        {
+            "to": "network_session",
+            "relationship": "communicates_with"
+        },
+        {
+            "to": "ssl_certificate",
+            "relationship": "presents"
+        },
+        {
+            "to": "port",
+            "relationship": "exposes"
+        },
+        {
+            "to": "rdp_ssh_session",
+            "relationship": "accessed_via"
+        },
+        {
+            "to": "mac_address",
+            "relationship": "mapped_to"
+        },
+        {
+            "to": "network_traffic",
+            "relationship": "observed_in"
+        },
+        {
+            "to": "service",
+            "relationship": "hosts"
+        }
+    ],
+    "domain": [
+        {
+            "to": "ip",
+            "relationship": "resolves_to"
+        },
+        {
+            "to": "fqdn",
+            "relationship": "parent_of"
+        },
+        {
+            "to": "url",
+            "relationship": "hosts"
+        },
+        {
+            "to": "dns_record",
+            "relationship": "has_record"
+        },
+        {
+            "to": "whois",
+            "relationship": "registered_with"
+        },
+        {
+            "to": "ssl_certificate",
+            "relationship": "uses"
+        },
+        {
+            "to": "email",
+            "relationship": "used_in"
+        }
+    ],
+    "fqdn": [
+        {
+            "to": "domain",
+            "relationship": "belongs_to"
+        },
+        {
+            "to": "ip",
+            "relationship": "resolves_to"
+        },
+        {
+            "to": "url",
+            "relationship": "hosts"
+        },
+        {
+            "to": "dns_record",
+            "relationship": "has_record"
+        }
+    ],
+    "url": [
+        {
+            "to": "domain",
+            "relationship": "belongs_to"
+        },
+        {
+            "to": "fqdn",
+            "relationship": "belongs_to"
+        },
+        {
+            "to": "ip",
+            "relationship": "connects_to"
+        },
+        {
+            "to": "http_request",
+            "relationship": "requested_via"
+        },
+        {
+            "to": "file",
+            "relationship": "delivers"
+        },
+        {
+            "to": "user_agent",
+            "relationship": "accessed_by"
+        },
+        {
+            "to": "email",
+            "relationship": "embedded_in"
+        }
+    ],
+    "hash": [
+        {
+            "to": "file",
+            "relationship": "identifies"
+        },
+        {
+            "to": "url",
+            "relationship": "downloaded_from"
+        },
+        {
+            "to": "ip",
+            "relationship": "hosted_on"
+        },
+        {
+            "to": "domain",
+            "relationship": "associated_with"
+        },
+        {
+            "to": "process",
+            "relationship": "executed_by"
+        },
+        {
+            "to": "malware_family",
+            "relationship": "classified_as"
+        }
+    ],
+    "dns_query": [
+        {
+            "to": "dns_record",
+            "relationship": "queries"
+        },
+        {
+            "to": "domain",
+            "relationship": "queries"
+        },
+        {
+            "to": "ip",
+            "relationship": "resolves_to"
+        },
+        {
+            "to": "host",
+            "relationship": "initiated_by"
+        }
+    ],
+    "file": [
+        {
+            "to": "hash",
+            "relationship": "has_hash"
+        },
+        {
+            "to": "process",
+            "relationship": "executed_by"
+        },
+        {
+            "to": "process",
+            "relationship": "spawned_by"
+        },
+        {
+            "to": "host",
+            "relationship": "exists_on"
+        },
+        {
+            "to": "user",
+            "relationship": "owned_by"
+        }
+    ],
+    "http_request": [
+        {
+            "to": "url",
+            "relationship": "targets"
+        },
+        {
+            "to": "user_agent",
+            "relationship": "uses"
+        }
+    ],
+    "file_path": [
+        {
+            "to": "file",
+            "relationship": "points_to"
+        }
+    ],
+    "process": [
+        {
+            "to": "parent_process",
+            "relationship": "spawned_by"
+        },
+        {
+            "to": "dll",
+            "relationship": "loads"
+        },
+        {
+            "to": "mutex",
+            "relationship": "creates"
+        },
+        {
+            "to": "pipe",
+            "relationship": "uses"
+        },
+        {
+            "to": "named_pipe",
+            "relationship": "uses"
+        },
+        {
+            "to": "driver",
+            "relationship": "loads"
+        },
+        {
+            "to": "registry",
+            "relationship": "modifies"
+        },
+        {
+            "to": "scheduled_task",
+            "relationship": "creates"
+        },
+        {
+            "to": "startup_item",
+            "relationship": "creates"
+        },
+        {
+            "to": "wmi_query",
+            "relationship": "executes"
+        },
+        {
+            "to": "prefetch",
+            "relationship": "generates"
+        },
+        {
+            "to": "process",
+            "relationship": "spawned_by"
+        },
+        {
+            "to": "process",
+            "relationship": "spawns"
+        },
+        {
+            "to": "command_line",
+            "relationship": "executed_with"
+        },
+        {
+            "to": "file",
+            "relationship": "runs"
+        },
+        {
+            "to": "user",
+            "relationship": "executed_as"
+        },
+        {
+            "to": "host",
+            "relationship": "runs_on"
+        }
+    ],
+    "user": [
+        {
+            "to": "host",
+            "relationship": "logs_into"
+        },
+        {
+            "to": "process",
+            "relationship": "executes"
+        },
+        {
+            "to": "ip",
+            "relationship": "originates_from"
+        },
+        {
+            "to": "cloud_resource",
+            "relationship": "accesses"
+        }
+    ],
+    "host": [
+        {
+            "to": "process",
+            "relationship": "runs"
+        },
+        {
+            "to": "file",
+            "relationship": "stores"
+        },
+        {
+            "to": "user",
+            "relationship": "used_by"
+        },
+        {
+            "to": "ip",
+            "relationship": "assigned"
+        },
+        {
+            "to": "network_session",
+            "relationship": "generates"
+        }
+    ],
+    "network_session": [
+        {
+            "to": "ip",
+            "relationship": "originates_from"
+        },
+        {
+            "to": "ip",
+            "relationship": "connects_to"
+        },
+        {
+            "to": "domain",
+            "relationship": "queries"
+        },
+        {
+            "to": "url",
+            "relationship": "accesses"
+        },
+        {
+            "to": "port",
+            "relationship": "uses"
+        },
+        {
+            "to": "protocol",
+            "relationship": "uses"
+        }
+    ],
+    "ssl_certificate": [
+        {
+            "to": "domain",
+            "relationship": "issued_to"
+        },
+        {
+            "to": "ip",
+            "relationship": "used_by"
+        },
+        {
+            "to": "issuer",
+            "relationship": "issued_by"
+        },
+        {
+            "to": "fingerprint",
+            "relationship": "identified_by"
+        }
+    ],
+    "cloud_resource": [
+        {
+            "to": "identity",
+            "relationship": "owned_by"
+        },
+        {
+            "to": "ip",
+            "relationship": "exposed_via"
+        },
+        {
+            "to": "api_activity",
+            "relationship": "generates"
+        }
+    ],
+    "ja3": [
+        {
+            "to": "ip",
+            "relationship": "observed_on"
+        },
+        {
+            "to": "domain",
+            "relationship": "connects_to"
+        },
+        {
+            "to": "malware_family",
+            "relationship": "associated_with"
+        }
+    ],
+    "user_agent": [
+        {
+            "to": "url",
+            "relationship": "accesses"
+        },
+        {
+            "to": "ip",
+            "relationship": "observed_from"
+        },
+        {
+            "to": "network_session",
+            "relationship": "part_of"
+        }
+    ],
+    "email": [
+        {
+            "to": "attachment",
+            "relationship": "contains"
+        },
+        {
+            "to": "url",
+            "relationship": "contains"
+        },
+        {
+            "to": "domain",
+            "relationship": "originates_from"
+        }
+    ],
+    "attachment": [
+        {
+            "to": "hash",
+            "relationship": "has_hash"
+        }
+    ],
+    "ssl_cert": [
+        {
+            "to": "certificate",
+            "relationship": "is"
+        }
+    ],
+    "registry": [
+        {
+            "to": "host",
+            "relationship": "exists_on"
+        }
+    ],
+    "scheduled_task": [
+        {
+            "to": "host",
+            "relationship": "runs_on"
+        }
+    ],
+    "startup_item": [
+        {
+            "to": "host",
+            "relationship": "runs_on"
+        }
+    ],
+    "share": [
+        {
+            "to": "host",
+            "relationship": "hosted_on"
+        }
+    ],
+    "rdp_session": [
+        {
+            "to": "host",
+            "relationship": "connects_to"
+        },
+        {
+            "to": "user",
+            "relationship": "initiated_by"
+        }
+    ],
+    "event_id": [
+        {
+            "to": "process",
+            "relationship": "relates_to"
+        }
+    ],
+    "command_line": [
+        {
+            "to": "process",
+            "relationship": "used_by"
+        }
+    ],
+    "vulnerability_id": [
+        {
+            "to": "host",
+            "relationship": "affects"
+        },
+        {
+            "to": "service",
+            "relationship": "affects"
+        }
+    ],
+    "network_traffic": [
+        {
+            "to": "ip",
+            "relationship": "involves"
+        },
+        {
+            "to": "port",
+            "relationship": "uses"
+        }
+    ],
+    "identity": [
+        {
+            "to": "user",
+            "relationship": "represents"
+        }
+    ]
+}

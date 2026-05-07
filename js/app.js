@@ -295,6 +295,48 @@ function initGraph() {
 
 }
 
+// ── _orbitLayout ─────────────────────────────────────────────────────────────
+function _orbitLayout(centerNode, orbitEles) {
+  if (!cy || !centerNode || !centerNode.length) return;
+
+  // Viewport center in model coordinates
+  var ext = cy.extent();
+  var cx = (ext.x1 + ext.x2) / 2;
+  var cY = (ext.y1 + ext.y2) / 2;
+
+  var orbitNodes = orbitEles.filter('node');
+  var count = orbitNodes.length;
+  var radius = Math.max(190, count * 22);
+
+  // Clicked node snaps to center
+  centerNode.stop(true).animate({
+    position: { x: cx, y: cY },
+    duration: 360,
+    easing: 'ease-in-out-sine'
+  });
+
+  // Orbit nodes fan out with staggered delay
+  orbitNodes.forEach(function(n, i) {
+    var angle = (2 * Math.PI * i / count) - Math.PI / 2;
+    n.stop(true).animate({
+      position: { x: cx + radius * Math.cos(angle), y: cY + radius * Math.sin(angle) },
+      duration: 500,
+      delay: i * 20,
+      easing: 'ease-in-out-sine'
+    });
+  });
+
+  // Fit to cluster once animation settles
+  setTimeout(function() {
+    if (!cy) return;
+    cy.animate({
+      fit: { eles: orbitNodes.union(centerNode), padding: 75 },
+      duration: 300,
+      easing: 'ease-in-out-sine'
+    });
+  }, 560);
+}
+
 // ── selectArtifact ──────────────────────────────────────────────────────────
 function selectArtifact(type) {
   stopEdgeFlow();
@@ -320,10 +362,8 @@ function selectArtifact(type) {
   _applyPathHighlight();
   startEdgeFlow();
 
-  // Center the selected node in the viewport
   var artNode = cy.getElementById(type);
-  cy.stop();
-  cy.animate({ center: { eles: artNode }, duration: 320, easing: 'ease-in-out-sine' });
+  _orbitLayout(artNode, cy.$('.next-pivot'));
 
   showNodeInfo(artNode);
   renderPivotPath();
@@ -344,10 +384,8 @@ function extendPivotPath(id) {
   _applyPathHighlight();
   startEdgeFlow();
 
-  // Center on the new endpoint
   var node = cy.getElementById(id);
-  cy.stop();
-  cy.animate({ center: { eles: node }, duration: 320, easing: 'ease-in-out-sine' });
+  _orbitLayout(node, cy.$('.next-pivot'));
 
   showNodeInfo(node);
   renderPivotPath();
@@ -442,9 +480,6 @@ function _applyPathHighlight() {
     }
   });
 
-  if (pivotPath.length >= 2) {
-    cy.animate({ fit: { eles: pathNodeSet.union(nextPivotSet), padding: 70 }, duration: 420, easing: 'ease-in-out-sine' });
-  }
 }
 
 function _setActiveChip(type) {

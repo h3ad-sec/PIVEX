@@ -295,72 +295,6 @@ function initGraph() {
 
 }
 
-// ── _orbitLayout ─────────────────────────────────────────────────────────────
-function _orbitLayout(centerNode, orbitEles) {
-  if (!cy || !centerNode || !centerNode.length) return;
-
-  var ext = cy.extent();
-  var vw = ext.x2 - ext.x1;
-  var vh = ext.y2 - ext.y1;
-
-  var orbitNodes = orbitEles.filter('node');
-  var count = orbitNodes.length;
-  var radius = Math.max(190, count * 22);
-  var margin = radius + 55;
-
-  // Base: geometric center of current viewport
-  var cx = (ext.x1 + ext.x2) / 2;
-  var cY = (ext.y1 + ext.y2) / 2;
-
-  // If path history nodes exist, push center away from their centroid
-  // so history + new orbit don't pile on top of each other
-  var histNodes = cy.$('.highlighted').difference(centerNode);
-  if (histNodes.length > 0) {
-    var hbb = histNodes.boundingBox();
-    var hcx = (hbb.x1 + hbb.x2) / 2;
-    var hcY = (hbb.y1 + hbb.y2) / 2;
-    var dx = cx - hcx, dy = cY - hcY;
-    var d = Math.sqrt(dx * dx + dy * dy) || 1;
-    // Push in the direction away from history by ~radius
-    cx = cx + (dx / d) * radius * 0.85;
-    cY = cY + (dy / d) * radius * 0.85;
-  }
-
-  // Clamp so the full orbit ring stays inside viewport
-  cx = Math.max(ext.x1 + margin, Math.min(ext.x2 - margin, cx));
-  cY = Math.max(ext.y1 + margin, Math.min(ext.y2 - margin, cY));
-
-  // Orient ring: if history exists, rotate so the gap faces history centroid
-  var ringOffset = -Math.PI / 2;
-  if (histNodes.length > 0) {
-    var hbb2 = histNodes.boundingBox();
-    var toHistX = ((hbb2.x1 + hbb2.x2) / 2) - cx;
-    var toHistY = ((hbb2.y1 + hbb2.y2) / 2) - cY;
-    ringOffset = Math.atan2(toHistY, toHistX) + Math.PI;
-  }
-
-  centerNode.stop(true).animate({
-    position: { x: cx, y: cY },
-    duration: 360,
-    easing: 'ease-in-out-sine'
-  });
-
-  orbitNodes.forEach(function(n, i) {
-    var angle = ringOffset + (2 * Math.PI * i / count);
-    n.stop(true).animate({
-      position: { x: cx + radius * Math.cos(angle), y: cY + radius * Math.sin(angle) },
-      duration: 500,
-      delay: i * 20,
-      easing: 'ease-in-out-sine'
-    });
-  });
-
-  setTimeout(function() {
-    if (!cy) return;
-    var fitEles = orbitNodes.union(centerNode).union(histNodes);
-    cy.animate({ fit: { eles: fitEles, padding: 70 }, duration: 320, easing: 'ease-in-out-sine' });
-  }, 560);
-}
 
 // ── selectArtifact ──────────────────────────────────────────────────────────
 function selectArtifact(type) {
@@ -388,8 +322,6 @@ function selectArtifact(type) {
   startEdgeFlow();
 
   var artNode = cy.getElementById(type);
-  _orbitLayout(artNode, cy.$('.next-pivot'));
-
   showNodeInfo(artNode);
   renderPivotPath();
 }
@@ -410,8 +342,6 @@ function extendPivotPath(id) {
   startEdgeFlow();
 
   var node = cy.getElementById(id);
-  _orbitLayout(node, cy.$('.next-pivot'));
-
   showNodeInfo(node);
   renderPivotPath();
 }

@@ -9,6 +9,8 @@ var _flowOffset = 0;
 var _arcMap = null;
 var _arcCenter = null;
 var _arcRadius = 0;
+var _arcRadiusX = 0;
+var _arcRadiusY = 0;
 var _activeCat = null;
 
 // ── Category colors ─────────────────────────────────────────────────────────
@@ -64,7 +66,11 @@ function applyCategoryArcLayout() {
   var H = container.offsetHeight;
   if (!W || !H) return;
   var cx = W / 2, cyc = H / 2;
-  var radius = Math.min(W, H) * 0.38;
+  var radiusX = W * 0.43;
+  var radiusY = H * 0.43;
+  var radius = Math.min(radiusX, radiusY);
+  _arcRadiusX = radiusX;
+  _arcRadiusY = radiusY;
 
   var totalNodes = ARTIFACT_ORDER.length; // 30
   var CAT_GAP_DEG = 4;                    // small visual gap between categories
@@ -113,10 +119,10 @@ function applyCategoryArcLayout() {
       ? arc.midDeg
       : arc.startDeg + (idx + 0.5) * perNode;
     var rad = deg * Math.PI / 180;
-    node.position({ x: cx + radius * Math.cos(rad), y: cyc + radius * Math.sin(rad) });
+    node.position({ x: cx + radiusX * Math.cos(rad), y: cyc + radiusY * Math.sin(rad) });
   });
 
-  cy.fit(cy.nodes(), 44);
+  cy.fit(cy.nodes(), 18);
   drawCategoryLabels();
 }
 
@@ -125,15 +131,16 @@ function drawCategoryLabels() {
   var overlay = document.getElementById('cat-labels');
   if (!overlay || !cy || !_arcMap || !_arcCenter) return;
   overlay.innerHTML = '';
-  var labelR = _arcRadius * 1.24;
+  var labelRX = _arcRadiusX * 1.16;
+  var labelRY = _arcRadiusY * 1.16;
   var counts = {};
   ARC_CONFIG.forEach(function(c) { counts[c.category] = c.count; });
 
   Object.keys(_arcMap).forEach(function(cat) {
     var arc = _arcMap[cat];
     var midRad = arc.midDeg * Math.PI / 180;
-    var mx = _arcCenter.x + labelR * Math.cos(midRad);
-    var my = _arcCenter.y + labelR * Math.sin(midRad);
+    var mx = _arcCenter.x + labelRX * Math.cos(midRad);
+    var my = _arcCenter.y + labelRY * Math.sin(midRad);
     var rendered = cy.modelToRenderedPosition({ x: mx, y: my });
     var el = document.createElement('div');
     el.className = 'cat-arc-label cat-arc-' + cat;
@@ -590,6 +597,14 @@ function showNodeInfo(node) {
 
   var panel = document.getElementById('info-panel');
   if (panel) { panel.innerHTML = html; panel.classList.add('visible'); }
+  var gp = document.querySelector('.graph-panel');
+  if (gp) {
+    gp.classList.add('panel-open');
+    gp.addEventListener('transitionend', function h() {
+      gp.removeEventListener('transitionend', h);
+      if (cy) applyCategoryArcLayout();
+    });
+  }
 }
 
 // ── clearNodeInfo ────────────────────────────────────────────────────────────
@@ -606,6 +621,14 @@ function _clearPanel() {
       '<div class="info-ph-icon">&#9672;</div>' +
       '<div class="info-ph-text">Select an artifact or click any node.</div>' +
       '</div>';
+  }
+  var gp = document.querySelector('.graph-panel');
+  if (gp) {
+    gp.classList.remove('panel-open');
+    gp.addEventListener('transitionend', function h() {
+      gp.removeEventListener('transitionend', h);
+      if (cy) applyCategoryArcLayout();
+    });
   }
 }
 

@@ -306,11 +306,12 @@
     .graph-panel {
       flex: 1;
       position: relative;
-      height: 74vh;
-      min-height: 460px;
+      height: 82vh;
+      min-height: 480px;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
       overflow: hidden;
+      transition: height 0.28s ease;
     }
 
     /* ── Cytoscape canvas ──────────────────────────────────────────────── */
@@ -504,8 +505,8 @@
 
     /* Narrow tablet (≤ 768px) */
     @media (max-width: 768px) {
-      .info-panel { width: 260px; }
-      .graph-panel { height: 60vh; }
+      .info-panel { width: 240px; }
+      .graph-panel { height: 68vh; }
       .piv-below { padding: 24px 16px 52px; }
     }
 
@@ -516,20 +517,23 @@
       .hero-piv, .hero-ex { font-size: 17px; }
       .piv-tagline { display: none; }
 
-      /* Graph */
-      .graph-panel { height: 50vh; min-height: 290px; }
+      /* Graph — taller on mobile so bottom sheet doesn't eat it */
+      .graph-panel { height: 56vh; min-height: 320px; }
+      .graph-panel.panel-open { height: 42vh; min-height: 240px; }
       .cat-arc-label { font-size: 7px; padding: 1px 4px; letter-spacing: 0.07em; }
       .graph-stats { font-size: 8px; padding: 3px 7px; gap: 7px; }
 
-      /* Info panel — slides up from bottom on mobile */
+      /* Info panel — fixed bottom sheet, does NOT overlap graph */
       .info-panel {
+        position: fixed;
         top: auto; left: 0; right: 0; bottom: 0;
-        width: 100%; max-height: 58vh;
+        width: 100%; max-height: 48vh;
         border-right: none;
         border-top: 1px solid var(--border);
         border-radius: 14px 14px 0 0;
         transform: translateY(100%);
         padding: 16px 16px 28px;
+        z-index: 500;
       }
       .info-panel.visible { transform: translateY(0); }
 
@@ -550,8 +554,9 @@
     @media (max-width: 400px) {
       .topbar-right { display: none; }
       .hero-piv, .hero-ex { font-size: 15px; }
-      .graph-panel { height: 44vh; min-height: 260px; }
-      .info-panel { max-height: 64vh; }
+      .graph-panel { height: 50vh; min-height: 280px; }
+      .graph-panel.panel-open { height: 38vh; }
+      .info-panel { max-height: 52vh; }
       .chip-cat-btn { font-size: 7.5px; padding: 3px 8px; }
       .artifact-chip { font-size: 8px; padding: 3px 7px; }
     }

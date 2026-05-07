@@ -230,29 +230,36 @@ function initGraph() {
       // Edge labels (shown on highlighted / next-pivot edges only)
       { selector: 'edge.highlighted', style: {
           'label': 'data(label)',
-          'font-family': 'Share Tech Mono, monospace',
-          'font-size': '7.5px',
-          'letter-spacing': '0.02em',
-          'color': '#c8ddf0',
-          'text-background-color': 'rgba(6,8,14,0.82)',
+          'font-family': 'monospace',
+          'font-size': '9px',
+          'font-weight': 'bold',
+          'color': '#ffffff',
+          'text-opacity': 1,
+          'text-background-color': '#0a1628',
           'text-background-opacity': 1,
-          'text-background-padding': '2px',
+          'text-background-padding': '3px',
           'text-background-shape': 'roundrectangle',
           'text-rotation': 'autorotate',
-          'text-margin-y': -5,
-          'z-index': 12
+          'text-wrap': 'none',
+          'z-index': 20
       }},
-      { selector: 'edge[?crossPivot].next-pivot-edge', style: {
+      { selector: 'edge.next-pivot-edge', style: {
           'label': 'data(label)',
-          'font-family': 'Share Tech Mono, monospace',
-          'font-size': '7px',
-          'color': '#7a9ab8',
-          'text-background-color': 'rgba(6,8,14,0.7)',
+          'font-family': 'monospace',
+          'font-size': '8px',
+          'color': '#c8ddf0',
+          'text-opacity': 1,
+          'text-background-color': '#0a1628',
           'text-background-opacity': 1,
           'text-background-padding': '2px',
           'text-background-shape': 'roundrectangle',
           'text-rotation': 'autorotate',
-          'text-margin-y': -5
+          'text-wrap': 'none',
+          'opacity': 1,
+          'line-color': '#2e5070',
+          'target-arrow-color': '#2e5070',
+          'width': 1.5,
+          'z-index': 15
       }},
       // Highlighted (path or first-hop)
       { selector: 'node.highlighted', style: {
@@ -435,13 +442,8 @@ function _applyPathHighlight() {
     // Next pivot nodes: semi-visible
     nextPivotSet.addClass('next-pivot');
 
-    // Next pivot edges: subtle in last node's color
+    // Next pivot edges: class-only, let stylesheet handle color (no inline opacity)
     nextPivotEdges.addClass('next-pivot-edge');
-    nextPivotEdges.style({
-      'opacity': 0.3,
-      'line-color': lastColor,
-      'target-arrow-color': lastColor
-    });
 
     // Dim everything else
     cy.nodes().difference(pathNodeSet).difference(nextPivotSet).addClass('dimmed');

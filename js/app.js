@@ -9,6 +9,7 @@ var _flowOffset = 0;
 var _arcMap = null;
 var _arcCenter = null;
 var _arcRadius = 0;
+var _activeCat = null;
 
 // ── Category colors ─────────────────────────────────────────────────────────
 var CAT_COLORS = {
@@ -467,10 +468,23 @@ function _setActiveChip(type) {
   document.querySelectorAll('.artifact-chip').forEach(function(b) { b.classList.remove('active'); });
   var chip = document.querySelector('.artifact-chip[data-type="' + type + '"]');
   if (chip) {
+    // If chip is hidden by category filter, reveal all chips first
+    if (chip.style.display === 'none') filterCat(null);
     chip.classList.add('active');
-    // Scroll the chip into view in the topbar
-    chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }
+}
+
+// ── filterCat ────────────────────────────────────────────────────────────────
+function filterCat(cat) {
+  _activeCat = cat;
+  document.querySelectorAll('.chip-artifact-row .artifact-chip').forEach(function(c) {
+    c.style.display = (!cat || c.dataset.category === cat) ? '' : 'none';
+  });
+  document.querySelectorAll('.chip-cat-btn').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.cat === cat);
+  });
+  var allBtn = document.querySelector('.chip-all');
+  if (allBtn) allBtn.classList.toggle('active', !cat);
 }
 
 // ── selectAll ───────────────────────────────────────────────────────────────
@@ -479,7 +493,7 @@ function selectAll() {
   resetHighlight();
   pivotPath = [];
   activeArtifact = null;
-  _setActiveChip('all');
+  filterCat(null);
   updateStats(null);
   renderPivotPath();
   _clearPanel();
@@ -491,7 +505,7 @@ function clearPivotPath() {
   resetHighlight();
   pivotPath = [];
   activeArtifact = null;
-  _setActiveChip('all');
+  filterCat(null);
   updateStats(null);
   renderPivotPath();
   _clearPanel();

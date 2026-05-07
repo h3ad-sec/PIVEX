@@ -180,9 +180,9 @@ function initGraph() {
           'text-rotation': 'autorotate',
           'text-wrap': 'none',
           'opacity': 1,
-          'line-color': '#2e5070',
-          'target-arrow-color': '#2e5070',
-          'width': 1.5,
+          'line-color': '#3a6080',
+          'target-arrow-color': '#3a6080',
+          'width': 1.8,
           'z-index': 15
       }},
       // Highlighted (path or first-hop)
@@ -205,8 +205,8 @@ function initGraph() {
       }},
       // Next pivot — reachable from path endpoint, not yet in path
       { selector: 'node.next-pivot', style: {
-          'opacity': 0.5,
-          'border-width': 2,
+          'opacity': 1,
+          'border-width': 2.5,
           'z-index': 5
       }},
       // Dim state

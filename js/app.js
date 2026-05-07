@@ -526,14 +526,6 @@ function showNodeInfo(node) {
 
   var panel = document.getElementById('info-panel');
   if (panel) { panel.innerHTML = html; panel.classList.add('visible'); }
-  var gp = document.querySelector('.graph-panel');
-  if (gp) {
-    gp.classList.add('panel-open');
-    gp.addEventListener('transitionend', function h() {
-      gp.removeEventListener('transitionend', h);
-      if (cy) applyCategoryArcLayout();
-    });
-  }
 }
 
 // ── clearNodeInfo ────────────────────────────────────────────────────────────
@@ -550,14 +542,6 @@ function _clearPanel() {
       '<div class="info-ph-icon">&#9672;</div>' +
       '<div class="info-ph-text">Select an artifact or click any node.</div>' +
       '</div>';
-  }
-  var gp = document.querySelector('.graph-panel');
-  if (gp) {
-    gp.classList.remove('panel-open');
-    gp.addEventListener('transitionend', function h() {
-      gp.removeEventListener('transitionend', h);
-      if (cy) applyCategoryArcLayout();
-    });
   }
 }
 

@@ -300,6 +300,7 @@
       display: flex;
       flex: 1;
       min-height: 0;
+      position: relative;
     }
 
     /* ── Graph panel ─────────────────────────────────────────────────────── */
@@ -517,25 +518,39 @@
       .hero-piv, .hero-ex { font-size: 17px; }
       .piv-tagline { display: none; }
 
-      /* Graph — taller on mobile so bottom sheet doesn't eat it */
-      .graph-panel { height: 56vh; min-height: 320px; }
-      .graph-panel.panel-open { height: 42vh; min-height: 240px; }
-      .cat-arc-label { font-size: 7px; padding: 1px 4px; letter-spacing: 0.07em; }
+      /* Main layout — stack graph + info vertically */
+      .piv-main-layout { flex-direction: column; }
+
+      /* Graph */
+      .graph-panel { height: 55vh; min-height: 300px; flex: none; }
       .graph-stats { font-size: 8px; padding: 3px 7px; gap: 7px; }
 
-      /* Info panel — fixed bottom sheet, does NOT overlap graph */
+      /* Info panel — flows below graph, no overlay */
       .info-panel {
-        position: fixed;
-        top: auto; left: 0; right: 0; bottom: 0;
-        width: 100%; max-height: 48vh;
+        position: relative;
+        top: auto; left: auto; bottom: auto;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: none;
         border-right: none;
+        border-left: none;
         border-top: 1px solid var(--border);
-        border-radius: 14px 14px 0 0;
-        transform: translateY(100%);
-        padding: 16px 16px 28px;
-        z-index: 500;
+        border-radius: 0;
+        padding: 0;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: max-height 0.3s ease, opacity 0.2s, padding 0.3s;
+        pointer-events: none;
       }
-      .info-panel.visible { transform: translateY(0); }
+      .info-panel.visible {
+        max-height: 480px;
+        opacity: 1;
+        padding: 14px 16px 20px;
+        pointer-events: auto;
+        transform: none;
+      }
 
       /* Chip topbar */
       .chip-topbar { padding: 7px 10px 6px; gap: 5px; }
@@ -554,9 +569,8 @@
     @media (max-width: 400px) {
       .topbar-right { display: none; }
       .hero-piv, .hero-ex { font-size: 15px; }
-      .graph-panel { height: 50vh; min-height: 280px; }
-      .graph-panel.panel-open { height: 38vh; }
-      .info-panel { max-height: 52vh; }
+      .graph-panel { height: 48vh; min-height: 260px; }
+      .info-panel.visible { max-height: 420px; }
       .chip-cat-btn { font-size: 7.5px; padding: 3px 8px; }
       .artifact-chip { font-size: 8px; padding: 3px 7px; }
     }
@@ -714,20 +728,20 @@
 
         <div id="cat-labels" style="display:none"></div>
 
-        <!-- Info panel (slides up from bottom of graph) -->
-        <div id="info-panel" class="info-panel">
-          <div class="info-placeholder">
-            <div class="info-ph-icon">&#9672;</div>
-            <div class="info-ph-text">Select an artifact or click any node.</div>
-          </div>
-        </div>
-
         <!-- Stats overlay -->
         <div id="graph-stats" class="graph-stats">
           <span>30 artifacts</span><span>83 pivots</span>
         </div>
 
       </div><!-- /graph-panel -->
+
+      <!-- Info panel — desktop: absolute overlay left side; mobile: below graph -->
+      <div id="info-panel" class="info-panel">
+        <div class="info-placeholder">
+          <div class="info-ph-icon">&#9672;</div>
+          <div class="info-ph-text">Select an artifact or click any node.</div>
+        </div>
+      </div>
 
     </div><!-- /piv-main-layout -->
 

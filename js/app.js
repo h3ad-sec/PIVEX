@@ -111,8 +111,8 @@ function initGraph() {
           'font-family': 'Share Tech Mono, monospace',
           'font-size': '8px',
           'font-weight': 'bold',
-          'width': 56,
-          'height': 56,
+          'width': 'data(nodeSize)',
+          'height': 'data(nodeSize)',
           'text-valign': 'center',
           'text-halign': 'center',
           'text-wrap': 'wrap',
@@ -210,7 +210,24 @@ function initGraph() {
       { selector: 'node.dimmed', style: { 'opacity': 0.055 }},
       { selector: 'edge.dimmed', style: { 'opacity': 0.015 }},
       // Selected (node in path)
-      { selector: 'node.selected', style: { 'border-width': 3.5, 'z-index': 20 }}
+      { selector: 'node.selected', style: { 'border-width': 3.5, 'z-index': 20 }},
+      // Edge hover
+      { selector: 'edge.hovered', style: {
+          'label': 'data(label)',
+          'font-family': 'monospace',
+          'font-size': '8px',
+          'color': '#e0f0ff',
+          'text-opacity': 1,
+          'text-background-color': '#0a1628',
+          'text-background-opacity': 1,
+          'text-background-padding': '2px',
+          'text-background-shape': 'roundrectangle',
+          'text-rotation': 'autorotate',
+          'text-wrap': 'none',
+          'opacity': 0.85,
+          'width': 2,
+          'z-index': 10
+      }}
     ],
     layout: {
       name: 'cose',
@@ -256,6 +273,9 @@ function initGraph() {
       clearPivotPath();
     }
   });
+
+  cy.on('mouseover', 'edge', function(evt) { evt.target.addClass('hovered'); });
+  cy.on('mouseout',  'edge', function(evt) { evt.target.removeClass('hovered'); });
 
 }
 
@@ -465,13 +485,16 @@ function renderPivotPath() {
   var trail = document.getElementById('pivotPathTrail');
   if (!bar || !trail) return;
 
+  var copyBtn = document.getElementById('pivotCopyBtn');
   if (pivotPath.length < 2) {
     bar.classList.remove('visible');
     trail.innerHTML = '';
+    if (copyBtn) copyBtn.style.display = 'none';
     return;
   }
 
   bar.classList.add('visible');
+  if (copyBtn) copyBtn.style.display = '';
   trail.innerHTML = pivotPath.map(function(id, i) {
     var nd = GRAPH_NODES.find(function(n) { return n.data.id === id; });
     var label = nd ? nd.data.label : id;
@@ -545,6 +568,34 @@ function _clearPanel() {
   }
 }
 
+// ── resetLayout ──────────────────────────────────────────────────────────────
+function resetLayout() {
+  if (!cy) return;
+  cy.layout({
+    name: 'cose', animate: true, animationDuration: 600,
+    nodeRepulsion: function() { return 10000; },
+    nodeOverlap: 24,
+    idealEdgeLength: function() { return 90; },
+    edgeElasticity: function() { return 100; },
+    gravity: 50, numIter: 1000, initialTemp: 200,
+    coolingFactor: 0.95, minTemp: 1.0,
+    randomize: true, fit: true, padding: 22
+  }).run();
+}
+
+// ── copyPivotPath ─────────────────────────────────────────────────────────────
+function copyPivotPath() {
+  if (!pivotPath.length) return;
+  var text = pivotPath.map(function(id) {
+    var nd = GRAPH_NODES.find(function(n) { return n.data.id === id; });
+    return nd ? nd.data.label : id;
+  }).join(' → ');
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('pivotCopyBtn');
+    if (btn) { btn.textContent = '✓ COPIED'; setTimeout(function() { btn.textContent = '⎘ COPY'; }, 1600); }
+  });
+}
+
 // ── toggleTheme ──────────────────────────────────────────────────────────────
 function toggleTheme() {
   var isLight = document.body.classList.toggle('light');
@@ -603,6 +654,22 @@ function escHtml(str) {
   resize();
   window.addEventListener('resize', resize);
   setInterval(draw, 55);
+})();
+
+// ── Node sizes by connectivity ───────────────────────────────────────────────
+(function() {
+  var counts = {};
+  GRAPH_NODES.forEach(function(n) { counts[n.data.id] = 0; });
+  GRAPH_EDGES.forEach(function(e) {
+    if (counts[e.data.source] !== undefined) counts[e.data.source]++;
+    if (counts[e.data.target] !== undefined) counts[e.data.target]++;
+  });
+  var vals = Object.keys(counts).map(function(k) { return counts[k]; });
+  var maxC = Math.max.apply(null, vals);
+  GRAPH_NODES.forEach(function(n) {
+    var c = counts[n.data.id] || 0;
+    n.data.nodeSize = Math.round(42 + (c / maxC) * 34);
+  });
 })();
 
 // ── Boot ─────────────────────────────────────────────────────────────────────

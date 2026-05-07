@@ -286,14 +286,31 @@
     .path-node-visited { opacity: 0.6; }
     .path-node-active  { opacity: 1; }
     .path-arrow { color: var(--muted); margin: 0 4px; flex-shrink: 0; font-size: 11px; }
-    .pivot-path-clear {
+    .pivot-path-clear, .pivot-path-copy {
       background: none; border: 1px solid var(--border); color: var(--muted);
       font-family: 'Share Tech Mono', monospace; font-size: 9px;
       padding: 2px 8px; border-radius: 3px; cursor: pointer;
       flex-shrink: 0; letter-spacing: 0.08em;
       transition: color 0.12s, border-color 0.12s; white-space: nowrap;
     }
-    .pivot-path-clear:hover { color: var(--text); border-color: var(--accent); }
+    .pivot-path-clear:hover { color: var(--text); border-color: #ff5555; }
+    .pivot-path-copy { border-color: rgba(0,212,255,0.3); color: rgba(0,212,255,0.6); }
+    .pivot-path-copy:hover { color: #00d4ff; border-color: #00d4ff; }
+
+    /* ── Graph toolbar ──────────────────────────────────────────────────────── */
+    .graph-toolbar {
+      position: absolute; top: 12px; right: 12px;
+      display: flex; flex-direction: column; gap: 4px; z-index: 18;
+    }
+    .gtb-btn {
+      width: 28px; height: 28px;
+      background: rgba(9,13,22,0.82); border: 1px solid var(--border);
+      color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 15px;
+      border-radius: 4px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.14s; backdrop-filter: blur(4px);
+    }
+    .gtb-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,255,159,0.08); }
 
     /* ── Main layout ───────────────────────────────────────────────────── */
     .piv-main-layout {
@@ -714,6 +731,7 @@
     <!-- ── Pivot path breadcrumb ──────────────────────────────────────── -->
     <div class="pivot-path-bar" id="pivotPathBar">
       <div class="pivot-path-trail" id="pivotPathTrail"></div>
+      <button class="pivot-path-copy" id="pivotCopyBtn" onclick="copyPivotPath()" style="display:none">&#x2398; COPY</button>
       <button class="pivot-path-clear" onclick="clearPivotPath()">&#x2715; CLEAR</button>
     </div>
 
@@ -731,6 +749,13 @@
         <!-- Stats overlay -->
         <div id="graph-stats" class="graph-stats">
           <span>30 artifacts</span><span>83 pivots</span>
+        </div>
+
+        <!-- Graph toolbar -->
+        <div class="graph-toolbar">
+          <button class="gtb-btn" onclick="cy.zoom(Math.min(cy.zoom()*1.3,3))" title="Zoom in">+</button>
+          <button class="gtb-btn" onclick="cy.zoom(Math.max(cy.zoom()*0.75,0.3))" title="Zoom out">&#x2212;</button>
+          <button class="gtb-btn" onclick="resetLayout()" title="Reset layout">&#x21BB;</button>
         </div>
 
       </div><!-- /graph-panel -->

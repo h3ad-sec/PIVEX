@@ -226,6 +226,33 @@ function initGraph() {
           'transition-property': 'opacity width line-color',
           'transition-duration': '0.18s'
       }},
+      // Edge labels (shown on highlighted / next-pivot edges only)
+      { selector: 'edge.highlighted', style: {
+          'label': 'data(label)',
+          'font-family': 'Share Tech Mono, monospace',
+          'font-size': '7.5px',
+          'letter-spacing': '0.02em',
+          'color': '#c8ddf0',
+          'text-background-color': 'rgba(6,8,14,0.82)',
+          'text-background-opacity': 1,
+          'text-background-padding': '2px',
+          'text-background-shape': 'roundrectangle',
+          'text-rotation': 'autorotate',
+          'text-margin-y': -5,
+          'z-index': 12
+      }},
+      { selector: 'edge[?crossPivot].next-pivot-edge', style: {
+          'label': 'data(label)',
+          'font-family': 'Share Tech Mono, monospace',
+          'font-size': '7px',
+          'color': '#7a9ab8',
+          'text-background-color': 'rgba(6,8,14,0.7)',
+          'text-background-opacity': 1,
+          'text-background-padding': '2px',
+          'text-background-shape': 'roundrectangle',
+          'text-rotation': 'autorotate',
+          'text-margin-y': -5
+      }},
       // Highlighted (path or first-hop)
       { selector: 'node.highlighted', style: {
           'opacity': 1,
@@ -385,7 +412,7 @@ function _applyPathHighlight() {
   cy.batch(function() {
     cy.elements().removeStyle();
     cy.nodes().removeClass('highlighted dimmed selected next-pivot');
-    cy.edges().removeClass('highlighted dimmed');
+    cy.edges().removeClass('highlighted dimmed next-pivot-edge');
 
     // Path nodes: highlighted
     pathNodeSet.addClass('highlighted');
@@ -408,6 +435,7 @@ function _applyPathHighlight() {
     nextPivotSet.addClass('next-pivot');
 
     // Next pivot edges: subtle in last node's color
+    nextPivotEdges.addClass('next-pivot-edge');
     nextPivotEdges.style({
       'opacity': 0.3,
       'line-color': lastColor,
@@ -475,7 +503,7 @@ function resetHighlight() {
   cy.batch(function() {
     cy.elements().removeStyle();
     cy.nodes().removeClass('highlighted dimmed selected next-pivot');
-    cy.edges().removeClass('highlighted dimmed');
+    cy.edges().removeClass('highlighted dimmed next-pivot-edge');
   });
 }
 

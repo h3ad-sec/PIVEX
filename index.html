@@ -319,23 +319,30 @@
     /* ── Info panel ─────────────────────────────────────────────────────── */
     .info-panel {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: var(--panel);
-      border-top: 1px solid var(--border);
-      padding: 0 20px;
-      max-height: 0;
-      overflow: hidden;
+      top: 0; left: 0; bottom: 0;
+      width: 280px;
+      background: rgba(9,13,22,0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid var(--border);
+      padding: 14px 16px;
+      overflow-y: auto; overflow-x: hidden;
       opacity: 0;
       pointer-events: none;
-      transition: max-height 0.28s ease, opacity 0.2s, padding 0.2s;
+      transform: translateX(-100%);
+      transition: transform 0.26s ease, opacity 0.22s;
       z-index: 15;
+      scrollbar-width: thin;
+      scrollbar-color: var(--muted-dim) transparent;
     }
+    .info-panel::-webkit-scrollbar { width: 3px; }
+    .info-panel::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
     .info-panel.visible {
-      max-height: 200px;
       opacity: 1;
       pointer-events: auto;
-      padding: 12px 20px;
+      transform: translateX(0);
     }
+    body.light .info-panel { background: rgba(238,242,248,0.96); }
 
     .info-placeholder {
       display: flex; flex-direction: column; align-items: center;
@@ -383,13 +390,11 @@
     .info-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 9px; }
     .info-stat { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--accent); margin-top: 2px; }
     .info-hint { font-size: 9.5px; color: var(--muted); font-style: italic; margin-top: 6px; }
-    .info-inner { overflow-y: auto; max-height: 160px; }
-    .info-inner::-webkit-scrollbar { width: 3px; }
-    .info-inner::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
+    .info-inner { overflow-y: visible; }
 
     /* ── Graph stats overlay ─────────────────────────────────────────────── */
     .graph-stats {
-      position: absolute; bottom: 10px; left: 10px; z-index: 20;
+      position: absolute; bottom: 10px; right: 10px; z-index: 20;
       font-family: 'Share Tech Mono', monospace; font-size: 9px;
       letter-spacing: 0.07em; color: var(--muted);
       display: flex; gap: 10px;
@@ -686,27 +691,39 @@
               <table class="ref-table">
                 <thead><tr><th>FROM</th><th>TO</th><th>PURPOSE</th></tr></thead>
                 <tbody>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Domain / FQDN</td><td>Passive DNS resolution</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>SSL Cert</td><td>Infrastructure clustering</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Domain</td><td><span class="ref-arrow">&#8594;</span>URL / IP</td><td>Delivery &amp; hosting pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>Hash</td><td>Payload download chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>HTTP Req</td><td><span class="ref-arrow">&#8594;</span>JA3 / UA</td><td>TLS fingerprint &amp; tool ID</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>SSL Cert</td><td><span class="ref-arrow">&#8594;</span>JA3</td><td>TLS client fingerprint</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>Active session pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>File</td><td>Payload download chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Net Session</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>Session attribution</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>File / Process</td><td>Execution &amp; artifact chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>File</td><td>On-disk artifact lookup</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Cmd Line</td><td>LOLBin &amp; arg analysis</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Registry</td><td>Persistence write</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Sched. Task</td><td>Persistence creation</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Vuln ID</td><td>Patch state pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>Scope affected assets</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>User</td><td><span class="ref-arrow">&#8594;</span>Host / Identity</td><td>Lateral move &amp; cloud pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>RDP Session</td><td><span class="ref-arrow">&#8594;</span>Host / IP</td><td>Lateral movement tracking</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Attach / URL</td><td>Phishing chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-cld">CLD</span>Cloud Res</td><td><span class="ref-arrow">&#8594;</span>Identity / IP</td><td>IAM &amp; access origin pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Vuln ID</td><td><span class="ref-arrow">&#8594;</span>Host / Service</td><td>Affected asset scope</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Domain / FQDN</td><td>resolves_to — Passive DNS pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>SSL Certificate</td><td>presents — Cert infra clustering</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>communicates_with — Session pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Domain</td><td><span class="ref-arrow">&#8594;</span>IP / FQDN / URL</td><td>resolves_to / parent_of / hosts</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Domain</td><td><span class="ref-arrow">&#8594;</span>SSL Certificate</td><td>uses — Cert-based infra link</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>File</td><td>delivers — Payload download chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>HTTP Request</td><td>requested_via — Request trace</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Net Session</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>originates_from / queries</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>SSL Certificate</td><td><span class="ref-arrow">&#8594;</span>Domain / IP</td><td>issued_to / used_by</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>JA3</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>observed_on / connects_to</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>User Agent</td><td><span class="ref-arrow">&#8594;</span>URL / Net Session</td><td>accesses / part_of</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>File</td><td>identifies — File artifact lookup</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>URL / IP / Domain</td><td>downloaded_from / hosted_on / associated_with</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by — Execution chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Hash / Process</td><td>has_hash / executed_by</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>exists_on / owned_by</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>File</td><td>points_to — On-disk lookup</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Command Line</td><td>executed_with — LOLBin analysis</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Registry</td><td>modifies — Persistence write</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Sched. Task / Startup Item</td><td>creates — Persistence chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>spawned_by / spawns — Tree walk</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>File / User / Host</td><td>runs / executed_as / runs_on</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Process / File / User</td><td>runs / stores / used_by</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>generates — Session scope</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Vuln ID</td><td><span class="ref-arrow">&#8594;</span>Host</td><td>affects — Affected asset scope</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>User</td><td><span class="ref-arrow">&#8594;</span>Host / Process</td><td>logs_into / executes</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>User</td><td><span class="ref-arrow">&#8594;</span>IP / Cloud Resource</td><td>originates_from / accesses</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>RDP Session</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>connects_to / initiated_by</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>Identity</td><td><span class="ref-arrow">&#8594;</span>User</td><td>represents — Cloud identity map</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Attachment / URL</td><td>contains — Phishing chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Domain</td><td>originates_from — Sender pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Attachment</td><td><span class="ref-arrow">&#8594;</span>Hash</td><td>has_hash — Payload hash</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-cld">CLD</span>Cloud Resource</td><td><span class="ref-arrow">&#8594;</span>Identity / IP</td><td>owned_by / exposed_via</td></tr>
                 </tbody>
               </table>
             </div>
@@ -719,26 +736,35 @@
               <table class="ref-table">
                 <thead><tr><th>ARTIFACT TYPE</th><th>PRIMARY SOURCES</th></tr></thead>
                 <tbody>
-                  <tr><td>IP Address</td><td>Firewall &middot; SIEM &middot; NetFlow &middot; Shodan &middot; AbuseIPDB</td></tr>
-                  <tr><td>Domain / FQDN</td><td>Passive DNS &middot; Proxy logs &middot; DNS server logs &middot; RiskIQ</td></tr>
-                  <tr><td>URL</td><td>Proxy &middot; Email Gateway &middot; Browser history &middot; EDR</td></tr>
-                  <tr><td>DNS Query</td><td>DNS logs &middot; Sysmon Event 22 &middot; EDR &middot; Network tap</td></tr>
-                  <tr><td>HTTP Request / UA</td><td>Proxy &middot; Zeek &middot; Suricata &middot; Network sensor</td></tr>
-                  <tr><td>SSL Cert / SSL Certificate</td><td>Censys &middot; Shodan &middot; crt.sh &middot; JARM</td></tr>
-                  <tr><td>JA3 Hash</td><td>Network sensor &middot; Zeek &middot; Suricata &middot; PCAP</td></tr>
-                  <tr><td>Net Traffic / Net Session</td><td>NetFlow &middot; Zeek &middot; Firewall &middot; Proxy</td></tr>
-                  <tr><td>File Hash</td><td>EDR &middot; AV &middot; Sandbox &middot; MalwareBazaar &middot; VT</td></tr>
-                  <tr><td>File / File Path</td><td>EDR &middot; Sysmon Event 11 &middot; MFT &middot; File system audit</td></tr>
-                  <tr><td>Process</td><td>EDR &middot; Sysmon Event 1 &middot; WinEvent 4688</td></tr>
-                  <tr><td>Command Line</td><td>EDR &middot; Sysmon Event 1 &middot; PowerShell Script Block log</td></tr>
-                  <tr><td>Registry</td><td>Sysmon 12-14 &middot; EDR &middot; WinEvent 4657 &middot; Autoruns</td></tr>
-                  <tr><td>Sched. Task / Startup Item</td><td>WinEvent 4698 &middot; Autoruns &middot; EDR &middot; Task Scheduler logs</td></tr>
-                  <tr><td>Host / Network Share</td><td>EDR &middot; CMDB &middot; AD &middot; WinEvent 5140/5145</td></tr>
-                  <tr><td>Event ID</td><td>Windows Event Log &middot; SIEM &middot; Splunk &middot; Elastic</td></tr>
-                  <tr><td>Vuln ID (CVE)</td><td>NVD &middot; CISA KEV &middot; Tenable &middot; Qualys &middot; Shodan</td></tr>
-                  <tr><td>User / Identity / RDP</td><td>AD &middot; Okta &middot; IAM &middot; WinEvent 4624/4778</td></tr>
-                  <tr><td>Email / Attachment</td><td>Email Gateway &middot; O365 Message Trace &middot; Proofpoint</td></tr>
-                  <tr><td>Cloud Resource</td><td>CloudTrail &middot; GuardDuty &middot; Azure Monitor &middot; GCP Audit</td></tr>
+                  <tr><td>IP Address</td><td>Firewall · SIEM · NetFlow · Proxy · Shodan · AbuseIPDB</td></tr>
+                  <tr><td>Domain</td><td>Passive DNS · Proxy logs · DNS server logs · RiskIQ · SecurityTrails</td></tr>
+                  <tr><td>FQDN</td><td>DNS logs · Sysmon Event 22 · EDR · Proxy</td></tr>
+                  <tr><td>URL</td><td>Proxy logs · Email Gateway · Browser history · EDR · Zeek</td></tr>
+                  <tr><td>DNS Query</td><td>DNS logs · Sysmon Event 22 · EDR · Network tap</td></tr>
+                  <tr><td>HTTP Request</td><td>Proxy · Zeek · Suricata · Firewall · Network sensor</td></tr>
+                  <tr><td>SSL Cert / SSL Certificate</td><td>Censys · Shodan · crt.sh · JARM · Passive DNS</td></tr>
+                  <tr><td>JA3 Hash</td><td>Network sensor · Zeek · Suricata · PCAP</td></tr>
+                  <tr><td>User Agent</td><td>Proxy · Zeek · Firewall logs · SIEM</td></tr>
+                  <tr><td>Net Traffic</td><td>NetFlow · PCAP · Zeek · Suricata · Firewall</td></tr>
+                  <tr><td>Net Session</td><td>NetFlow · Firewall · Proxy · Zeek · EDR</td></tr>
+                  <tr><td>File Hash</td><td>EDR · AV · Sandbox · MalwareBazaar · VirusTotal</td></tr>
+                  <tr><td>File</td><td>EDR · Sandbox · AV · MalwareBazaar · File system audit</td></tr>
+                  <tr><td>File Path</td><td>EDR · Sysmon Event 11 · MFT · USN Journal · KAPE</td></tr>
+                  <tr><td>Process</td><td>EDR · Sysmon Event 1 · WinEvent 4688 · Process Monitor</td></tr>
+                  <tr><td>Command Line</td><td>EDR · Sysmon Event 1 · WinEvent 4688 · PowerShell ScriptBlock</td></tr>
+                  <tr><td>Registry Key</td><td>Sysmon 12-14 · EDR · WinEvent 4657 · Autoruns · reg.exe</td></tr>
+                  <tr><td>Scheduled Task</td><td>WinEvent 4698 · Task Scheduler logs · EDR · Autoruns</td></tr>
+                  <tr><td>Startup Item</td><td>Autoruns · EDR · Sysmon · Registry audit · WinEvent 4688</td></tr>
+                  <tr><td>Host</td><td>EDR · SIEM · AD · CMDB · Vuln Scanner</td></tr>
+                  <tr><td>Network Share</td><td>WinEvent 5140/5145 · EDR · Sysmon · AD</td></tr>
+                  <tr><td>Event ID</td><td>Windows Event Log · SIEM · Splunk · Elastic</td></tr>
+                  <tr><td>Vuln ID (CVE)</td><td>NVD · CISA KEV · Tenable · Qualys · Shodan</td></tr>
+                  <tr><td>User</td><td>AD logs · IAM · Okta · SIEM · UEBA</td></tr>
+                  <tr><td>Identity</td><td>Azure AD · AWS IAM · GCP SA · Okta · CloudTrail</td></tr>
+                  <tr><td>RDP Session</td><td>WinEvent 4624/4778/4779 · EDR · NetFlow · Security Onion</td></tr>
+                  <tr><td>Email</td><td>Email Gateway · O365 Message Trace · Proofpoint · Mimecast</td></tr>
+                  <tr><td>Attachment</td><td>Email Gateway · Sandbox · AV · EDR · O365 ATP</td></tr>
+                  <tr><td>Cloud Resource</td><td>CloudTrail · Azure Monitor · GCP Audit · GuardDuty</td></tr>
                 </tbody>
               </table>
             </div>

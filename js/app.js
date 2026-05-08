@@ -1,4 +1,4 @@
-// PIVEX — app.js  v9.2
+// PIVEX — app.js  v10.0
 
 // ── State ───────────────────────────────────────────────────────────────────
 var cy = null;
@@ -30,19 +30,21 @@ var SHORT_LABELS = {
   dns_query:'DNS-Q', http_request:'HTTP',
   ssl_cert:'SSL', ssl_certificate:'SSL-CERT', ja3:'JA3',
   user_agent:'UA', network_traffic:'NETFLOW', network_session:'NET-SES',
+  asn:'ASN', port:'PORT',
   hash:'HASH', file:'FILE', file_path:'F-PATH', process:'PROC',
   command_line:'CMD', registry:'REG', scheduled_task:'S-TASK',
   startup_item:'STARTUP', host:'HOST', share:'SHARE',
   event_id:'EVT-ID', vulnerability_id:'CVE',
+  service:'SVC', mutex:'MUTEX', named_pipe:'NPIPE', dll:'DLL',
   user:'USER', identity:'IDENT', rdp_session:'RDP',
   email:'EMAIL', attachment:'ATTACH',
   cloud_resource:'CLOUD'
 };
 
-// ── Arc layout config ────────────────────────────────────────────────────────
+// ── Arc layout config (category node counts) ─────────────────────────────────
 var ARC_CONFIG = [
-  { category: 'network',  count: 12 },
-  { category: 'endpoint', count: 12 },
+  { category: 'network',  count: 14 },
+  { category: 'endpoint', count: 16 },
   { category: 'identity', count: 3  },
   { category: 'email',    count: 2  },
   { category: 'cloud',    count: 1  }
@@ -51,24 +53,23 @@ var ARC_CONFIG = [
 // ── Artifact order (grouped by category, clockwise) ──────────────────────────
 var ARTIFACT_ORDER = [
   'ip','domain','fqdn','url','dns_query','http_request',
-  'ssl_cert','ssl_certificate','ja3','user_agent','network_traffic','network_session',
+  'ssl_cert','ssl_certificate','ja3','user_agent','network_traffic','network_session','asn','port',
   'hash','file','file_path','process','command_line','registry',
   'scheduled_task','startup_item','host','share','event_id','vulnerability_id',
+  'service','mutex','named_pipe','dll',
   'user','identity','rdp_session',
   'email','attachment',
   'cloud_resource'
 ];
 
-// ── applyCategoryArcLayout ───────────────────────────────────────────────────
 function applyCategoryArcLayout() {
   if (!cy) return;
   cy.fit(cy.nodes(), 22);
 }
 
-// ── drawCategoryLabels ───────────────────────────────────────────────────────
-function drawCategoryLabels() { /* no-op: arc layout replaced by force layout */ }
+function drawCategoryLabels() {}
 
-function updateCategoryHalos() { /* removed */ }
+function updateCategoryHalos() {}
 
 // ── startEdgeFlow / stopEdgeFlow ─────────────────────────────────────────────
 function startEdgeFlow() {
@@ -90,7 +91,7 @@ function updateStats(selectedType) {
   var el = document.getElementById('graph-stats');
   if (!el) return;
   if (!selectedType) {
-    el.innerHTML = '<span>30 artifacts</span><span>83 pivots</span>';
+    el.innerHTML = '<span>36 artifacts</span><span>168+ pivots</span>';
   } else {
     var pathData = ARTIFACT_PATHS[selectedType];
     var nc = pathData ? pathData.nodes.length - 1 : 0;
@@ -484,16 +485,19 @@ function renderPivotPath() {
   var trail = document.getElementById('pivotPathTrail');
   if (!bar || !trail) return;
 
-  var copyBtn = document.getElementById('pivotCopyBtn');
+  var copyBtn   = document.getElementById('pivotCopyBtn');
+  var exportBtn = document.getElementById('pivotExportBtn');
   if (pivotPath.length < 2) {
     bar.classList.remove('visible');
     trail.innerHTML = '';
-    if (copyBtn) copyBtn.style.display = 'none';
+    if (copyBtn)   copyBtn.style.display = 'none';
+    if (exportBtn) exportBtn.style.display = 'none';
     return;
   }
 
   bar.classList.add('visible');
-  if (copyBtn) copyBtn.style.display = '';
+  if (copyBtn)   copyBtn.style.display = '';
+  if (exportBtn) exportBtn.style.display = '';
   trail.innerHTML = pivotPath.map(function(id, i) {
     var nd = GRAPH_NODES.find(function(n) { return n.data.id === id; });
     var label = nd ? nd.data.label : id;
@@ -531,6 +535,17 @@ function showNodeInfo(node) {
     ? '<div class="info-section"><div class="info-section-label">DATA SOURCES</div>' +
       '<div class="info-sources">' + escHtml(d.sources) + '</div></div>'
     : '';
+  var mitreHtml = d.mitre
+    ? '<div class="info-section"><div class="info-section-label">MITRE ATT&amp;CK</div>' +
+      '<div class="info-mitre">' +
+      d.mitre.split('·').map(function(t) {
+        var tid = t.trim();
+        return '<a class="mitre-tag" href="https://attack.mitre.org/techniques/' +
+          encodeURIComponent(tid.replace('.','/',1)) +
+          '/" target="_blank" rel="noopener">' + escHtml(tid) + '</a>';
+      }).join('') +
+      '</div></div>'
+    : '';
 
   var html = '<div class="info-header">' +
     '<span class="info-type-badge info-type-artifact">Artifact</span>' +
@@ -540,7 +555,7 @@ function showNodeInfo(node) {
     '<div class="info-inner">' +
     '<div class="info-title">' + escHtml(d.label || d.id) + '</div>';
   if (d.desc) html += '<div class="info-desc">' + escHtml(d.desc) + '</div>';
-  html += sourcesHtml + pivotsHtml;
+  html += sourcesHtml + pivotsHtml + mitreHtml;
   if (pivotPath.length > 0) {
     html += '<div class="info-hint">Click a highlighted node to extend pivot path.</div>';
   }
@@ -618,14 +633,15 @@ var _LAYOUTS = {
   },
   circle: {
     name: 'circle', animate: true, animationDuration: 500,
-    fit: true, padding: 28, startAngle: -Math.PI / 2, clockwise: true
+    fit: true, padding: 28, startAngle: -Math.PI / 2, clockwise: true,
+    avoidOverlap: true, avoidOverlapPadding: 6
   },
   concentric: {
     name: 'concentric', animate: true, animationDuration: 500,
     fit: true, padding: 28,
     concentric: function(n) { return n.degree(); },
     levelWidth: function(nodes) { return Math.max(1, nodes.maxDegree() / 5); },
-    minNodeSpacing: 12
+    minNodeSpacing: 10, avoidOverlap: true
   },
   grid: {
     name: 'grid', animate: true, animationDuration: 500,
@@ -639,7 +655,13 @@ function switchLayout(name) {
   document.querySelectorAll('.gtb-layout').forEach(function(b) { b.classList.remove('active'); });
   var btn = document.getElementById('ltb-' + name);
   if (btn) btn.classList.add('active');
-  cy.layout(_LAYOUTS[name] || _LAYOUTS.cose).run();
+  var pad = window.innerWidth <= 600 ? 14 : 24;
+  var base = _LAYOUTS[name] || _LAYOUTS.cose;
+  var cfg = {}; for (var k in base) cfg[k] = base[k];
+  cfg.padding = pad;
+  var layout = cy.layout(cfg);
+  layout.on('layoutstop', function() { cy.fit(cy.nodes(), pad); });
+  layout.run();
 }
 
 function resetLayout() { switchLayout(_activeLayout); }
@@ -655,6 +677,57 @@ function copyPivotPath() {
     var btn = document.getElementById('pivotCopyBtn');
     if (btn) { btn.textContent = '✓ COPIED'; setTimeout(function() { btn.textContent = '⎘ COPY'; }, 1600); }
   });
+}
+
+// ── exportPivotPath ───────────────────────────────────────────────────────────
+function exportPivotPath() {
+  if (pivotPath.length < 2) return;
+
+  var rows = [['Step','From Artifact','From Category','Relationship','To Artifact','To Category','Data Sources','MITRE ATT&CK']];
+
+  for (var i = 0; i < pivotPath.length - 1; i++) {
+    var srcId = pivotPath[i];
+    var tgtId = pivotPath[i + 1];
+
+    var srcNd = GRAPH_NODES.find(function(n) { return n.data.id === srcId; });
+    var tgtNd = GRAPH_NODES.find(function(n) { return n.data.id === tgtId; });
+
+    var edge = GRAPH_EDGES.find(function(e) {
+      return (e.data.source === srcId && e.data.target === tgtId) ||
+             (e.data.source === tgtId && e.data.target === srcId);
+    });
+
+    rows.push([
+      i + 1,
+      srcNd ? srcNd.data.label    : srcId,
+      srcNd ? srcNd.data.category : '',
+      edge  ? edge.data.label     : '',
+      tgtNd ? tgtNd.data.label    : tgtId,
+      tgtNd ? tgtNd.data.category : '',
+      tgtNd ? (tgtNd.data.sources || '') : '',
+      tgtNd ? (tgtNd.data.mitre   || '') : ''
+    ]);
+  }
+
+  var csv = rows.map(function(r) {
+    return r.map(function(cell) {
+      var s = String(cell).replace(/"/g, '""');
+      return /[,"\n]/.test(s) ? '"' + s + '"' : s;
+    }).join(',');
+  }).join('\r\n');
+
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href  = url;
+  a.download = 'pivex-path-' + Date.now() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  var btn = document.getElementById('pivotExportBtn');
+  if (btn) { btn.textContent = '✓ SAVED'; setTimeout(function() { btn.textContent = '⇩ CSV'; }, 1600); }
 }
 
 // ── toggleTheme ──────────────────────────────────────────────────────────────
@@ -696,17 +769,22 @@ function escHtml(str) {
   var canvas = document.getElementById('matrix');
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
-  var terms = ['IOC','PIVOT','TTPs','C2','SIEM','EDR','HASH','SCAN',
-                'DNS','TI','CVE','YARA','MITRE','HUNT','SOCK','APT',
-                'NULL','0x','0xff','REG','SMB','WMI','LSASS','RCE'];
+  var terms = ['10.0.0.1','192.168.','8.8.8.8','172.16.',
+                'PIVOT','IOC','TTPs','C2','HASH','CVE','ASN','PORT',
+                'DNS','YARA','MITRE','HUNT','EDR','SIEM','APT','TI',
+                'LSASS','SMB','WMI','RDP','HTTP','SSL','JA3','NULL',
+                '0x','0xff','REG','RCE','H3AD','PIVEX'];
   var cols, drops, fs = 13;
   function resize() {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     cols = Math.floor(canvas.width / fs); drops = Array(cols).fill(1);
   }
   function draw() {
-    ctx.fillStyle = 'rgba(6,8,15,0.15)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = 'rgba(0,255,159,0.22)'; ctx.font = fs + 'px Share Tech Mono,monospace';
+    var l = document.body.classList.contains('light');
+    ctx.fillStyle = l ? 'rgba(245,247,251,0.08)' : 'rgba(0,0,0,0.12)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = l ? '#0077ff' : '#00ff9f';
+    ctx.font = fs + 'px Share Tech Mono,monospace';
     for (var i = 0; i < drops.length; i++) {
       ctx.fillText(terms[Math.floor(Math.random()*terms.length)], i*fs, drops[i]*fs);
       if (drops[i]*fs > canvas.height && Math.random() > 0.975) drops[i] = 0;

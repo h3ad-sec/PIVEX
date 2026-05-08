@@ -304,14 +304,14 @@
     }
     .gtb-btn {
       width: 28px; height: 28px;
-      background: rgba(9,13,22,0.82); border: 1px solid var(--border);
+      background: var(--panel); border: 1px solid var(--border);
       color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 15px;
       border-radius: 4px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.14s; backdrop-filter: blur(4px);
     }
-    .gtb-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,255,159,0.08); }
-    .gtb-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0,255,159,0.14); }
+    .gtb-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--panel-alt); }
+    .gtb-btn.active { color: var(--accent); border-color: var(--accent); background: var(--surface); }
     .gtb-sep { height: 1px; background: var(--border); margin: 3px 0; }
 
     /* ── Node tooltip ───────────────────────────────────────────────────────── */
@@ -340,8 +340,8 @@
     .graph-panel {
       flex: 1;
       position: relative;
-      height: 82vh;
-      min-height: 480px;
+      height: calc(100vh - var(--nav-h) - 128px);
+      min-height: 500px;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
       overflow: hidden;
@@ -540,7 +540,7 @@
     /* Narrow tablet (≤ 768px) */
     @media (max-width: 768px) {
       .info-panel { width: 240px; }
-      .graph-panel { height: 68vh; }
+      .graph-panel { height: calc(100vh - var(--nav-h) - 140px); }
       .piv-below { padding: 24px 16px 52px; }
     }
 
@@ -555,7 +555,7 @@
       .piv-main-layout { flex-direction: column; }
 
       /* Graph */
-      .graph-panel { height: 55vh; min-height: 300px; flex: none; }
+      .graph-panel { height: calc(100svh - var(--nav-h) - 160px); min-height: 320px; flex: none; }
       .graph-stats { font-size: 8px; padding: 3px 7px; gap: 7px; }
 
       /* Info panel — flows below graph, no overlay */
@@ -602,7 +602,7 @@
     @media (max-width: 400px) {
       .topbar-right { display: none; }
       .hero-piv, .hero-ex { font-size: 15px; }
-      .graph-panel { height: 48vh; min-height: 260px; }
+      .graph-panel { height: calc(100svh - var(--nav-h) - 180px); min-height: 260px; }
       .info-panel.visible { max-height: 420px; }
       .chip-cat-btn { font-size: 7.5px; padding: 3px 8px; }
       .artifact-chip { font-size: 8px; padding: 3px 7px; }
@@ -700,9 +700,9 @@
 
       <!-- Row 1: ALL + category filter tabs -->
       <div class="chip-cat-row">
-        <button class="chip-all active" data-type="all" onclick="selectAll()">ALL &middot; 30</button>
-        <button class="chip-cat-btn cat-btn-net" data-cat="network"  onclick="filterCat('network')">NET &middot; 12</button>
-        <button class="chip-cat-btn cat-btn-ept"        data-cat="endpoint" onclick="filterCat('endpoint')">EPT &middot; 12</button>
+        <button class="chip-all active" data-type="all" onclick="selectAll()">ALL &middot; 36</button>
+        <button class="chip-cat-btn cat-btn-net" data-cat="network"  onclick="filterCat('network')">NET &middot; 14</button>
+        <button class="chip-cat-btn cat-btn-ept"        data-cat="endpoint" onclick="filterCat('endpoint')">EPT &middot; 16</button>
         <button class="chip-cat-btn cat-btn-idn"        data-cat="identity" onclick="filterCat('identity')">IDN &middot; 3</button>
         <button class="chip-cat-btn cat-btn-eml"        data-cat="email"    onclick="filterCat('email')">EML &middot; 2</button>
         <button class="chip-cat-btn cat-btn-cld"        data-cat="cloud"    onclick="filterCat('cloud')">CLD &middot; 1</button>
@@ -722,6 +722,8 @@
         <button class="artifact-chip" data-type="user_agent"      data-category="network"  onclick="selectArtifact('user_agent')">User Agent</button>
         <button class="artifact-chip" data-type="network_traffic" data-category="network"  onclick="selectArtifact('network_traffic')">Net Traffic</button>
         <button class="artifact-chip" data-type="network_session" data-category="network"  onclick="selectArtifact('network_session')">Net Session</button>
+        <button class="artifact-chip" data-type="asn"             data-category="network"  onclick="selectArtifact('asn')">ASN</button>
+        <button class="artifact-chip" data-type="port"            data-category="network"  onclick="selectArtifact('port')">Port</button>
         <button class="artifact-chip" data-type="hash"            data-category="endpoint" onclick="selectArtifact('hash')">File Hash</button>
         <button class="artifact-chip" data-type="file"            data-category="endpoint" onclick="selectArtifact('file')">File</button>
         <button class="artifact-chip" data-type="file_path"       data-category="endpoint" onclick="selectArtifact('file_path')">File Path</button>
@@ -734,6 +736,10 @@
         <button class="artifact-chip" data-type="share"           data-category="endpoint" onclick="selectArtifact('share')">Network Share</button>
         <button class="artifact-chip" data-type="event_id"        data-category="endpoint" onclick="selectArtifact('event_id')">Event ID</button>
         <button class="artifact-chip" data-type="vulnerability_id" data-category="endpoint" onclick="selectArtifact('vulnerability_id')">Vuln ID</button>
+        <button class="artifact-chip" data-type="service"         data-category="endpoint" onclick="selectArtifact('service')">Service</button>
+        <button class="artifact-chip" data-type="mutex"           data-category="endpoint" onclick="selectArtifact('mutex')">Mutex</button>
+        <button class="artifact-chip" data-type="named_pipe"      data-category="endpoint" onclick="selectArtifact('named_pipe')">Named Pipe</button>
+        <button class="artifact-chip" data-type="dll"             data-category="endpoint" onclick="selectArtifact('dll')">DLL</button>
         <button class="artifact-chip" data-type="user"            data-category="identity" onclick="selectArtifact('user')">User</button>
         <button class="artifact-chip" data-type="identity"        data-category="identity" onclick="selectArtifact('identity')">Identity</button>
         <button class="artifact-chip" data-type="rdp_session"     data-category="identity" onclick="selectArtifact('rdp_session')">RDP Session</button>

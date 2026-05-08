@@ -227,18 +227,18 @@ function initGraph() {
       name: 'cose',
       animate: true,
       animationDuration: 900,
-      nodeRepulsion: function() { return 10000; },
-      nodeOverlap: 24,
-      idealEdgeLength: function() { return 90; },
-      edgeElasticity: function() { return 100; },
-      gravity: 50,
-      numIter: 1000,
-      initialTemp: 200,
+      nodeRepulsion: function() { return 20000; },
+      nodeOverlap: 18,
+      idealEdgeLength: function() { return 140; },
+      edgeElasticity: function() { return 80; },
+      gravity: 22,
+      numIter: 1500,
+      initialTemp: 250,
       coolingFactor: 0.95,
       minTemp: 1.0,
       randomize: true,
       fit: true,
-      padding: 22
+      padding: 30
     },
     userZoomingEnabled: true,
     userPanningEnabled: true,
@@ -608,13 +608,13 @@ function toggleFocusMode() {
 var _LAYOUTS = {
   cose: {
     name: 'cose', animate: true, animationDuration: 600,
-    nodeRepulsion: function() { return 10000; },
-    nodeOverlap: 24,
-    idealEdgeLength: function() { return 90; },
-    edgeElasticity: function() { return 100; },
-    gravity: 50, numIter: 1000, initialTemp: 200,
+    nodeRepulsion: function() { return 20000; },
+    nodeOverlap: 18,
+    idealEdgeLength: function() { return 140; },
+    edgeElasticity: function() { return 80; },
+    gravity: 22, numIter: 1500, initialTemp: 250,
     coolingFactor: 0.95, minTemp: 1.0,
-    randomize: true, fit: true, padding: 22
+    randomize: true, fit: true, padding: 30
   },
   circle: {
     name: 'circle', animate: true, animationDuration: 500,

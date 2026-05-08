@@ -13,6 +13,7 @@ var _arcRadiusX = 0;
 var _arcRadiusY = 0;
 var _activeCat = null;
 var _focusMode = false;
+var _activeLayout = 'cose';
 
 // ── Category colors ─────────────────────────────────────────────────────────
 var CAT_COLORS = {
@@ -98,6 +99,121 @@ function updateStats(selectedType) {
   }
 }
 
+// ── _buildCyStyle ────────────────────────────────────────────────────────────
+function _buildCyStyle(isLight) {
+  var t = isLight ? {
+    nodeBg:            '#f2f6fc',
+    nodeBorder:        '#96b4cc',
+    nodeText:          '#1e3a5a',
+    cat: {
+      network:  { border: '#009ec4', color: '#006688' },
+      endpoint: { border: '#00bb77', color: '#007755' },
+      identity: { border: '#9333ea', color: '#7a20c0' },
+      email:    { border: '#ea580c', color: '#b84000' },
+      cloud:    { border: '#2563eb', color: '#1a4bc4' }
+    },
+    edgeColor:         'data(srcColorLight)',
+    edgeOpacity:       0.55,
+    edgeLabelColor:    '#1a2a3a',
+    edgeLabelBg:       '#e8f0fb',
+    nextEdgeLabelColor:'#0d2a4a',
+    nextEdgeColor:     '#2a6090',
+    hoveredColor:      '#1a2a3a',
+    dimNodeOpacity:    0.13,
+    dimEdgeOpacity:    0.07
+  } : {
+    nodeBg:            '#0b1422',
+    nodeBorder:        '#2a4060',
+    nodeText:          '#7a9ab8',
+    cat: {
+      network:  { border: '#00d4ff', color: '#00d4ff' },
+      endpoint: { border: '#00ff9f', color: '#00ff9f' },
+      identity: { border: '#c084fc', color: '#c084fc' },
+      email:    { border: '#fb923c', color: '#fb923c' },
+      cloud:    { border: '#60a5fa', color: '#60a5fa' }
+    },
+    edgeColor:         'data(srcColor)',
+    edgeOpacity:       0.28,
+    edgeLabelColor:    '#ffffff',
+    edgeLabelBg:       '#0a1628',
+    nextEdgeLabelColor:'#c8ddf0',
+    nextEdgeColor:     '#3a6080',
+    hoveredColor:      '#e0f0ff',
+    dimNodeOpacity:    0.055,
+    dimEdgeOpacity:    0.015
+  };
+
+  return [
+    { selector: 'node', style: {
+        'shape': 'ellipse',
+        'label': function(n) { return SHORT_LABELS[n.data('id')] || n.data('label'); },
+        'font-family': 'Share Tech Mono, monospace',
+        'font-size': '8px', 'font-weight': 'bold',
+        'width': 'data(nodeSize)', 'height': 'data(nodeSize)',
+        'text-valign': 'center', 'text-halign': 'center',
+        'text-wrap': 'wrap', 'text-max-width': 48,
+        'background-color': t.nodeBg,
+        'border-color': t.nodeBorder, 'border-width': 3,
+        'color': t.nodeText,
+        'transition-property': 'opacity shadow-blur shadow-opacity border-color border-width',
+        'transition-duration': '0.18s', 'cursor': 'pointer'
+    }},
+    { selector: 'node[category = "network"]',  style: { 'border-color': t.cat.network.border,  'color': t.cat.network.color,  'border-width': 3 }},
+    { selector: 'node[category = "endpoint"]', style: { 'border-color': t.cat.endpoint.border, 'color': t.cat.endpoint.color, 'border-width': 3 }},
+    { selector: 'node[category = "identity"]', style: { 'border-color': t.cat.identity.border, 'color': t.cat.identity.color, 'border-width': 3 }},
+    { selector: 'node[category = "email"]',    style: { 'border-color': t.cat.email.border,    'color': t.cat.email.color,    'border-width': 3 }},
+    { selector: 'node[category = "cloud"]',    style: { 'border-color': t.cat.cloud.border,    'color': t.cat.cloud.color,    'border-width': 3 }},
+    { selector: 'edge', style: {
+        'width': 1.2, 'opacity': t.edgeOpacity,
+        'line-color': t.edgeColor, 'target-arrow-color': t.edgeColor,
+        'target-arrow-shape': 'data(arrowShape)', 'arrow-scale': 0.7,
+        'curve-style': 'bezier', 'control-point-step-size': 40,
+        'transition-property': 'opacity width line-color', 'transition-duration': '0.18s'
+    }},
+    { selector: 'edge[source = "process"][target = "process"]', style: {
+        'curve-style': 'loop', 'loop-direction': '-45deg', 'loop-sweep': '45deg', 'control-point-step-size': 40
+    }},
+    { selector: 'edge.highlighted', style: {
+        'label': 'data(label)', 'font-family': 'monospace', 'font-size': '9px', 'font-weight': 'bold',
+        'color': t.edgeLabelColor, 'text-opacity': 1,
+        'text-background-color': t.edgeLabelBg, 'text-background-opacity': 1,
+        'text-background-padding': '3px', 'text-background-shape': 'roundrectangle',
+        'text-rotation': 'autorotate', 'text-wrap': 'none', 'z-index': 20
+    }},
+    { selector: 'edge.next-pivot-edge', style: {
+        'label': 'data(label)', 'font-family': 'monospace', 'font-size': '8px',
+        'color': t.nextEdgeLabelColor, 'text-opacity': 1,
+        'text-background-color': t.edgeLabelBg, 'text-background-opacity': 1,
+        'text-background-padding': '2px', 'text-background-shape': 'roundrectangle',
+        'text-rotation': 'autorotate', 'text-wrap': 'none',
+        'opacity': 1, 'line-color': t.nextEdgeColor, 'target-arrow-color': t.nextEdgeColor,
+        'width': 1.8, 'z-index': 15
+    }},
+    { selector: 'node.highlighted', style: { 'opacity': 1, 'border-width': 3, 'shadow-blur': 20, 'shadow-opacity': 0.75, 'z-index': 10 }},
+    { selector: 'node[category = "network"].highlighted',  style: { 'border-color': t.cat.network.border,  'shadow-color': t.cat.network.border  }},
+    { selector: 'node[category = "endpoint"].highlighted', style: { 'border-color': t.cat.endpoint.border, 'shadow-color': t.cat.endpoint.border }},
+    { selector: 'node[category = "identity"].highlighted', style: { 'border-color': t.cat.identity.border, 'shadow-color': t.cat.identity.border }},
+    { selector: 'node[category = "email"].highlighted',    style: { 'border-color': t.cat.email.border,    'shadow-color': t.cat.email.border    }},
+    { selector: 'node[category = "cloud"].highlighted',    style: { 'border-color': t.cat.cloud.border,    'shadow-color': t.cat.cloud.border    }},
+    { selector: 'edge.highlighted', style: {
+        'opacity': 1, 'width': 2.5,
+        'line-style': 'dashed', 'line-dash-pattern': [6, 3], 'line-dash-offset': 0, 'arrow-scale': 0.9
+    }},
+    { selector: 'node.next-pivot', style: { 'opacity': 1, 'border-width': 2.5, 'z-index': 5 }},
+    { selector: 'node.dimmed',     style: { 'opacity': t.dimNodeOpacity }},
+    { selector: 'edge.dimmed',     style: { 'opacity': t.dimEdgeOpacity }},
+    { selector: 'node.selected',   style: { 'border-width': 3.5, 'z-index': 20 }},
+    { selector: 'edge.hovered', style: {
+        'label': 'data(label)', 'font-family': 'monospace', 'font-size': '8px',
+        'color': t.hoveredColor, 'text-opacity': 1,
+        'text-background-color': t.edgeLabelBg, 'text-background-opacity': 1,
+        'text-background-padding': '2px', 'text-background-shape': 'roundrectangle',
+        'text-rotation': 'autorotate', 'text-wrap': 'none',
+        'opacity': 0.85, 'width': 2, 'z-index': 10
+    }}
+  ];
+}
+
 // ── initGraph ───────────────────────────────────────────────────────────────
 function initGraph() {
   var container = document.getElementById('cy');
@@ -106,140 +222,7 @@ function initGraph() {
   cy = cytoscape({
     container: container,
     elements: GRAPH_NODES.concat(GRAPH_EDGES),
-    style: [
-      // Base node — Neo4j style circles
-      { selector: 'node', style: {
-          'shape': 'ellipse',
-          'label': function(n) { return SHORT_LABELS[n.data('id')] || n.data('label'); },
-          'font-family': 'Share Tech Mono, monospace',
-          'font-size': '8px',
-          'font-weight': 'bold',
-          'width': 'data(nodeSize)',
-          'height': 'data(nodeSize)',
-          'text-valign': 'center',
-          'text-halign': 'center',
-          'text-wrap': 'wrap',
-          'text-max-width': 48,
-          'background-color': '#0b1422',
-          'border-color': '#2a4060',
-          'border-width': 3,
-          'color': '#7a9ab8',
-          'transition-property': 'opacity shadow-blur shadow-opacity border-color border-width',
-          'transition-duration': '0.18s',
-          'cursor': 'pointer'
-      }},
-      // Category colors
-      { selector: 'node[category = "network"]',
-        style: { 'border-color': '#00d4ff', 'color': '#00d4ff', 'border-width': 3 }},
-      { selector: 'node[category = "endpoint"]',
-        style: { 'border-color': '#00ff9f', 'color': '#00ff9f', 'border-width': 3 }},
-      { selector: 'node[category = "identity"]',
-        style: { 'border-color': '#c084fc', 'color': '#c084fc', 'border-width': 3 }},
-      { selector: 'node[category = "email"]',
-        style: { 'border-color': '#fb923c', 'color': '#fb923c', 'border-width': 3 }},
-      { selector: 'node[category = "cloud"]',
-        style: { 'border-color': '#60a5fa', 'color': '#60a5fa', 'border-width': 3 }},
-      // Default edges
-      { selector: 'edge', style: {
-          'width': 1.2,
-          'opacity': 0.28,
-          'line-color': 'data(srcColor)',
-          'target-arrow-color': 'data(srcColor)',
-          'target-arrow-shape': 'data(arrowShape)',
-          'arrow-scale': 0.7,
-          'curve-style': 'bezier',
-          'control-point-step-size': 40,
-          'transition-property': 'opacity width line-color',
-          'transition-duration': '0.18s'
-      }},
-      // Self-loops (process→process)
-      { selector: 'edge[source = "process"][target = "process"]', style: {
-          'curve-style': 'loop',
-          'loop-direction': '-45deg',
-          'loop-sweep': '45deg',
-          'control-point-step-size': 40
-      }},
-      // Edge labels (shown on highlighted / next-pivot edges only)
-      { selector: 'edge.highlighted', style: {
-          'label': 'data(label)',
-          'font-family': 'monospace',
-          'font-size': '9px',
-          'font-weight': 'bold',
-          'color': '#ffffff',
-          'text-opacity': 1,
-          'text-background-color': '#0a1628',
-          'text-background-opacity': 1,
-          'text-background-padding': '3px',
-          'text-background-shape': 'roundrectangle',
-          'text-rotation': 'autorotate',
-          'text-wrap': 'none',
-          'z-index': 20
-      }},
-      { selector: 'edge.next-pivot-edge', style: {
-          'label': 'data(label)',
-          'font-family': 'monospace',
-          'font-size': '8px',
-          'color': '#c8ddf0',
-          'text-opacity': 1,
-          'text-background-color': '#0a1628',
-          'text-background-opacity': 1,
-          'text-background-padding': '2px',
-          'text-background-shape': 'roundrectangle',
-          'text-rotation': 'autorotate',
-          'text-wrap': 'none',
-          'opacity': 1,
-          'line-color': '#3a6080',
-          'target-arrow-color': '#3a6080',
-          'width': 1.8,
-          'z-index': 15
-      }},
-      // Highlighted (path or first-hop)
-      { selector: 'node.highlighted', style: {
-          'opacity': 1,
-          'border-width': 3,
-          'shadow-blur': 20,
-          'shadow-opacity': 0.75,
-          'z-index': 10
-      }},
-      { selector: 'node[category = "network"].highlighted',  style: { 'border-color': '#00d4ff', 'shadow-color': '#00d4ff' }},
-      { selector: 'node[category = "endpoint"].highlighted', style: { 'border-color': '#00ff9f', 'shadow-color': '#00ff9f' }},
-      { selector: 'node[category = "identity"].highlighted', style: { 'border-color': '#c084fc', 'shadow-color': '#c084fc' }},
-      { selector: 'node[category = "email"].highlighted',    style: { 'border-color': '#fb923c', 'shadow-color': '#fb923c' }},
-      { selector: 'node[category = "cloud"].highlighted',    style: { 'border-color': '#60a5fa', 'shadow-color': '#60a5fa' }},
-      { selector: 'edge.highlighted', style: {
-          'opacity': 1, 'width': 2.5,
-          'line-style': 'dashed', 'line-dash-pattern': [6, 3], 'line-dash-offset': 0,
-          'arrow-scale': 0.9
-      }},
-      // Next pivot — reachable from path endpoint, not yet in path
-      { selector: 'node.next-pivot', style: {
-          'opacity': 1,
-          'border-width': 2.5,
-          'z-index': 5
-      }},
-      // Dim state
-      { selector: 'node.dimmed', style: { 'opacity': 0.055 }},
-      { selector: 'edge.dimmed', style: { 'opacity': 0.015 }},
-      // Selected (node in path)
-      { selector: 'node.selected', style: { 'border-width': 3.5, 'z-index': 20 }},
-      // Edge hover
-      { selector: 'edge.hovered', style: {
-          'label': 'data(label)',
-          'font-family': 'monospace',
-          'font-size': '8px',
-          'color': '#e0f0ff',
-          'text-opacity': 1,
-          'text-background-color': '#0a1628',
-          'text-background-opacity': 1,
-          'text-background-padding': '2px',
-          'text-background-shape': 'roundrectangle',
-          'text-rotation': 'autorotate',
-          'text-wrap': 'none',
-          'opacity': 0.85,
-          'width': 2,
-          'z-index': 10
-      }}
-    ],
+    style: _buildCyStyle(document.body.classList.contains('light')),
     layout: {
       name: 'cose',
       animate: true,
@@ -621,10 +604,9 @@ function toggleFocusMode() {
   }
 }
 
-// ── resetLayout ──────────────────────────────────────────────────────────────
-function resetLayout() {
-  if (!cy) return;
-  cy.layout({
+// ── switchLayout / resetLayout ───────────────────────────────────────────────
+var _LAYOUTS = {
+  cose: {
     name: 'cose', animate: true, animationDuration: 600,
     nodeRepulsion: function() { return 10000; },
     nodeOverlap: 24,
@@ -633,8 +615,34 @@ function resetLayout() {
     gravity: 50, numIter: 1000, initialTemp: 200,
     coolingFactor: 0.95, minTemp: 1.0,
     randomize: true, fit: true, padding: 22
-  }).run();
+  },
+  circle: {
+    name: 'circle', animate: true, animationDuration: 500,
+    fit: true, padding: 28, startAngle: -Math.PI / 2, clockwise: true
+  },
+  concentric: {
+    name: 'concentric', animate: true, animationDuration: 500,
+    fit: true, padding: 28,
+    concentric: function(n) { return n.degree(); },
+    levelWidth: function(nodes) { return Math.max(1, nodes.maxDegree() / 5); },
+    minNodeSpacing: 12
+  },
+  grid: {
+    name: 'grid', animate: true, animationDuration: 500,
+    fit: true, padding: 28, avoidOverlapPadding: 12
+  }
+};
+
+function switchLayout(name) {
+  if (!cy) return;
+  _activeLayout = name;
+  document.querySelectorAll('.gtb-layout').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('ltb-' + name);
+  if (btn) btn.classList.add('active');
+  cy.layout(_LAYOUTS[name] || _LAYOUTS.cose).run();
 }
+
+function resetLayout() { switchLayout(_activeLayout); }
 
 // ── copyPivotPath ─────────────────────────────────────────────────────────────
 function copyPivotPath() {
@@ -654,6 +662,7 @@ function toggleTheme() {
   var isLight = document.body.classList.toggle('light');
   localStorage.setItem('pivex-theme', isLight ? 'light' : 'dark');
   setLogo(isLight);
+  if (cy) cy.setStyle(_buildCyStyle(isLight));
 }
 
 function setLogo(isLight) {
@@ -724,7 +733,8 @@ function escHtml(str) {
     n.data.nodeSize = Math.round(42 + (c / maxC) * 34);
   });
 
-  var CAT_HEX = { network:'#00d4ff', endpoint:'#00ff9f', identity:'#c084fc', email:'#fb923c', cloud:'#60a5fa' };
+  var CAT_HEX       = { network:'#00d4ff', endpoint:'#00ff9f', identity:'#c084fc', email:'#fb923c', cloud:'#60a5fa' };
+  var CAT_HEX_LIGHT = { network:'#006688', endpoint:'#007755', identity:'#7a20c0', email:'#b84000', cloud:'#1a4bc4' };
   var VEE_LABELS   = { 'spawned_by':1,'spawns':1,'executed_by':1,'runs':1,'executed_as':1,'executed_with':1,'executes':1 };
   var SQ_LABELS    = { 'has_hash':1,'stores':1,'contains':1,'identified_by':1,'points_to':1,'has_record':1,'owned_by':1,'delivers':1 };
   var CIRC_LABELS  = { 'observed_in':1,'observed_on':1,'observed_from':1,'part_of':1,'associated_with':1,'mapped_to':1,'located_in':1 };
@@ -732,7 +742,8 @@ function escHtml(str) {
   GRAPH_EDGES.forEach(function(e) {
     var srcNode = GRAPH_NODES.find(function(n) { return n.data.id === e.data.source; });
     var cat = srcNode ? srcNode.data.category : null;
-    e.data.srcColor = (cat && CAT_HEX[cat]) ? CAT_HEX[cat] : '#3a5470';
+    e.data.srcColor      = (cat && CAT_HEX[cat])       ? CAT_HEX[cat]       : '#3a5470';
+    e.data.srcColorLight = (cat && CAT_HEX_LIGHT[cat]) ? CAT_HEX_LIGHT[cat] : '#4a6a8a';
     var lbl = e.data.label || '';
     e.data.arrowShape = VEE_LABELS[lbl] ? 'vee' : SQ_LABELS[lbl] ? 'square' : CIRC_LABELS[lbl] ? 'circle' : 'triangle';
   });

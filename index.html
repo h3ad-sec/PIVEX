@@ -312,6 +312,7 @@
     }
     .gtb-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,255,159,0.08); }
     .gtb-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0,255,159,0.14); }
+    .gtb-sep { height: 1px; background: var(--border); margin: 3px 0; }
 
     /* ── Node tooltip ───────────────────────────────────────────────────────── */
     .node-tooltip {
@@ -766,7 +767,7 @@
 
         <!-- Stats overlay -->
         <div id="graph-stats" class="graph-stats">
-          <span>30 artifacts</span><span>83 pivots</span>
+          <span>36 artifacts</span><span>168+ pivots</span>
         </div>
 
         <!-- Graph toolbar -->
@@ -775,6 +776,11 @@
           <button class="gtb-btn" onclick="cy.zoom(Math.max(cy.zoom()*0.75,0.3))" title="Zoom out">&#x2212;</button>
           <button class="gtb-btn" onclick="resetLayout()" title="Reset layout">&#x21BB;</button>
           <button class="gtb-btn" id="focusBtn" onclick="toggleFocusMode()" title="Focus mode">&#x25CE;</button>
+          <div class="gtb-sep"></div>
+          <button class="gtb-btn gtb-layout active" id="ltb-cose"       onclick="switchLayout('cose')"       title="Force layout">&#x2B59;</button>
+          <button class="gtb-btn gtb-layout"        id="ltb-circle"     onclick="switchLayout('circle')"     title="Circle layout">&#x25CB;</button>
+          <button class="gtb-btn gtb-layout"        id="ltb-concentric" onclick="switchLayout('concentric')" title="Concentric layout">&#x25CE;</button>
+          <button class="gtb-btn gtb-layout"        id="ltb-grid"       onclick="switchLayout('grid')"       title="Grid layout">&#x229E;</button>
         </div>
 
       </div><!-- /graph-panel -->

@@ -102,6 +102,7 @@
       display: flex; align-items: center;
       justify-content: space-between; gap: 16px; flex-wrap: wrap;
       flex-shrink: 0;
+      transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .3s ease;
     }
     .piv-breadcrumb {
       font-family: 'Share Tech Mono', monospace; font-size: 10px;
@@ -568,9 +569,27 @@
       .chip-cat-btn { font-size: 7.5px; padding: 3px 8px; }
       .artifact-chip { font-size: 8px; padding: 3px 7px; }
     }
+
+    #scroll-sentinel{position:absolute;top:0;left:0;width:1px;height:10px;pointer-events:none;}
+    .xv-nav-pill{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-left:10px;padding-left:10px;border-left:1px solid var(--border);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity .3s ease,transform .3s cubic-bezier(.4,0,.2,1);white-space:nowrap;flex-shrink:0;}
+    .xv-pill-name{font-family:var(--mono);font-size:13px;letter-spacing:4px;line-height:1;}
+    .xv-pill-accent{color:var(--accent);}
+    .xv-pill-text{color:var(--text);}
+    .xv-pill-tagline{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1.5px;}
+    body.hero-hidden .xv-nav-pill{opacity:1;transform:translateX(0);pointer-events:auto;}
+    body.hero-hidden .piv-topbar{transform:translateY(-100%);opacity:0;pointer-events:none;}
+    body.hero-hidden .page-wrap{padding-top:calc(var(--nav-h) + 20px);}
+    @media(max-width:1000px){
+      .piv-topbar{display:none;}
+      .page-wrap{padding-top:calc(var(--nav-h)+20px);}
+      body.hero-hidden .page-wrap{padding-top:calc(var(--nav-h)+20px);}
+      .xv-nav-pill{opacity:1;transform:none;pointer-events:auto;transition:none;}
+    }
   </style>
 </head>
 <body>
+
+  <div id="scroll-sentinel" aria-hidden="true"></div>
 
   <canvas id="matrix"></canvas>
 
@@ -579,6 +598,10 @@
     <div class="hamburger" id="hamburger" onclick="toggleDrawer()"><span></span><span></span><span></span></div>
     <a class="nav-brand" href="https://h3ad-sec.github.io" target="_blank" rel="noopener">
       <img id="navLogo" src="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" alt="H3AD-SEC" style="height:22px;vertical-align:middle;" />
+    </a>
+    <a class="xv-nav-pill" id="xv-nav-pill" href="https://h3ad-sec.github.io/PIVEX/" style="text-decoration:none">
+      <span class="xv-pill-name"><span class="xv-pill-accent">PIV</span><span class="xv-pill-text">EX</span></span>
+      <span class="xv-pill-tagline">Pivot Across Every Artifact.</span>
     </a>
     <div class="nav-links">
       <div class="nav-divider"></div>
@@ -916,5 +939,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js"></script>
   <script src="js/graph-data.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    /* ── HERO SCROLL HIDE ── */
+    (function(){var s=document.getElementById('scroll-sentinel');if(!s)return;new IntersectionObserver(function(e){document.body.classList.toggle('hero-hidden',!e[0].isIntersecting);},{threshold:0}).observe(s);})();
+  </script>
 </body>
 </html>

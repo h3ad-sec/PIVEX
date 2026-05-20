@@ -764,38 +764,6 @@ function escHtml(str) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── Matrix canvas ─────────────────────────────────────────────────────────────
-(function() {
-  var canvas = document.getElementById('matrix');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var terms = ['10.0.0.1','192.168.','8.8.8.8','172.16.',
-                'PIVOT','IOC','TTPs','C2','HASH','CVE','ASN','PORT',
-                'DNS','YARA','MITRE','HUNT','EDR','SIEM','APT','TI',
-                'LSASS','SMB','WMI','RDP','HTTP','SSL','JA3','NULL',
-                '0x','0xff','REG','RCE','H3AD','PIVEX'];
-  var cols, drops, fs = 13;
-  function resize() {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    cols = Math.floor(canvas.width / fs); drops = Array(cols).fill(1);
-  }
-  function draw() {
-    var l = document.body.classList.contains('light');
-    ctx.fillStyle = l ? 'rgba(245,247,251,0.08)' : 'rgba(0,0,0,0.12)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = l ? '#0077ff' : '#00ff9f';
-    ctx.font = fs + 'px Share Tech Mono,monospace';
-    for (var i = 0; i < drops.length; i++) {
-      ctx.fillText(terms[Math.floor(Math.random()*terms.length)], i*fs, drops[i]*fs);
-      if (drops[i]*fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
-    }
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  setInterval(draw, 55);
-})();
-
 // ── Node sizes + edge metadata ───────────────────────────────────────────────
 (function() {
   var counts = {};

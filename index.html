@@ -49,6 +49,7 @@
       font-family: 'Exo 2', sans-serif; font-size: 14px;
       line-height: 1.6; min-height: 100vh;
       transition: background 0.25s, color 0.25s;
+      overflow-x: hidden;
     }
     body::before {
       content: '';
@@ -149,7 +150,7 @@
     }
     .chip-cat-row {
       display: flex; align-items: center;
-      gap: 5px; flex-wrap: nowrap;
+      gap: 5px; flex-wrap: wrap;
     }
     .chip-artifact-row {
       display: flex; flex-wrap: wrap;
@@ -467,6 +468,7 @@
       font-family: 'Share Tech Mono', monospace; font-size: 10.5px;
       color: var(--text-dim); padding: 6px 11px;
       border-bottom: 1px solid var(--border-dim); vertical-align: top;
+      word-break: break-word;
     }
     .ref-table tr:last-child td { border-bottom: none; }
     .ref-table tr:hover td { background: var(--panel-alt); }
@@ -580,6 +582,15 @@
       .info-panel.visible { max-height: 420px; }
       .chip-cat-btn { font-size: 7.5px; padding: 3px 8px; }
       .artifact-chip { font-size: 8px; padding: 3px 7px; }
+      .piv-below { padding: 14px 10px 36px; }
+      .graph-stats { font-size: 7.5px; gap: 5px; padding: 2px 5px; }
+    }
+
+    /* Ultra-small (≤ 320px) */
+    @media (max-width: 320px) {
+      .chip-all { display: none; }
+      .chip-cat-btn { font-size: 7px; padding: 2px 6px; }
+      .artifact-chip { font-size: 7.5px; padding: 2px 6px; }
     }
 
     #scroll-sentinel{position:absolute;top:0;left:0;width:1px;height:10px;pointer-events:none;}

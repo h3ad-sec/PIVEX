@@ -733,7 +733,7 @@ function exportPivotPath() {
 // ── toggleTheme ──────────────────────────────────────────────────────────────
 function toggleTheme() {
   var isLight = document.body.classList.toggle('light');
-  localStorage.setItem('pivex-theme', isLight ? 'light' : 'dark');
+  localStorage.setItem('h3ad-theme', isLight ? 'light' : 'dark');
   setLogo(isLight);
   if (cy) cy.setStyle(_buildCyStyle(isLight));
 }
@@ -797,7 +797,7 @@ function escHtml(str) {
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
-  var saved = localStorage.getItem('pivex-theme');
+  var saved = localStorage.getItem('h3ad-theme');
   if (saved === 'light') { document.body.classList.add('light'); setLogo(true); }
   else { setLogo(false); }
   initGraph();

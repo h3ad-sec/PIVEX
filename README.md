@@ -13,7 +13,8 @@ PIVEX is an interactive graph that maps how to pivot between artifact types duri
 - Copy path as text or export as CSV (with MITRE ATT&CK technique and data source columns)
 - Per-node info panel: description, data sources, outbound pivots, MITRE technique tags
 - Focus mode to isolate a subgraph
-- Dark / light theme with matrix rain background
+- Dark / light theme with ambient gradient background
+- Fully responsive — works on mobile, tablet, and desktop
 
 ## Artifact Categories
 
@@ -39,9 +40,9 @@ PIVEX is a sub-tool under [H3AD-HUNT](https://h3ad-sec.github.io/H3AD-HUNT/), th
 | Module | Tools |
 |--------|-------|
 | [H3AD-X](https://h3ad-sec.github.io/H3AD-X/) | X-VERDIKT, PARSE-X, DNSCOPE |
-| [H3AD-AI](https://h3ad-sec.github.io/H3AD-AI/) | INSIGHT-AI, QUERYCRAFT-AI, FPLENS-AI, ATTMAP-AI, CHRONO-AI, THREATBRIEF-AI, PERSONA-AI, DEBRIEF-AI, MALBRIEF-AI |
+| [H3AD-AI](https://h3ad-sec.github.io/H3AD-AI/) | INSIGHT-AI, QUERYCRAFT-AI, FPLENS-AI, ATTMAP-AI, CHRONO-AI, MALBRIEF-AI |
 | [H3AD-DETECT](https://h3ad-sec.github.io/H3AD-DETECT/) | TRACERULES |
 | [H3AD-HUNT](https://h3ad-sec.github.io/H3AD-HUNT/) | HYPOS, PIVEX, TRACEPULSE |
-| [H3AD-OPS](https://h3ad-sec.github.io/H3AD-OPS/) | QUICKTRACE, SHIFTLOG |
-| [H3AD-DF](https://h3ad-sec.github.io/H3AD-DF/) | REGSCOPE, MALBRIEF-AI, EVTXPARSE, ARTIFACTDB |
-| [H3AD-IR](https://h3ad-sec.github.io/H3AD-IR/) | DEBRIEF-AI, CASEBOARD |
+| [H3AD-OPS](https://h3ad-sec.github.io/H3AD-OPS/) | QUICKTRACE, SHIFTLOG, PHISHOPS |
+| [H3AD-DF](https://h3ad-sec.github.io/H3AD-DF/) | REGSCOPE |
+| [H3AD-IR](https://h3ad-sec.github.io/H3AD-IR/) | — |

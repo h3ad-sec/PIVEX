@@ -3,22 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PIVEX - Pivot Across Every Artifact // H3AD-SEC</title>
+  <title>PIVEX: Pivot Graph for Security Investigations</title>
+  <meta name="description" content="Free interactive pivot graph for security investigations. Map 36 artifact types across 168+ pivot paths with MITRE ATT&amp;CK tags and CSV export." />
+  <link rel="canonical" href="https://h3ad-sec.github.io/PIVEX/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="H3AD-SEC" />
+  <meta property="og:url" content="https://h3ad-sec.github.io/PIVEX/" />
+  <meta property="og:title" content="PIVEX: Pivot Graph for Security Investigations" />
+  <meta property="og:description" content="Free interactive pivot graph for security investigations. Map 36 artifact types across 168+ pivot paths with MITRE ATT&amp;CK tags and CSV export." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PIVEX: Pivot Graph for Security Investigations" />
+  <meta name="twitter:description" content="Free interactive pivot graph for security investigations. Map 36 artifact types across 168+ pivot paths with MITRE ATT&amp;CK tags and CSV export." />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" />
+
   <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" />
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PIVEX",
+    "description": "Interactive pivot graph mapping relationships across 36 security investigation artifact types with 168+ pivot paths and MITRE ATT&CK tags.",
+    "url": "https://h3ad-sec.github.io/PIVEX/",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "H3AD-SEC",
+      "url": "https://h3ad-sec.github.io"
+    }
+  }
+  </script>
   <style>
     /* ── CSS variables ─────────────────────────────────────────────────── */
     :root {
       --bg: #080c14;
       --panel: #0d1117;
       --panel-alt: #111827;
+      --panel2: #111827;
       --surface: #18253a;
       --text: #e6edf3;
       --text-dim: #96b0cc;
-      --muted: #6b7280;
+      --muted: #8b949e;
       --muted-dim: #3a5470;
       --accent: #00d4ff;
-      --accent2: #4d94ff;
+      --accent2: #3b82f6;
       --border: #1c2333;
       --border-dim: #121e30;
       --primary: #00d4ff;
@@ -27,27 +67,40 @@
       --status-live: #00d4ff;
       --status-partial: #f59e0b;
       --status-soon: #2d3748;
+      --red: #ff3b5c; --yellow: #ffd60a; --green: #00d4ff;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Exo 2', sans-serif;
+      --ui: 'IBM Plex Sans', sans-serif;
+      --fs-xs: 11px; --fs-sm: 13px; --fs-base: 15px; --fs-md: 16px; --fs-lg: 18px;
       --nav-h: 48px;
     }
     body.light {
-      --bg: #f8fafc; --panel: #ffffff; --panel-alt: #f1f5f9;
-      --surface: #ccd8ec; --text: #0d1117; --text-dim: #142540;
-      --muted: #5c6b8a; --muted-dim: #5c7a9a;
-      --accent: #0284c7; --accent2: #007a55;
-      --border: #e2e8f0; --border-dim: #c8d8ec;
-      --primary: #0284c7;
-      --primary-dim: rgba(2, 132, 199, 0.07);
-      --status-live: #0284c7;
-      --status-partial: #d97706;
+      --bg: #D3D7DC; --panel: #DADDE1; --panel-alt: #C9CDD2; --panel2: #C9CDD2;
+      --surface: #BFC5CE; --text: #000000; --text-dim: #1B2430;
+      --muted: #2E343B; --muted-dim: #4A525C;
+      --accent: #0A6EA8; --accent2: #C2540E;
+      --border: #BBC0C6; --border-dim: #C5CBD1;
+      --primary: #0A6EA8;
+      --primary-dim: rgba(10, 110, 168, 0.07);
+      --status-live: #0A6EA8;
+      --status-partial: #B45309;
+      --red: #DC2626; --yellow: #B45309; --green: #059669;
+      font-weight: 500;
     }
+    body.light .hero-banner-tagline,
+    body.light .hero-sub,
+    body.light .info-hint,
+    body.light .nt-desc,
+    body.light .footer-muted,
+    body.light .footer-sep { font-weight: 400; }
 
     /* ── Reset & base ──────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
       background: var(--bg); color: var(--text);
-      font-family: 'Exo 2', sans-serif; font-size: 14px;
-      line-height: 1.6; min-height: 100vh;
+      font-family: var(--ui); font-size: var(--fs-base);
+      line-height: 1.55; min-height: 100vh;
       transition: background 0.25s, color 0.25s;
       overflow-x: hidden;
     }
@@ -72,37 +125,35 @@
     }
 
     /* ── NAV ───────────────────────────────────────────────────────────── */
-    .nav { position:fixed;top:0;left:0;right:0;z-index:100;background:var(--panel);border-bottom:1px solid var(--border);height:var(--nav-h);display:flex;align-items:center;padding:0 1.25rem;transition:background .3s,border-color .3s; }
+    .nav { position:fixed;top:0;left:0;right:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--border);height:var(--nav-h);display:flex;align-items:center;padding:0 1.25rem;transition:background .3s,border-color .3s; }
     .nav-brand { font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--accent);letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-right:1rem;text-decoration:none;display:flex;align-items:center; }
     .nav-brand img { height:22px;width:auto;vertical-align:middle; }
-    .nav-links { position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;overflow:visible; }
+    .nav-links { display:none; }
     .nav-links a { font-family:'Exo 2',sans-serif;font-weight:500;font-size:11px;color:var(--text-dim);text-decoration:none;padding:5px 8px;border-radius:4px;border:1px solid transparent;white-space:nowrap;transition:all .15s; }
     .nav-links a:hover { color:var(--accent);border-color:var(--border);background:rgba(0,255,159,.04); }
     .nav-links a.nav-current { color:var(--accent);border:1px solid var(--border); }
     .nav-divider { width:1px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0; }
-    .nav-right { margin-left:auto;flex-shrink:0;padding-left:1rem; }
+    .nav-right { margin-left:auto;flex-shrink:0;padding-left:1rem;display:flex;align-items:center;gap:14px; }
     .theme-toggle { cursor:pointer; }
     .toggle-track { width:44px;height:22px;background:var(--border);border-radius:50px;position:relative; }
     .toggle-thumb { width:16px;height:16px;background:var(--accent);border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .3s;box-shadow:0 0 6px var(--accent); }
     body.light .toggle-thumb { transform:translateX(22px); }
-    .hamburger { display:none;flex-direction:column;justify-content:center;gap:4px;cursor:pointer;padding:6px;margin-right:8px;flex-shrink:0; }
+    .hamburger { display:flex;flex-direction:column;justify-content:center;gap:4px;cursor:pointer;padding:6px;margin-right:8px;flex-shrink:0; }
     .hamburger span { display:block;width:20px;height:2px;background:var(--muted);border-radius:2px; }
     .nav-item { position:relative;display:flex;align-items:center; }
-    .nav-dropdown { display:none;position:absolute;top:100%;left:0;min-width:130px;padding-top:6px;z-index:200; }
+    .nav-dropdown { display:none;position:absolute;top:100%;left:0;min-width:130px;padding-top:6px;z-index:100; }
     .nav-dropdown-inner { background:var(--panel);border:1px solid var(--border);border-radius:4px;overflow:hidden; }
     .nav-item:hover .nav-dropdown { display:block; }
-    .nav-links .nav-dropdown a { display:block;padding:7px 12px;font-family:'Exo 2',sans-serif;font-weight:500;font-size:11px;color:var(--text-dim);border:none;border-left:2px solid transparent;border-radius:0;transition:.15s; }
+    .nav-links .nav-dropdown a { display:block;padding:7px 12px;font-family:var(--ui);font-weight:500;font-size:11px;color:var(--text-dim);border:none;border-left:2px solid transparent;border-radius:0;transition:.15s; }
     .nav-links .nav-dropdown a:hover, .nav-links .nav-dropdown a.nav-current { color:var(--accent);border-left-color:var(--accent);background:rgba(0,255,159,.04); }
 
     /* ── Mobile drawer ─────────────────────────────────────────────────── */
-    .nav-drawer { display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--panel);border-bottom:1px solid var(--border);z-index:99;padding:.75rem 1.25rem 1rem;flex-direction:column;gap:2px;max-height:calc(100vh - var(--nav-h));overflow-y:auto; }
+    .nav-drawer { display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--panel);border-bottom:1px solid var(--border);z-index:49;padding:.75rem 1.25rem 1rem;flex-direction:column;gap:2px;max-height:calc(100vh - var(--nav-h));overflow-y:auto; }
     .nav-drawer.open { display:flex; }
-    .nav-drawer a { font-family:'Exo 2',sans-serif;font-weight:500;font-size:13px;color:var(--text-dim);text-decoration:none;padding:8px 10px;border-radius:4px;border-left:2px solid transparent;transition:.15s; }
+    .nav-drawer a { font-family:var(--ui);font-weight:500;font-size:13px;color:var(--text-dim);text-decoration:none;padding:8px 10px;border-radius:4px;border-left:2px solid transparent;transition:.15s; }
     .nav-drawer a:hover { color:var(--accent);border-left-color:var(--accent);background:rgba(0,255,159,.04); }
     .nav-drawer a.nav-current { color:var(--accent); }
     .drawer-sub { padding-left:1.8rem !important;font-size:11px !important;opacity:.8; }
-    body.nav-compact .nav-links { display: none; }
-    body.nav-compact .hamburger { display: flex; }
 
     /* ── Page wrap ──────────────────────────────────────────────────────── */
     .page-wrap {
@@ -112,37 +163,79 @@
       display: flex; flex-direction: column;
     }
 
-    /* ── Topbar ─────────────────────────────────────────────────────────── */
-    .piv-topbar {
-      background: linear-gradient(180deg, var(--panel-alt) 0%, rgba(11,16,24,0) 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 20px 10px;
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 16px; flex-wrap: wrap;
-      flex-shrink: 0;
+    /* ── View tabs (Overview / Workspace) ─────────────────────────────────── */
+    .view-tabs { display:flex;align-items:center;gap:2px;padding:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;flex-shrink:0; }
+    .view-tab { font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:1.5px;color:var(--muted);background:transparent;border:none;border-radius:4px;padding:6px 10px;line-height:1;text-align:center;cursor:pointer;transition:all .15s;white-space:nowrap; }
+    .view-tab:hover { color:var(--text); }
+    .view-tab.active { background:var(--panel);color:var(--accent); }
+    .view-tabs.below { width:100%;margin:0 0 16px;box-shadow:0 4px 14px rgba(0,0,0,.22); }
+    .view-tabs.below .view-tab { flex:1;text-align:center;padding:8px; }
+    .drawer-view-tabs { display:flex;gap:2px;padding:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;margin-bottom:8px; }
+    .drawer-view-tabs .view-tab { flex:1;text-align:center;padding:8px 10px; }
+
+    /* ── Overview hero ──────────────────────────────────────────────────── */
+    .hero { max-width:1700px; margin:0 auto 20px; width:100%; padding:20px 28px 0; animation:fadeIn .3s ease; }
+    .hero-banner { display:flex; justify-content:center; align-items:baseline; gap:2px; font-family:'Exo 2',sans-serif; font-weight:700; font-size:clamp(26px,5vw,42px); letter-spacing:4px; }
+    .hero-banner-tagline { text-align:center; font-family:'Exo 2',sans-serif; font-size:var(--fs-xs); color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-top:-6px; }
+    .hero-banner-by { text-align:center; font-family:var(--ui); font-weight:600; font-size:var(--fs-sm); color:var(--accent); letter-spacing:1px; margin-bottom:18px; }
+    .hero-intro { display:flex; flex-direction:column; align-items:center; text-align:center; max-width:980px; margin:0 auto; }
+    .hero-title { font-family:var(--sans); font-weight:700; font-size:clamp(22px,4vw,34px); line-height:1.25; color:var(--text); margin-bottom:10px; }
+    .hero-net { color:#00d4ff; } .hero-ept { color:#00ff9f; } .hero-idn { color:#c084fc; } .hero-eml { color:#fb923c; } .hero-cld { color:#60a5fa; }
+    .hero-sub { font-family:var(--ui); font-size:var(--fs-sm); color:var(--muted); max-width:640px; line-height:1.6; margin-bottom:18px; }
+    .hero-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:18px; border-radius:6px; overflow:hidden; }
+    .hero-stat { background:var(--panel); padding:12px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:2px; min-width:0; transition:background .2s; }
+    .hero-stat:hover { background:var(--panel-alt); }
+    .hero-stat-num { font-family:var(--sans); font-weight:700; font-size:20px; color:var(--accent); }
+    .hero-stat-label { font-family:var(--ui); font-size:10px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+    .hero-cols { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:16px; margin-bottom:16px; }
+    .hero-col { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:16px 18px; min-width:0; transition:border-color .2s,transform .2s,box-shadow .2s; animation:fadeIn .35s ease backwards; }
+    .hero-col:hover { border-color:var(--accent); }
+    .hero-cols .hero-col:nth-child(2) { animation-delay:.06s; }
+    .hero-col-wide { margin-bottom:16px; animation:fadeIn .35s ease backwards; animation-delay:.08s; }
+    .hero-col-title { font-family:var(--ui); font-weight:600; font-size:11px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; margin:0 0 12px; padding-left:10px; border-left:2px solid var(--accent); }
+    .hero-steps { list-style:none; counter-reset:hero-step; display:flex; flex-direction:column; gap:10px; }
+    .hero-steps li { counter-increment:hero-step; position:relative; padding-left:26px; font-family:var(--ui); font-size:var(--fs-sm); color:var(--muted); line-height:1.5; }
+    .hero-steps li::before { content:counter(hero-step); position:absolute; left:0; top:0; width:18px; height:18px; border-radius:50%; background:var(--primary-dim); color:var(--accent); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .hero-steps li strong { color:var(--text); }
+    .hero-steps li code { background:var(--panel2); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-family:var(--mono); color:var(--text); }
+    .hero-principles { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .hero-principles li { position:relative; padding-left:16px; font-family:var(--ui); font-size:var(--fs-sm); color:var(--muted); line-height:1.55; }
+    .hero-principles li::before { content:''; position:absolute; left:0; top:7px; width:6px; height:6px; border-radius:1px; background:var(--accent); }
+    .hero-principles li strong { color:var(--text); }
+    .hero-layouts { display:flex; flex-direction:column; gap:10px; }
+    .hero-layout-row { display:flex; align-items:center; gap:8px; font-family:var(--ui); font-size:var(--fs-sm); color:var(--muted); }
+    .hero-layout-row .li-icon { font-family:var(--mono); font-size:12px; color:var(--text); background:var(--bg); border:1px solid var(--border); border-bottom-width:2px; border-radius:4px; padding:3px 8px; min-width:20px; text-align:center; }
+    .hero-feature-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .hero-feature { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:14px; font-family:var(--ui); font-size:var(--fs-sm); color:var(--muted); line-height:1.55; min-width:0; transition:border-color .2s,transform .2s,box-shadow .2s; animation:fadeIn .3s ease backwards; }
+    .hero-feature:hover { border-color:var(--accent); }
+    .hero-feature strong { display:block; color:var(--text); font-weight:600; margin-bottom:4px; }
+    .hero-feature-grid .hero-feature:nth-child(1) { animation-delay:.02s; }
+    .hero-feature-grid .hero-feature:nth-child(2) { animation-delay:.06s; }
+    .hero-feature-grid .hero-feature:nth-child(3) { animation-delay:.1s; }
+    .hero-feature-grid .hero-feature:nth-child(4) { animation-delay:.14s; }
+    .hero-feature-grid .hero-feature:nth-child(5) { animation-delay:.18s; }
+    .hero-feature-grid .hero-feature:nth-child(6) { animation-delay:.22s; }
+    .hero-feature-wide { grid-column:1/-1; }
+    .hero-legend-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; margin-top:8px; }
+    .hero-legend-chip { display:flex; align-items:center; gap:6px; background:var(--bg); border-left:2px solid var(--border); border-radius:0 4px 4px 0; padding:6px 10px; font-family:var(--ui); font-size:var(--fs-xs); color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hero-legend-chip b { font-family:var(--ui); font-weight:700; }
+    .hero-cta-row { display:flex; justify-content:center; margin-top:24px; }
+    .hero-btn-primary { display:inline-flex; align-items:center; background:var(--accent); color:var(--bg); border:1px solid var(--accent); font-family:var(--ui); font-size:var(--fs-base); letter-spacing:1.5px; text-transform:uppercase; white-space:nowrap; padding:11px 28px; border-radius:4px; cursor:pointer; box-shadow:0 0 18px rgba(0,212,255,.2); transition:all .15s; }
+    .hero-btn-primary:hover { opacity:.88; transform:scale(1.02); }
+    .hero-btn-primary:active { transform:scale(.96); }
+    @media(max-width:768px) {
+      .hero-cols { grid-template-columns:1fr; }
+      .hero-feature-grid { grid-template-columns:1fr 1fr; }
+      .hero-legend-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .hero { padding-left:16px; padding-right:16px; }
     }
-    .piv-breadcrumb {
-      font-family: 'Share Tech Mono', monospace; font-size: 11px;
-      color: var(--muted); letter-spacing: 0.06em; margin-bottom: 3px;
+    @media(max-width:480px) {
+      .hero-feature-grid { grid-template-columns:1fr; }
+      .hero-stat { padding:10px 12px; }
     }
-    .piv-breadcrumb a { color: var(--muted); }
-    .piv-breadcrumb a:hover { color: var(--accent); opacity: 1; }
-    .piv-breadcrumb span { color: var(--accent); opacity: 0.6; margin: 0 5px; }
-    .piv-title-row {
-      display: flex; align-items: baseline; gap: 0;
-      text-decoration: none; line-height: 1;
+    @media(max-width:375px) {
+      .hero { padding-left:10px; padding-right:10px; }
     }
-    .hero-piv { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--accent); letter-spacing: 0.12em; }
-    .hero-ex  { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--text);  letter-spacing: 0.12em; }
-    .piv-tagline { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.07em; margin-top: 2px; }
-    .topbar-right { display: flex; align-items: center; gap: 10px; }
-    .piv-version {
-      font-family: 'Share Tech Mono', monospace; font-size: 10px;
-      color: var(--accent); background: rgba(0,255,159,0.08);
-      border: 1px solid rgba(0,255,159,0.22);
-      padding: 3px 10px; border-radius: 3px; letter-spacing: 0.06em;
-    }
-    body.light .piv-version { background: rgba(0,77,184,0.08); border-color: rgba(0,77,184,0.25); }
 
     /* ── Chip topbar ─────────────────────────────────────────────────────── */
     .chip-topbar {
@@ -162,7 +255,7 @@
     }
     /* Category filter buttons */
     .chip-cat-btn {
-      font-family: 'Share Tech Mono', monospace;
+      font-family: var(--mono);
       font-size: 10px; font-weight: bold;
       letter-spacing: 0.09em;
       padding: 4px 12px; border-radius: 20px;
@@ -185,7 +278,7 @@
     .cat-btn-cld:hover, .cat-btn-cld.active { background: rgba(96,165,250,0.14); border-color: #60a5fa; box-shadow: 0 0 8px rgba(96,165,250,0.22); }
 
     .chip-all {
-      font-family: 'Share Tech Mono', monospace; font-size: 10.5px;
+      font-family: var(--mono); font-size: 10.5px;
       letter-spacing: 0.08em;
       background: rgba(0,255,159,0.06); color: var(--muted);
       border: 1px solid rgba(0,255,159,0.2); border-radius: 20px;
@@ -198,7 +291,7 @@
 
     /* Artifact chips — pill style */
     .artifact-chip {
-      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      font-family: var(--mono); font-size: 10px;
       letter-spacing: 0.04em;
       border-radius: 20px; border: 1px solid transparent;
       padding: 4px 10px; cursor: pointer;
@@ -247,7 +340,7 @@
     .pivot-path-bar::-webkit-scrollbar-thumb { background: var(--muted-dim); border-radius: 2px; }
     .pivot-path-trail {
       display: flex; align-items: center; flex-wrap: nowrap;
-      font-family: 'Share Tech Mono', monospace; font-size: 10px;
+      font-family: var(--mono); font-size: 10px;
       gap: 0; flex: 1; min-width: 0;
     }
     .path-node {
@@ -259,7 +352,7 @@
     .path-arrow { color: var(--muted); margin: 0 4px; flex-shrink: 0; font-size: 11px; }
     .pivot-path-clear, .pivot-path-copy {
       background: none; border: 1px solid var(--border); color: var(--muted);
-      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      font-family: var(--mono); font-size: 9px;
       padding: 2px 8px; border-radius: 3px; cursor: pointer;
       flex-shrink: 0; letter-spacing: 0.08em;
       transition: color 0.12s, border-color 0.12s; white-space: nowrap;
@@ -276,7 +369,7 @@
     .gtb-btn {
       width: 28px; height: 28px;
       background: var(--panel); border: 1px solid var(--border);
-      color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 15px;
+      color: var(--muted); font-family: var(--mono); font-size: 15px;
       border-radius: 4px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.14s; backdrop-filter: blur(4px);
@@ -295,8 +388,8 @@
       transition: opacity 0.12s, transform 0.12s;
     }
     .node-tooltip.visible { opacity: 1; transform: translateY(0); }
-    .nt-label { display: block; font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: bold; margin-bottom: 3px; }
-    .nt-edges { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--muted); float: right; margin-top: -16px; }
+    .nt-label { display: block; font-family: var(--mono); font-size: 10px; font-weight: bold; margin-bottom: 3px; }
+    .nt-edges { font-family: var(--mono); font-size: 8px; color: var(--muted); float: right; margin-top: -16px; }
     .nt-desc  { font-size: 9px; color: var(--muted); line-height: 1.4; margin-top: 4px; clear: both; }
 
     /* ── Main layout ───────────────────────────────────────────────────── */
@@ -329,7 +422,7 @@
     }
     .cat-arc-label {
       position: absolute;
-      font-family: 'Share Tech Mono', monospace;
+      font-family: var(--mono);
       font-size: 8.5px; font-weight: bold; letter-spacing: 0.14em;
       text-transform: uppercase;
       transform: translate(-50%, -50%);
@@ -387,13 +480,13 @@
       justify-content: space-between; margin-bottom: 7px; flex-wrap: wrap;
     }
     .info-type-badge {
-      font-family: 'Share Tech Mono', monospace; font-size: 8px;
+      font-family: var(--mono); font-size: 8px;
       letter-spacing: 0.1em; padding: 2px 7px; border-radius: 3px; text-transform: uppercase;
     }
     .info-type-artifact { background: rgba(0,255,159,0.14); color: #00ff9f; }
     body.light .info-type-artifact { background: rgba(0,77,184,0.12); color: #004db8; }
     .info-cat-badge {
-      font-family: 'Share Tech Mono', monospace; font-size: 8px;
+      font-family: var(--mono); font-size: 8px;
       letter-spacing: 0.07em; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;
     }
     .info-close {
@@ -403,19 +496,19 @@
     }
     .info-close:hover { color: var(--text); }
     .info-title {
-      font-family: 'Share Tech Mono', monospace; font-size: 12px;
+      font-family: var(--mono); font-size: 12px;
       color: var(--text); margin-bottom: 6px; line-height: 1.4;
     }
-    .info-desc { font-family: 'Exo 2', sans-serif; font-weight: 400; font-size: 11px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
+    .info-desc { font-family: var(--ui); font-weight: 400; font-size: 11px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
     .info-section { margin-bottom: 8px; }
     .info-section-label {
-      font-family: 'Share Tech Mono', monospace; font-size: 8px;
+      font-family: var(--mono); font-size: 8px;
       letter-spacing: 0.12em; color: var(--accent); margin-bottom: 3px;
     }
     .info-sources { font-size: 11px; color: var(--text-dim); line-height: 1.65; }
     .info-mitre { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
     .mitre-tag {
-      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      font-family: var(--mono); font-size: 9px;
       color: var(--muted); background: rgba(255,214,10,0.07);
       border: 1px solid rgba(255,214,10,0.2); border-radius: 3px;
       padding: 2px 7px; text-decoration: none; letter-spacing: 0.04em;
@@ -428,14 +521,14 @@
       position: relative; border-bottom: 1px solid var(--border-dim);
     }
     .info-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 9px; }
-    .info-stat { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--accent); margin-top: 2px; }
+    .info-stat { font-family: var(--mono); font-size: 20px; color: var(--accent); margin-top: 2px; }
     .info-hint { font-size: 9.5px; color: var(--muted); font-style: italic; margin-top: 6px; }
     .info-inner { overflow-y: visible; }
 
     /* ── Graph stats overlay ─────────────────────────────────────────────── */
     .graph-stats {
       position: absolute; bottom: 10px; right: 10px; z-index: 20;
-      font-family: 'Share Tech Mono', monospace; font-size: 9px;
+      font-family: var(--mono); font-size: 9px;
       letter-spacing: 0.07em; color: var(--muted);
       display: flex; gap: 10px;
       background: rgba(9,13,22,0.72);
@@ -449,14 +542,12 @@
       max-width: 1200px; margin: 0 auto; width: 100%;
       padding: 32px 20px 60px; display: flex; flex-direction: column; gap: 36px;
     }
-    .section-label {
-      font-family: 'Share Tech Mono', monospace; font-size: 9.5px;
+    .section-title {
+      font-family: var(--mono); font-weight: 700; font-size: 9.5px;
       letter-spacing: 0.14em; color: var(--accent);
-      text-transform: uppercase; margin-bottom: 12px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 2px 10px;
-      border-radius: 4px;
+      text-transform: uppercase; margin: 0 0 12px;
+      padding-left: 10px;
+      border-left: 2px solid var(--accent);
     }
 
     /* ── Tables ─────────────────────────────────────────────────────────── */
@@ -467,13 +558,13 @@
     }
     .ref-table { width: 100%; border-collapse: collapse; }
     .ref-table th {
-      font-family: 'Share Tech Mono', monospace; font-size: 8.5px;
+      font-family: var(--mono); font-size: 8.5px;
       letter-spacing: 0.1em; color: var(--accent); text-align: left;
       padding: 8px 11px; border-bottom: 1px solid var(--border);
       background: var(--panel-alt); white-space: nowrap;
     }
     .ref-table td {
-      font-family: 'Share Tech Mono', monospace; font-size: 10.5px;
+      font-family: var(--mono); font-size: 10.5px;
       color: var(--text-dim); padding: 6px 11px;
       border-bottom: 1px solid var(--border-dim); vertical-align: top;
       word-break: break-word;
@@ -496,22 +587,33 @@
     .legend-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .legend-item {
       display: flex; align-items: center; gap: 5px;
-      font-family: 'Share Tech Mono', monospace; font-size: 9.5px;
+      font-family: var(--mono); font-size: 9.5px;
       color: var(--text-dim); letter-spacing: 0.04em;
     }
     .legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
     .legend-divider { width: 1px; height: 13px; background: var(--border); }
 
     /* ── Footer ─────────────────────────────────────────────────────────── */
-    .piv-footer {
-      position: relative; z-index: 1;
-      border-top: 1px solid var(--border); padding: 12px 20px;
-      display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    .site-footer { border-top:1px solid var(--border); margin-top:32px; padding:8px 28px; }
+    .footer-inner { position:relative; max-width:1700px; margin:0 auto; display:flex; align-items:center; gap:12px; font-family:var(--ui); font-size:var(--fs-xs); color:var(--muted); flex-wrap:wrap; }
+    .footer-brand { color:var(--accent); text-decoration:none; transition:color .15s; }
+    .footer-brand:hover { color:var(--accent2); }
+    .footer-project { color:var(--accent2); }
+    .footer-sep { color:var(--border); }
+    .footer-src-list { display:flex; flex:1 1 100%; max-width:100%; flex-wrap:wrap; align-items:center; gap:5px; font-family:var(--mono); letter-spacing:.2px; }
+    .footer-src-sep { color:var(--border); margin:0 1px; }
+    .footer-credit-row { display:flex; justify-content:center; margin-top:16px; }
+    .footer-credit-pill { display:inline-flex; flex-wrap:nowrap; align-items:center; gap:6px; padding:4px 12px; border:1px solid var(--border); border-radius:999px; text-decoration:none; font-family:'Exo 2',sans-serif; font-weight:500; font-size:var(--fs-xs); white-space:nowrap; transition:border-color .15s; }
+    .footer-credit-pill:hover { border-color:var(--accent); }
+    .footer-credit-pill .credit-tool { font-weight:700; letter-spacing:2px; }
+    .footer-credit-pill .credit-by { color:var(--muted); }
+    .footer-credit-pill .credit-name { color:var(--accent); font-weight:700; letter-spacing:.5px; }
+    @media(max-width:768px) {
+      .site-footer { position:static; margin-top:32px; }
+      .footer-inner { flex-wrap:wrap; gap:8px; }
     }
-    .footer-left, .footer-right {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 9.5px; color: var(--muted); letter-spacing: 0.06em;
+    @media(max-width:375px) {
+      .footer-inner { font-size:10px; }
     }
 
     /* ── Responsive ─────────────────────────────────────────────────────── */
@@ -530,11 +632,6 @@
 
     /* Mobile (≤ 600px) */
     @media (max-width: 600px) {
-      /* Topbar */
-      .piv-topbar { padding: 8px 12px; gap: 10px; }
-      .hero-piv, .hero-ex { font-size: 17px; }
-      .piv-tagline { display: none; }
-
       /* Main layout — stack graph + info vertically */
       .piv-main-layout { flex-direction: column; }
 
@@ -584,8 +681,6 @@
 
     /* Extra small (≤ 400px) */
     @media (max-width: 400px) {
-      .topbar-right { display: none; }
-      .hero-piv, .hero-ex { font-size: 15px; }
       .graph-panel { height: calc(100svh - var(--nav-h) - 180px); min-height: 260px; }
       .info-panel.visible { max-height: 420px; }
       .chip-cat-btn { font-size: 7.5px; padding: 3px 8px; }
@@ -601,29 +696,43 @@
       .artifact-chip { font-size: 7.5px; padding: 2px 6px; }
     }
 
-    @media(max-width:640px){
-      .nav-links { display: none; }
-      .hamburger { display: flex; }
-    }
-    #scroll-sentinel{position:absolute;top:0;left:0;width:1px;height:10px;pointer-events:none;}
-    .xv-nav-pill{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-left:10px;padding-left:10px;border-left:1px solid var(--border);opacity:1;transform:none;pointer-events:auto;white-space:nowrap;flex-shrink:0;}
+    .xv-nav-pill{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-left:10px;padding-left:10px;border-left:1px solid var(--border);opacity:1;transform:none;pointer-events:auto;white-space:nowrap;flex-shrink:0;transition:opacity .3s ease,transform .3s ease;}
+    body.view-is-overview .xv-nav-pill{opacity:0;transform:translateY(-4px);pointer-events:none;}
+    body.view-is-overview.hero-hidden .xv-nav-pill{opacity:1;transform:none;pointer-events:auto;}
     .xv-pill-name{font-family:'Exo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:4px;line-height:1;}
     .xv-pill-accent{color:var(--accent);}
     .xv-pill-text{color:var(--text);}
     .xv-pill-tagline{font-family:'Exo 2',sans-serif;font-weight:400;font-size:8px;color:var(--muted);letter-spacing:1.5px;}
-    @media(max-width:1000px){
-      .piv-topbar{display:none;}
-      .xv-nav-pill{opacity:1;transform:none;pointer-events:auto;transition:none;}
+    @media(max-width:480px){
+      .xv-nav-pill{margin-left:0;padding-left:0;border-left:none;}
+      .nav{padding:0 .5rem;}
+      .hamburger{padding:3px;margin-right:4px;}
+      .hamburger span{width:16px;}
+      .nav-brand{display:none;}
+      .nav-right{gap:4px;padding-left:0;}
+      .theme-toggle .toggle-track{width:36px;height:18px;}
+      .theme-toggle .toggle-thumb{width:12px;height:12px;top:3px;left:3px;}
+      body.light .theme-toggle .toggle-thumb{transform:translateX(18px);}
+    }
+
+    /* ── Scrollbar ──────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+    ::-webkit-scrollbar-thumb:hover { background:var(--muted); }
+
+    /* ── Motion ─────────────────────────────────────────────────────────── */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
     }
   </style>
 </head>
-<body>
-
-  <div id="scroll-sentinel" aria-hidden="true"></div>
+<body class="dark">
 
   <!-- ── NAV ──────────────────────────────────────────────────────────── -->
   <nav class="nav">
-    <div class="hamburger" id="hamburger" onclick="toggleDrawer()"><span></span><span></span><span></span></div>
+    <div class="hamburger" id="hamburger" role="button" tabindex="0" aria-label="Open navigation menu" onclick="toggleDrawer()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDrawer();}"><span></span><span></span><span></span></div>
     <a class="nav-brand" href="https://h3ad-sec.github.io">
       <img id="navLogo" src="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" alt="H3AD-SEC" style="height:22px;vertical-align:middle;" />
     </a>
@@ -682,7 +791,11 @@
       <a href="mailto:h3adsec@gmail.com">CONTACT</a>
     </div>
     <div class="nav-right">
-      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+      <div class="view-tabs" id="view-tabs">
+        <button class="view-tab" data-view="overview" onclick="switchView('overview')">OVERVIEW</button>
+        <button class="view-tab active" data-view="workspace" onclick="switchView('workspace')">WORKSPACE</button>
+      </div>
+      <div class="theme-toggle" role="button" tabindex="0" aria-label="Toggle theme" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}" title="Toggle theme">
         <div class="toggle-track"><div class="toggle-thumb"></div></div>
       </div>
     </div>
@@ -690,6 +803,10 @@
 
   <!-- ── Mobile drawer ─────────────────────────────────────────────────── -->
   <div class="nav-drawer" id="navDrawer">
+    <div class="drawer-view-tabs">
+      <button class="view-tab" data-view="overview" onclick="switchView('overview');closeDrawer()">OVERVIEW</button>
+      <button class="view-tab active" data-view="workspace" onclick="switchView('workspace');closeDrawer()">WORKSPACE</button>
+    </div>
     <a href="https://h3ad-sec.github.io" onclick="closeDrawer()">HOME</a>
     <a href="https://h3ad-sec.github.io/H3AD/" onclick="closeDrawer()">H3AD</a>
     <a href="https://h3ad-sec.github.io/H3AD-X/" onclick="closeDrawer()">H3AD-X</a>
@@ -717,25 +834,161 @@
 
   <!-- ── Page wrapper ──────────────────────────────────────────────────── -->
   <div class="page-wrap">
+    <section class="hero" id="view-overview" style="display:none">
+      <div class="hero-banner"><span class="xv-pill-accent">PIV</span><span class="xv-pill-text">EX</span></div>
+      <div class="hero-banner-tagline">Pivot Across Every Artifact.</div>
+      <div class="hero-banner-by">by H3AD</div>
 
-    <!-- ── Topbar (branding only) ─────────────────────────────────────── -->
-    <div class="piv-topbar">
-      <div class="topbar-left">
-        <div class="piv-breadcrumb">
-          <a href="https://h3ad-sec.github.io">H3AD-SEC</a>
-          <span>›</span>
-          <a href="https://h3ad-sec.github.io/H3AD-HUNT/">H3AD-HUNT</a>
-          <span>›</span>PIVEX
+      <div class="hero-intro">
+        <h1 class="hero-title">Map Pivot Paths Across
+          <span class="hero-net">Network</span>, <span class="hero-ept">Endpoint</span>,
+          <span class="hero-idn">Identity</span>, <span class="hero-eml">Email</span> &amp;
+          <span class="hero-cld">Cloud</span> Artifacts
+        </h1>
+        <p class="hero-sub">Free interactive pivot graph for security investigations. Click any artifact, follow
+          the highlighted connections, and build a traceable path from first indicator to full scope.</p>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-num">36</span><span class="hero-stat-label">Artifacts</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">168+</span><span class="hero-stat-label">Pivot Paths</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-label">Categories</span></div>
+      </div>
+
+      <div class="hero-cols">
+        <div class="hero-col">
+          <h2 class="hero-col-title">THEORY</h2>
+          <ul class="hero-principles">
+            <li><strong>One indicator rarely tells the full story.</strong> Pivoting means using a single
+              artifact, an IP, a hash, a user account, as a starting point, then following its real relationships
+              outward to surface everything else connected to the same activity.</li>
+            <li><strong>Every pivot needs a source, not just a line on a graph.</strong> A relationship is only as
+              useful as the log or tool that can confirm it, that's why each edge here carries both a
+              relationship verb and a PRIMARY SOURCES list, not just an arrow.</li>
+            <li><strong>Investigations cross category boundaries.</strong> A phishing email (Email) leads to a
+              URL (Network) that drops a file (Endpoint) that creates a scheduled task (Endpoint) under a
+              compromised account (Identity). The 5 categories exist to make those crossings visible, not to
+              keep artifacts siloed.</li>
+          </ul>
         </div>
-        <a class="piv-title-row" href="https://h3ad-sec.github.io/PIVEX/">
-          <span class="hero-piv">PIV</span><span class="hero-ex">EX</span>
-        </a>
-        <div class="piv-tagline">Pivot Across Every Artifact</div>
+        <div class="hero-col">
+          <h2 class="hero-col-title">ANALYSIS</h2>
+          <ol class="hero-steps">
+            <li><strong>Start narrow, expand deliberately:</strong> begin from the one artifact you've actually
+              confirmed. Don't chase every visible edge, only the ones your case needs.</li>
+            <li><strong>Validate before you pivot:</strong> check DATA SOURCE MAPPING for the artifact you're
+              about to add. No matching log source in your environment means that pivot is theoretical, not
+              actionable yet.</li>
+            <li><strong>Tag technique, not just artifact:</strong> a registry key or scheduled task pivot usually
+              maps to a persistence technique. Attach the MITRE tag so the finished path reads as a technique
+              chain, not a bare artifact list.</li>
+            <li><strong>Export early, refine often:</strong> a pivot path is a working hypothesis. COPY or CSV it
+              as you go so a dead end doesn't cost you the trail you already built.</li>
+          </ol>
+        </div>
       </div>
-      <div class="topbar-right">
-        <span class="piv-version">v10.0 &middot; 36 ARTIFACTS</span>
+
+      <div class="hero-cols">
+        <div class="hero-col">
+          <h2 class="hero-col-title">HOW TO USE</h2>
+          <ol class="hero-steps">
+            <li><strong>Pick a starting artifact:</strong> click a category chip (NET / EPT / IDN / EML / CLD) to
+              filter, or click ALL, then click any artifact chip or graph node directly to select it.</li>
+            <li><strong>Read the info panel:</strong> category, description, real-world data sources, and the
+              PIVOT TO list appear on the left. Click a MITRE ATT&amp;CK tag to open the technique page.</li>
+            <li><strong>Build a pivot path:</strong> click a highlighted, connected node to extend the path. The
+              breadcrumb bar above the graph tracks every hop.</li>
+            <li><strong>Copy or export:</strong> use COPY for a plain-text trail, or CSV to export the full path
+              with category, relationship, data source, and MITRE columns.</li>
+          </ol>
+        </div>
+        <div class="hero-col">
+          <h2 class="hero-col-title">LAYOUTS</h2>
+          <div class="hero-layouts">
+            <div class="hero-layout-row"><span class="li-icon">&#x2B59;</span><span>Force, physics-based clustering (default)</span></div>
+            <div class="hero-layout-row"><span class="li-icon">&#x25CB;</span><span>Circle, Concentric, and Grid, switch anytime</span></div>
+            <div class="hero-layout-row"><span class="li-icon">&#x25CE;</span><span>Focus mode, dims everything but the selected node's neighbors</span></div>
+            <div class="hero-layout-row"><span class="li-icon">&#x21BB;</span><span>Reset, re-runs the active layout from scratch</span></div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <div class="hero-col hero-col-wide">
+        <h2 class="hero-col-title">CAPABILITIES</h2>
+        <div class="hero-feature-grid">
+          <div class="hero-feature"><strong>36 artifact types, 5 categories</strong>Network, Endpoint, Identity,
+            Email, and Cloud artifacts, filterable by category chip or individually.</div>
+          <div class="hero-feature"><strong>168+ tagged relationships</strong>Every pivot edge carries a real
+            relationship verb (resolves_to, executed_by, spawned_by, and more), listed in the CROSS-PIVOT
+            REFERENCE table below the graph.</div>
+          <div class="hero-feature"><strong>MITRE ATT&amp;CK tagging</strong>Relevant artifacts link straight out
+            to the technique page on attack.mitre.org.</div>
+          <div class="hero-feature"><strong>Pivot path builder</strong>Click connected nodes to build a traceable
+            path, then COPY it as text or export it as CSV with Step, From/To, Category, Relationship, Data
+            Sources, and MITRE columns.</div>
+          <div class="hero-feature"><strong>4 graph layouts</strong>Force, Circle, Concentric, and Grid. Switch
+            anytime without losing your pivot path.</div>
+          <div class="hero-feature"><strong>Real-world data source mapping</strong>Every artifact type lists the
+            logs and tools (EDR, SIEM, Sysmon event IDs, and more) that would actually surface it, in the DATA
+            SOURCE MAPPING table below the graph.</div>
+        </div>
+      </div>
+
+      <div class="hero-col hero-col-wide">
+        <h2 class="hero-col-title">READING THE GRAPH</h2>
+        <div class="hero-feature-grid">
+          <div class="hero-feature"><strong>Node color = category</strong>Every node's border and label color
+            match its category. Click a node (or an artifact chip) to open its info panel: description, data
+            sources, pivot-to list, and MITRE tags.</div>
+          <div class="hero-feature"><strong>Highlight and dim</strong>Selecting a node highlights its direct
+            connections and dims the rest of the graph, no positions move. Click a highlighted node to extend
+            your pivot path.</div>
+          <div class="hero-feature hero-feature-wide">
+            <strong>Category colors</strong>
+            <div class="hero-legend-grid">
+              <span class="hero-legend-chip" style="border-left-color:#00d4ff"><b style="color:#00d4ff">NET</b>Network (14)</span>
+              <span class="hero-legend-chip" style="border-left-color:#00ff9f"><b style="color:#00ff9f">EPT</b>Endpoint (16)</span>
+              <span class="hero-legend-chip" style="border-left-color:#c084fc"><b style="color:#c084fc">IDN</b>Identity (3)</span>
+              <span class="hero-legend-chip" style="border-left-color:#fb923c"><b style="color:#fb923c">EML</b>Email (2)</span>
+              <span class="hero-legend-chip" style="border-left-color:#60a5fa"><b style="color:#60a5fa">CLD</b>Cloud (1)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-col hero-col-wide">
+        <h2 class="hero-col-title">HOW IT WORKS</h2>
+        <div class="hero-feature-grid">
+          <div class="hero-feature"><strong>A static, curated graph</strong>All 36 artifacts and 168+
+            relationships are hand-defined ahead of time, not generated or inferred live. Every pivot path you
+            can build already existed in the data before you clicked anything.</div>
+          <div class="hero-feature"><strong>Node size = connection count</strong>A circle's size is computed
+            from how many real relationships that artifact has, relative to the busiest node in the graph.
+            Process and IP are the largest nodes because they sit on the most pivot paths, not because they were
+            sized by hand.</div>
+          <div class="hero-feature"><strong>Arrow shape = relationship type</strong>An edge's arrowhead encodes
+            what kind of relationship it is: a V for execution (spawned_by, executed_by), a square for
+            containment or ownership (has_hash, contains), a circle for observation or association, everything
+            else stays a plain triangle.</div>
+          <div class="hero-feature"><strong>Highlight and dim, never move</strong>Selecting a node applies a
+            highlighted state to it and its direct neighbors and a dimmed state to everything else, a pure
+            visual change. Node positions are never recalculated on click.</div>
+          <div class="hero-feature"><strong>Focus mode reuses that same state</strong>Focus doesn't run a new
+            query, it hides whatever's already marked dimmed. Turning it back off simply un-hides the same
+            nodes.</div>
+          <div class="hero-feature"><strong>Force layout is real physics</strong>The default arrangement runs a
+            force-directed simulation, node repulsion plus edge attraction over ~1,500 iterations, so related
+            artifacts naturally cluster together. Circle, Concentric, and Grid are pure geometric placements with
+            no simulation involved.</div>
+        </div>
+      </div>
+
+      <div class="hero-cta-row">
+        <button class="hero-btn-primary" onclick="switchView('workspace')">OPEN WORKSPACE &rarr;</button>
+      </div>
+    </section>
+
+    <div id="view-workspace">
 
     <!-- ── Artifact selector ─────────────────────────────────────────── -->
     <div class="chip-topbar" id="chipTopbar">
@@ -795,9 +1048,9 @@
     <!-- ── Pivot path breadcrumb ──────────────────────────────────────── -->
     <div class="pivot-path-bar" id="pivotPathBar">
       <div class="pivot-path-trail" id="pivotPathTrail"></div>
-      <button class="pivot-path-copy" id="pivotCopyBtn" onclick="copyPivotPath()" style="display:none">&#x2398; COPY</button>
-      <button class="pivot-path-copy" id="pivotExportBtn" onclick="exportPivotPath()" style="display:none">&#x21E9; CSV</button>
-      <button class="pivot-path-clear" onclick="clearPivotPath()">&#x2715; CLEAR</button>
+      <button class="pivot-path-copy" id="pivotCopyBtn" onclick="copyPivotPath()" style="display:none" aria-label="Copy pivot path">&#x2398; COPY</button>
+      <button class="pivot-path-copy" id="pivotExportBtn" onclick="exportPivotPath()" style="display:none" aria-label="Export pivot path as CSV">&#x21E9; CSV</button>
+      <button class="pivot-path-clear" onclick="clearPivotPath()" aria-label="Clear pivot path">&#x2715; CLEAR</button>
     </div>
 
     <!-- ── Main layout ───────────────────────────────────────────────────── -->
@@ -821,15 +1074,15 @@
 
         <!-- Graph toolbar -->
         <div class="graph-toolbar">
-          <button class="gtb-btn" onclick="cy.zoom(Math.min(cy.zoom()*1.3,3))" title="Zoom in">+</button>
-          <button class="gtb-btn" onclick="cy.zoom(Math.max(cy.zoom()*0.75,0.3))" title="Zoom out">&#x2212;</button>
-          <button class="gtb-btn" onclick="resetLayout()" title="Reset layout">&#x21BB;</button>
-          <button class="gtb-btn" id="focusBtn" onclick="toggleFocusMode()" title="Focus mode">&#x25CE;</button>
+          <button class="gtb-btn" onclick="cy.zoom(Math.min(cy.zoom()*1.3,3))" title="Zoom in" aria-label="Zoom in">+</button>
+          <button class="gtb-btn" onclick="cy.zoom(Math.max(cy.zoom()*0.75,0.3))" title="Zoom out" aria-label="Zoom out">&#x2212;</button>
+          <button class="gtb-btn" onclick="resetLayout()" title="Reset layout" aria-label="Reset layout">&#x21BB;</button>
+          <button class="gtb-btn" id="focusBtn" onclick="toggleFocusMode()" title="Focus mode" aria-label="Toggle focus mode">&#x25CE;</button>
           <div class="gtb-sep"></div>
-          <button class="gtb-btn gtb-layout active" id="ltb-cose"       onclick="switchLayout('cose')"       title="Force layout">&#x2B59;</button>
-          <button class="gtb-btn gtb-layout"        id="ltb-circle"     onclick="switchLayout('circle')"     title="Circle layout">&#x25CB;</button>
-          <button class="gtb-btn gtb-layout"        id="ltb-concentric" onclick="switchLayout('concentric')" title="Concentric layout">&#x25CE;</button>
-          <button class="gtb-btn gtb-layout"        id="ltb-grid"       onclick="switchLayout('grid')"       title="Grid layout">&#x229E;</button>
+          <button class="gtb-btn gtb-layout active" id="ltb-cose"       onclick="switchLayout('cose')"       title="Force layout" aria-label="Force layout">&#x2B59;</button>
+          <button class="gtb-btn gtb-layout"        id="ltb-circle"     onclick="switchLayout('circle')"     title="Circle layout" aria-label="Circle layout">&#x25CB;</button>
+          <button class="gtb-btn gtb-layout"        id="ltb-concentric" onclick="switchLayout('concentric')" title="Concentric layout" aria-label="Concentric layout">&#x25CE;</button>
+          <button class="gtb-btn gtb-layout"        id="ltb-grid"       onclick="switchLayout('grid')"       title="Grid layout" aria-label="Grid layout">&#x229E;</button>
         </div>
 
       </div><!-- /graph-panel -->
@@ -853,55 +1106,55 @@
 
           <!-- Cross-Pivot Reference -->
           <div>
-            <div class="section-label">CROSS-PIVOT REFERENCE</div>
+            <h2 class="section-title">CROSS-PIVOT REFERENCE</h2>
             <div class="table-wrap">
               <table class="ref-table">
                 <thead><tr><th>FROM</th><th>TO</th><th>PURPOSE</th></tr></thead>
                 <tbody>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Domain / FQDN</td><td>resolves_to — Passive DNS pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>SSL Certificate</td><td>presents — Cert infra clustering</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>communicates_with — Session pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Domain / FQDN</td><td>resolves_to: Passive DNS pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>SSL Certificate</td><td>presents: Cert infra clustering</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>IP</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>communicates_with: Session pivot</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>Domain</td><td><span class="ref-arrow">&#8594;</span>IP / FQDN / URL</td><td>resolves_to / parent_of / hosts</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Domain</td><td><span class="ref-arrow">&#8594;</span>SSL Certificate</td><td>uses — Cert-based infra link</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>File</td><td>delivers — Payload download chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>HTTP Request</td><td>requested_via — Request trace</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Domain</td><td><span class="ref-arrow">&#8594;</span>SSL Certificate</td><td>uses: Cert-based infra link</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>File</td><td>delivers: Payload download chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>URL</td><td><span class="ref-arrow">&#8594;</span>HTTP Request</td><td>requested_via: Request trace</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>Net Session</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>originates_from / queries</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>SSL Certificate</td><td><span class="ref-arrow">&#8594;</span>Domain / IP</td><td>issued_to / used_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>JA3</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>observed_on / connects_to</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>User Agent</td><td><span class="ref-arrow">&#8594;</span>URL / Net Session</td><td>accesses / part_of</td></tr>
                   <tr><td><span class="ref-cat ref-cat-net">NET</span>DNS Query</td><td><span class="ref-arrow">&#8594;</span>Domain / IP / Host</td><td>queries / resolves_to / originates_from</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Network Traffic</td><td><span class="ref-arrow">&#8594;</span>IP / Net Session</td><td>involves / part_of — Traffic scope</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>ASN</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>contains / resolves_to — Infra attribution</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Port</td><td><span class="ref-arrow">&#8594;</span>IP / Host / Service</td><td>open_on / exposes — Service fingerprint</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>File</td><td>identifies — File artifact lookup</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Network Traffic</td><td><span class="ref-arrow">&#8594;</span>IP / Net Session</td><td>involves / part_of: Traffic scope</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>ASN</td><td><span class="ref-arrow">&#8594;</span>IP / Domain</td><td>contains / resolves_to: Infra attribution</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-net">NET</span>Port</td><td><span class="ref-arrow">&#8594;</span>IP / Host / Service</td><td>open_on / exposes: Service fingerprint</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>File</td><td>identifies: File artifact lookup</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>URL / IP / Domain</td><td>downloaded_from / hosted_on / associated_with</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by — Execution chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Hash</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by: Execution chain</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Hash / Process</td><td>has_hash / executed_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>exists_on / owned_by</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>File</td><td>points_to — On-disk lookup</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Command Line</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by — LOLBin / cmdline trace</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Event ID</td><td><span class="ref-arrow">&#8594;</span>Process / Host</td><td>observed_on / part_of — Event context</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Command Line</td><td>executed_with — LOLBin analysis</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Registry</td><td>modifies — Persistence write</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Sched. Task / Startup Item</td><td>creates — Persistence chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>spawned_by / spawns — Tree walk</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>File Path</td><td><span class="ref-arrow">&#8594;</span>File</td><td>points_to: On-disk lookup</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Command Line</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>executed_by: LOLBin / cmdline trace</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Event ID</td><td><span class="ref-arrow">&#8594;</span>Process / Host</td><td>observed_on / part_of: Event context</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Command Line</td><td>executed_with: LOLBin analysis</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Registry</td><td>modifies: Persistence write</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Sched. Task / Startup Item</td><td>creates: Persistence chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Process</td><td>spawned_by / spawns: Tree walk</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>File / User / Host</td><td>runs / executed_as / runs_on</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Share</td><td><span class="ref-arrow">&#8594;</span>Host / File / User</td><td>exists_on / contains / accessed_by</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Process / File / User</td><td>runs / stores / used_by</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>generates — Session scope</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Vuln ID</td><td><span class="ref-arrow">&#8594;</span>Host</td><td>affects — Affected asset scope</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Service</td><td><span class="ref-arrow">&#8594;</span>Process / Host / File</td><td>runs_as / runs_on / loads — Service chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Host</td><td><span class="ref-arrow">&#8594;</span>Net Session</td><td>generates: Session scope</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Vuln ID</td><td><span class="ref-arrow">&#8594;</span>Host</td><td>affects: Affected asset scope</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Service</td><td><span class="ref-arrow">&#8594;</span>Process / Host / File</td><td>runs_as / runs_on / loads: Service chain</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Mutex</td><td><span class="ref-arrow">&#8594;</span>Process / Host / Hash</td><td>created_by / observed_on / associated_with</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Named Pipe</td><td><span class="ref-arrow">&#8594;</span>Process / Host</td><td>created_by / observed_on — IPC pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Named Pipe</td><td><span class="ref-arrow">&#8594;</span>Process / Host</td><td>created_by / observed_on: IPC pivot</td></tr>
                   <tr><td><span class="ref-cat ref-cat-ept">EPT</span>DLL</td><td><span class="ref-arrow">&#8594;</span>Process / Host / Hash</td><td>loaded_by / observed_on / has_hash</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Net Session / IP</td><td>communicates_with — Network beacon pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-ept">EPT</span>Process</td><td><span class="ref-arrow">&#8594;</span>Net Session / IP</td><td>communicates_with: Network beacon pivot</td></tr>
                   <tr><td><span class="ref-cat ref-cat-idn">IDN</span>User</td><td><span class="ref-arrow">&#8594;</span>Host / Process</td><td>logs_into / executes</td></tr>
                   <tr><td><span class="ref-cat ref-cat-idn">IDN</span>User</td><td><span class="ref-arrow">&#8594;</span>IP / Cloud Resource</td><td>originates_from / accesses</td></tr>
                   <tr><td><span class="ref-cat ref-cat-idn">IDN</span>RDP Session</td><td><span class="ref-arrow">&#8594;</span>Host / User</td><td>connects_to / initiated_by</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>Identity</td><td><span class="ref-arrow">&#8594;</span>User</td><td>represents — Cloud identity map</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Attachment / URL</td><td>contains — Phishing chain</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Domain</td><td>originates_from — Sender pivot</td></tr>
-                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Attachment</td><td><span class="ref-arrow">&#8594;</span>Hash</td><td>has_hash — Payload hash</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-idn">IDN</span>Identity</td><td><span class="ref-arrow">&#8594;</span>User</td><td>represents: Cloud identity map</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Attachment / URL</td><td>contains: Phishing chain</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Email</td><td><span class="ref-arrow">&#8594;</span>Domain</td><td>originates_from: Sender pivot</td></tr>
+                  <tr><td><span class="ref-cat ref-cat-eml">EML</span>Attachment</td><td><span class="ref-arrow">&#8594;</span>Hash</td><td>has_hash: Payload hash</td></tr>
                   <tr><td><span class="ref-cat ref-cat-cld">CLD</span>Cloud Resource</td><td><span class="ref-arrow">&#8594;</span>Identity / IP</td><td>owned_by / exposed_via</td></tr>
                 </tbody>
               </table>
@@ -910,7 +1163,7 @@
 
           <!-- Data Source Mapping -->
           <div>
-            <div class="section-label">DATA SOURCE MAPPING</div>
+            <h2 class="section-title">DATA SOURCE MAPPING</h2>
             <div class="table-wrap">
               <table class="ref-table">
                 <thead><tr><th>ARTIFACT TYPE</th><th>PRIMARY SOURCES</th></tr></thead>
@@ -960,7 +1213,7 @@
 
       <!-- Legend -->
       <section>
-        <div class="section-label">NODE LEGEND</div>
+        <h2 class="section-title">NODE LEGEND</h2>
         <div class="legend-row">
           <div class="legend-item"><div class="legend-dot" style="background:#00d4ff;"></div>NETWORK (14)</div>
           <div class="legend-item"><div class="legend-dot" style="background:#00ff9f;"></div>ENDPOINT (16)</div>
@@ -976,10 +1229,32 @@
 
     </div><!-- /piv-below -->
 
+    </div><!-- /view-workspace -->
+
     <!-- ── Footer ──────────────────────────────────────────────────────── -->
-    <footer class="piv-footer">
-      <span class="footer-left">H3AD-SEC &copy; 2026 | PIVEX</span>
-      <span class="footer-right">Intelligence. Detection. Response.</span>
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="https://h3ad-sec.github.io" class="footer-brand">H3AD-SEC</a>
+        <span class="footer-sep">/</span>
+        <span class="footer-project">PIVEX</span>
+        <span class="footer-sep">//</span>
+        <span class="footer-muted">Pivot Across Every Artifact.</span>
+        <span class="footer-sep">//</span>
+        <span class="footer-src-list">
+          <span style="color:#00d4ff">Network</span><span class="footer-src-sep">&middot;</span>
+          <span style="color:#00ff9f">Endpoint</span><span class="footer-src-sep">&middot;</span>
+          <span style="color:#c084fc">Identity</span><span class="footer-src-sep">&middot;</span>
+          <span style="color:#fb923c">Email</span><span class="footer-src-sep">&middot;</span>
+          <span style="color:#60a5fa">Cloud</span>
+        </span>
+      </div>
+      <div class="footer-credit-row">
+        <a class="footer-credit-pill" href="https://www.linkedin.com/in/hrushikesh-badgujar/" target="_blank" rel="noopener" title="Connect on LinkedIn">
+          <span class="credit-tool"><span class="xv-pill-accent">PIV</span><span class="xv-pill-text">EX</span></span>
+          <span class="credit-by">created by</span>
+          <span class="credit-name">H3AD</span>
+        </a>
+      </div>
   </footer>
 
   </div><!-- /page-wrap -->
@@ -989,8 +1264,49 @@
   <script src="js/app.js"></script>
   <script>
     /* ── HERO SCROLL HIDE ── */
-    (function(){var s=document.getElementById('scroll-sentinel');if(!s)return;new IntersectionObserver(function(e){document.body.classList.toggle('hero-hidden',!e[0].isIntersecting);},{threshold:0}).observe(s);})();
-    (function(){var pill=document.getElementById('xv-nav-pill'),links=document.querySelector('.nav-links'),toggle=document.querySelector('.theme-toggle'),G=20;function check(){if(!links)return;document.body.classList.remove('nav-compact');links.style.visibility='hidden';var lr=links.getBoundingClientRect(),pr=pill?pill.getBoundingClientRect().right:60,tl=toggle?toggle.getBoundingClientRect().left:window.innerWidth-60;links.style.visibility='';document.body.classList.toggle('nav-compact',(pr+G>lr.left)||(lr.right+G>tl));}check();window.addEventListener('resize',check);})();
+    (function () {
+      var s = document.querySelector('.hero-banner-by');
+      if (!s) return;
+      var navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 48;
+      function setInitial() {
+        document.body.classList.toggle('hero-hidden', s.getBoundingClientRect().bottom <= navH);
+      }
+      setInitial();
+      new IntersectionObserver(function (e) {
+        document.body.classList.toggle('hero-hidden', !e[0].isIntersecting);
+      }, { threshold: 0, rootMargin: '-' + navH + 'px 0px 0px 0px' }).observe(s);
+      window.addEventListener('load', setInitial);
+    })();
+    /* ── VIEW TABS: relocate to top of content when nav is too narrow ── */
+    (function () {
+      var vt = document.getElementById('view-tabs');
+      var pill = document.getElementById('xv-nav-pill');
+      var toggle = document.querySelector('.theme-toggle');
+      var navRight = document.querySelector('.nav-right');
+      var wrap = document.querySelector('.page-wrap');
+      if (!vt || !navRight || !wrap) return;
+      var inNav = true, G = 20;
+      function check() {
+        var pr = pill ? pill.getBoundingClientRect().right : 60;
+        var tl = toggle ? toggle.getBoundingClientRect().left : window.innerWidth - 120;
+        var wasBelow = vt.classList.contains('below');
+        if (wasBelow) vt.classList.remove('below');
+        var needed = vt.getBoundingClientRect().width || 190;
+        if (wasBelow) vt.classList.add('below');
+        var fits = (tl - pr) > (needed + G * 2);
+        if (fits && !inNav) {
+          vt.classList.remove('below');
+          navRight.insertBefore(vt, toggle);
+          inNav = true;
+        } else if (!fits && inNav) {
+          vt.classList.add('below');
+          wrap.insertBefore(vt, wrap.firstChild);
+          inNav = false;
+        }
+      }
+      check();
+      window.addEventListener('resize', check);
+    })();
   </script>
 </body>
 </html>

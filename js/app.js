@@ -550,10 +550,12 @@ function showNodeInfo(node) {
   var html = '<div class="info-header">' +
     '<span class="info-type-badge info-type-artifact">Artifact</span>' +
     catBadge +
-    '<button class="info-close" onclick="clearPivotPath()">&#x2715;</button>' +
+    '<button class="info-close" onclick="clearPivotPath()" aria-label="Close panel">&#x2715;</button>' +
     '</div>' +
     '<div class="info-inner">' +
-    '<div class="info-title">' + escHtml(d.label || d.id) + '</div>';
+    '<div class="info-title"' +
+    (d.category && CAT_COLORS[d.category] ? ' style="color:' + CAT_COLORS[d.category].bg + ';border-bottom:2px solid currentColor;padding-bottom:6px"' : '') +
+    '>' + escHtml(d.label || d.id) + '</div>';
   if (d.desc) html += '<div class="info-desc">' + escHtml(d.desc) + '</div>';
   html += sourcesHtml + pivotsHtml + mitreHtml;
   if (pivotPath.length > 0) {
@@ -795,12 +797,28 @@ function escHtml(str) {
   });
 })();
 
+// ── switchView ───────────────────────────────────────────────────────────────
+function switchView(view) {
+  document.getElementById('view-overview').style.display = view === 'overview' ? '' : 'none';
+  document.getElementById('view-workspace').style.display = view === 'overview' ? 'none' : '';
+  document.querySelectorAll('.view-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.view === view); });
+  document.body.classList.toggle('view-is-overview', view === 'overview');
+  localStorage.setItem('piv_view', view);
+  if (view === 'overview') {
+    window.scrollTo({ top: 0 });
+  } else if (cy) {
+    cy.resize();
+    cy.fit(cy.nodes(), 22);
+  }
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
   var saved = localStorage.getItem('h3ad-theme');
   if (saved === 'light') { document.body.classList.add('light'); setLogo(true); }
   else { setLogo(false); }
   initGraph();
+  switchView(localStorage.getItem('piv_view') === 'overview' ? 'overview' : 'workspace');
 });
 
 window.addEventListener('resize', function() {

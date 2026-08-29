@@ -98,9 +98,10 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
+      display: flex; flex-direction: column; min-height: 100dvh;
       background: var(--bg); color: var(--text);
       font-family: var(--ui); font-size: var(--fs-base);
-      line-height: 1.55; min-height: 100vh;
+      line-height: 1.55;
       transition: background 0.25s, color 0.25s;
       overflow-x: hidden;
     }
@@ -159,7 +160,7 @@
     .page-wrap {
       position: relative; z-index: 1;
       padding-top: var(--nav-h);
-      min-height: 100vh;
+      flex: 1 0 auto; width: 100%;
       display: flex; flex-direction: column;
     }
 
@@ -594,7 +595,7 @@
     .legend-divider { width: 1px; height: 13px; background: var(--border); }
 
     /* ── Footer ─────────────────────────────────────────────────────────── */
-    .site-footer { border-top:1px solid var(--border); margin-top:32px; padding:8px 28px; }
+    .site-footer { flex-shrink:0; border-top:1px solid var(--border); margin-top:32px; padding:8px 28px; }
     .footer-top { position:relative; max-width:1700px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:0.5rem 1.5rem; font-family:var(--ui); font-size:var(--fs-xs); color:var(--muted); flex-wrap:wrap; }
     .footer-left { color:var(--muted); }
     .footer-right { color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; opacity:0.85; }
@@ -1233,29 +1234,29 @@
 
     </div><!-- /view-workspace -->
 
-    <!-- ── Footer ──────────────────────────────────────────────────────── -->
-    <footer class="site-footer">
-      <div class="footer-top">
-        <span class="footer-left">H3AD-SEC © 2026 &nbsp;|&nbsp; PIVEX</span>
-        <span class="footer-right">Pivot Across Every Artifact.</span>
-        <div class="footer-credit-row">
-          <a class="footer-credit-pill" href="https://www.linkedin.com/in/hrushikesh-badgujar/" target="_blank" rel="noopener" title="Connect on LinkedIn">
-            <span class="credit-tool"><span class="xv-pill-accent">PIV</span><span class="xv-pill-text">EX</span></span>
-            <span class="credit-by">created by</span>
-            <span class="credit-name">H3AD</span>
-          </a>
-        </div>
-      </div>
-      <div class="footer-src-list">
-        <span style="color:#00d4ff">Network</span><span class="footer-src-sep">&middot;</span>
-        <span style="color:#00ff9f">Endpoint</span><span class="footer-src-sep">&middot;</span>
-        <span style="color:#c084fc">Identity</span><span class="footer-src-sep">&middot;</span>
-        <span style="color:#fb923c">Email</span><span class="footer-src-sep">&middot;</span>
-        <span style="color:#60a5fa">Cloud</span>
-      </div>
-  </footer>
-
   </div><!-- /page-wrap -->
+
+  <!-- ── Footer ──────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="footer-top">
+      <span class="footer-left">H3AD-SEC © 2026 &nbsp;|&nbsp; PIVEX</span>
+      <span class="footer-right">Pivot Across Every Artifact.</span>
+      <div class="footer-credit-row">
+        <a class="footer-credit-pill" href="https://www.linkedin.com/in/hrushikesh-badgujar/" target="_blank" rel="noopener" title="Connect on LinkedIn">
+          <span class="credit-tool"><span class="xv-pill-accent">PIV</span><span class="xv-pill-text">EX</span></span>
+          <span class="credit-by">created by</span>
+          <span class="credit-name">H3AD</span>
+        </a>
+      </div>
+    </div>
+    <div class="footer-src-list">
+      <span style="color:#00d4ff">Network</span><span class="footer-src-sep">&middot;</span>
+      <span style="color:#00ff9f">Endpoint</span><span class="footer-src-sep">&middot;</span>
+      <span style="color:#c084fc">Identity</span><span class="footer-src-sep">&middot;</span>
+      <span style="color:#fb923c">Email</span><span class="footer-src-sep">&middot;</span>
+      <span style="color:#60a5fa">Cloud</span>
+    </div>
+  </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js" integrity="sha512-yi5TwB0WBpzqlJXNLURNMtpFXJt4yxJhkOG8yqkVQYWhfMkAoDF93rZ/KjfoN1gADGr5uKXvr5/Bw6CC03YWpA==" crossorigin="anonymous"></script>
   <script src="js/graph-data.js"></script>
